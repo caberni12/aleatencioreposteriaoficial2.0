@@ -1,0 +1,16 @@
+R9.18.150 - FIX ESTILOS WEB
+
+Problema corregido:
+- cPanel/Dashboard podía aparecer sin estilos en producción aunque local funcionara.
+
+Corrección:
+- CSS local con rutas ./ explícitas y cache-busting.
+- styles.css + cpanel.css quedan además embebidos como fallback dentro de cpanel.html.
+- JS local con cache-busting para evitar HTML/CSS/JS mezclados por caché.
+- No se cambia el logo actual.
+
+Despliegue:
+1. Subir el CONTENIDO del ZIP a la raíz del repositorio GitHub Pages, reemplazando archivos existentes.
+2. Confirmar que cpanel.html, styles.css y cpanel.css estén en la misma carpeta raíz.
+3. Esperar el despliegue de GitHub Pages.
+4. Si Cloudflare sigue mostrando la versión anterior, purgar caché del sitio y recargar con Ctrl+F5.
