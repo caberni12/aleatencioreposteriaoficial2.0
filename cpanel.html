@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CPANEL | Ale Atencio</title>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="cpanel.css">
+
+  <style id="sidebar-critical-r918130">
+  /* Fallback crítico: evita mezclar el HTML categorizado con CSS cacheado anterior. */
+  @media (min-width:1001px){
+    body.sidebar-collapsed:not(.sidebar-hover-open) .admin-sidebar{width:76px!important;overflow-x:hidden!important}
+    body.sidebar-collapsed:not(.sidebar-hover-open) .admin-nav{display:flex!important;flex-direction:column!important;align-items:center!important}
+    body.sidebar-collapsed:not(.sidebar-hover-open) .nav-group{width:52px!important;min-width:52px!important;max-width:52px!important;overflow:hidden!important;border-color:transparent!important;background:transparent!important}
+    body.sidebar-collapsed:not(.sidebar-hover-open) .nav-group summary{width:52px!important;height:52px!important;min-height:52px!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;font-size:0!important;line-height:0!important;white-space:nowrap!important}
+    body.sidebar-collapsed:not(.sidebar-hover-open) .nav-group summary>span{width:52px!important;max-width:52px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;font-size:0!important;line-height:0!important;white-space:nowrap!important}
+    body.sidebar-collapsed:not(.sidebar-hover-open) .nav-group summary>span>i{display:block!important;width:auto!important;margin:0!important;font-size:20px!important;line-height:1!important}
+    body.sidebar-collapsed:not(.sidebar-hover-open) .nav-group-chevron,
+    body.sidebar-collapsed:not(.sidebar-hover-open) .nav-group-items{display:none!important}
+  }
+  </style>
+</head>
+<body class="admin-body auth-locked">
+<div class="login-screen" id="loginScreen">
+  <form class="login-card" id="loginForm">
+    <img src="logo-ale-atencio.png" alt="Ale Atencio">
+    <span class="eyebrow">Administración</span><h1>CPANEL</h1>
+    <p id="connectionText">Conecta y administra la tienda.</p>
+    <input id="adminUsername" type="text" value="admin" placeholder="Usuario" autocomplete="username">
+    <input id="adminPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
+    <button class="btn btn-primary btn-block" type="submit">Ingresar</button>
+    <div class="api-warning" id="apiWarning"></div>
+  </form>
+  <div class="login-design-credit" aria-label="Créditos de desarrollo"><span>Design by</span> <a href="https://serviciosinformaticosas.cl/" target="_blank" rel="noopener noreferrer">SERVICIOS INFORMÁTICOS AS</a><span class="admin-credit-sep">·</span><span>Desarrollo Web, Sistemas y Android</span></div>
+</div>
+
+<div class="admin-shell hidden" id="adminShell">
+  <aside class="admin-sidebar" id="adminSidebar" aria-label="Menú de administración">
+    <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Cerrar menú"><i class="bi bi-x-lg"></i></button>
+    <div class="admin-brand admin-brand-single"><img id="adminLogo" src="logo-ale-atencio.png" alt="Ale Atencio Repostería"><span>CPANEL</span></div>
+    <button class="sidebar-rail-toggle" id="sidebarRailToggle" type="button" aria-label="Expandir menú" aria-controls="adminSidebar" aria-expanded="false" title="Expandir menú"><i class="bi bi-list"></i></button>
+    <nav class="admin-nav" aria-label="Módulos del sistema">
+      <button class="active nav-dashboard" data-view="dashboard"><i class="bi bi-grid"></i> Dashboard</button>
+
+      <details class="nav-group" data-nav-group="ventas">
+        <summary><span><i class="bi bi-bag-check"></i> Ventas y Clientes</span><i class="bi bi-chevron-down nav-group-chevron"></i></summary>
+        <div class="nav-group-items">
+          <button data-view="orders"><i class="bi bi-bag-check"></i> Pedidos</button>
+          <button data-view="requests"><i class="bi bi-clipboard-heart"></i> Solicitudes</button>
+          <button data-view="quotes"><i class="bi bi-receipt-cutoff"></i> Cotizaciones</button>
+          <button data-view="clients"><i class="bi bi-person-vcard"></i> Clientes</button>
+        </div>
+      </details>
+
+      <details class="nav-group" data-nav-group="web">
+        <summary><span><i class="bi bi-window"></i> Web y Catálogo</span><i class="bi bi-chevron-down nav-group-chevron"></i></summary>
+        <div class="nav-group-items">
+          <button data-view="products"><i class="bi bi-cake2"></i> Productos</button>
+          <button data-view="categories"><i class="bi bi-tags"></i> Categorías</button>
+          <button data-view="banners"><i class="bi bi-images"></i> Carrusel</button>
+          <button data-view="gallery"><i class="bi bi-camera"></i> Galería</button>
+        </div>
+      </details>
+
+      <details class="nav-group" data-nav-group="compras-stock">
+        <summary><span><i class="bi bi-box-seam"></i> Compras e Inventario</span><i class="bi bi-chevron-down nav-group-chevron"></i></summary>
+        <div class="nav-group-items">
+          <button data-view="suppliers"><i class="bi bi-truck"></i> Proveedores</button>
+          <button data-view="purchases"><i class="bi bi-cart-check"></i> Compras / DTE recibidos</button>
+          <button data-view="warehouses"><i class="bi bi-building"></i> Bodegas</button>
+          <button data-view="stock"><i class="bi bi-box-seam"></i> Inventario</button>
+          <button data-view="inventory"><i class="bi bi-boxes"></i> Insumos / Costos</button>
+        </div>
+      </details>
+
+      <details class="nav-group" data-nav-group="mayoristas">
+        <summary><span><i class="bi bi-shop-window"></i> Mayoristas</span><i class="bi bi-chevron-down nav-group-chevron"></i></summary>
+        <div class="nav-group-items">
+          <button data-view="wholesale"><i class="bi bi-shop-window"></i> Mayoristas / Precios</button>
+          <button data-view="wholesale-credits"><i class="bi bi-wallet2"></i> Créditos Mayoristas</button>
+        </div>
+      </details>
+
+      <details class="nav-group" data-nav-group="finanzas-sii">
+        <summary><span><i class="bi bi-receipt"></i> Finanzas / SII</span><i class="bi bi-chevron-down nav-group-chevron"></i></summary>
+        <div class="nav-group-items">
+          <button data-view="payments"><i class="bi bi-credit-card-2-front"></i> Pasarela de pago</button>
+          <button data-view="billing-sii"><i class="bi bi-receipt"></i> Facturación SII</button>
+          <button data-view="folio-manager"><i class="bi bi-123"></i> Mantenedor de Folios</button>
+          <button data-view="ledger"><i class="bi bi-journal-text"></i> Libro Mayor Auxiliar</button>
+          <button data-view="reports"><i class="bi bi-graph-up-arrow"></i> Reportes</button>
+        </div>
+      </details>
+
+      <details class="nav-group" data-nav-group="sistema">
+        <summary><span><i class="bi bi-sliders"></i> Sistema / Configuración</span><i class="bi bi-chevron-down nav-group-chevron"></i></summary>
+        <div class="nav-group-items">
+          <button data-view="integrations"><i class="bi bi-diagram-3"></i> Integraciones</button>
+          <button data-view="users" id="usersNavBtn"><i class="bi bi-people"></i> Usuarios</button>
+          <button data-view="settings"><i class="bi bi-gear"></i> Configuración</button>
+        </div>
+      </details>
+    </nav>
+    <div class="sidebar-bottom"><a href="index.html" class="btn btn-light btn-block"><i class="bi bi-shop"></i> Ver tienda</a><button id="logoutBtn" class="btn btn-dark btn-block"><i class="bi bi-box-arrow-right"></i> Salir</button></div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+  <main class="admin-main">
+    <header class="admin-top">
+      <div class="admin-titlebar">
+        <button class="admin-menu-toggle" id="menuToggle" type="button" aria-label="Abrir menú" aria-controls="adminSidebar" aria-expanded="false"><i class="bi bi-list"></i></button>
+        <div><span class="eyebrow">Ale Atencio</span><h1 id="viewTitle">Dashboard</h1></div>
+      </div>
+      <div class="admin-top-actions">
+        <div class="notification-wrap">
+          <button class="notification-bell" id="notificationBell" type="button" aria-label="Abrir notificaciones" aria-expanded="false">
+            <i class="bi bi-bell"></i><span class="notification-badge hidden" id="notificationBadge">0</span>
+          </button>
+          <aside class="notification-panel hidden" id="notificationPanel" aria-label="Centro de notificaciones">
+            <div class="notification-panel-head">
+              <div><span class="eyebrow">Actividad</span><h3>Centro de notificaciones</h3></div>
+              <button class="icon-btn" id="closeNotifications" type="button" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="notification-tools">
+              <button class="notify-tool" id="notificationVoiceToggle" type="button"><i class="bi bi-volume-up"></i><span>Voz activada</span></button>
+              <button class="notify-tool" id="markAllNotifications" type="button"><i class="bi bi-check2-all"></i><span>Marcar todas</span></button>
+            </div>
+            <div class="notification-list" id="notificationList"><div class="notification-empty">No hay notificaciones nuevas.</div></div>
+          </aside>
+        </div>
+        <div class="admin-userbox"><img id="currentUserAvatar" src="favicon.png" alt="Perfil"><div><strong id="currentUserName">Usuario</strong><small id="currentUserRole">Conectado</small></div><div class="online-pill" id="syncPill"><span></span><b id="syncPillText">Conectado</b></div></div>
+      </div>
+    </header>
+
+    <section class="admin-view active" id="view-dashboard">
+      <div class="kpi-grid"><div class="kpi-card"><span>Productos</span><strong id="kpiProducts">0</strong></div><div class="kpi-card"><span>Pedidos pendientes</span><strong id="kpiOrders">0</strong></div><div class="kpi-card"><span>Solicitudes nuevas</span><strong id="kpiRequests">0</strong></div><div class="kpi-card"><span>Stock total</span><strong id="kpiStock">0</strong></div><div class="kpi-card"><span>Ventas pagadas hoy</span><strong id="dashboardSalesToday">$0</strong></div><div class="kpi-card"><span>Ventas pagadas mes</span><strong id="dashboardSalesMonth">$0</strong></div></div>
+      <div class="admin-card"><h2>Resumen</h2><div id="dashboardSummary" class="summary-list"></div></div>
+    </section>
+
+    <section class="admin-view" id="view-products">
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Catálogo</span><h2>Productos</h2></div><div class="card-head-actions"><a class="btn btn-light" href="PLANTILLA_IMPORTACION_PRODUCTOS_ALE_ATENCIO.xlsx" download><i class="bi bi-file-earmark-excel"></i> Plantilla XLSX</a><button class="btn btn-light" id="importProductsXlsx" type="button"><i class="bi bi-upload"></i> Importar XLSX</button><button class="btn btn-primary" id="newProduct">+ Nuevo producto</button></div></div>
+        <div class="editor hidden" id="productEditor" role="dialog" aria-modal="true" aria-labelledby="productEditorTitle"><div class="editor-modal-head"><div><span class="eyebrow">Catálogo</span><h3 id="productEditorTitle">Editar producto</h3><small class="product-editor-id" id="productEditorIdLabel">Producto nuevo</small></div><button type="button" class="editor-close-x" id="closeProductEditorX" aria-label="Cerrar">×</button></div><input type="hidden" id="pId"><input type="hidden" id="pImageId"><input type="hidden" id="pImageUrl"><input type="hidden" id="pOrder">
+          <div class="product-editor-layout">
+            <aside class="product-web-preview-panel" aria-label="Vista previa del producto en la Web">
+              <div class="product-preview-heading"><span class="eyebrow">Vista previa Web</span><strong>Así se verá la tarjeta</strong><small>Conectada al mismo producto e ID del catálogo.</small></div>
+              <article class="product-web-preview-card" id="productWebPreview"></article>
+            </aside>
+            <div class="product-editor-fields">
+              <div class="form-grid">
+                <label class="field-group"><span>Nombre del producto</span><input id="pName" placeholder="Ej. Torta Chocolate"></label>
+                <input id="pPrice" type="hidden" value="0">
+                
+                <label class="field-group"><span>Categoría</span><select id="pCategory"></select></label>
+                <div class="field-group span-2 product-size-editor"><div class="product-size-editor-head"><div><span>Tamaños y valores</span><small>Configura variantes y precios. El stock se administra desde Inventario por Bodega.</small></div><button class="btn btn-light btn-compact" id="addProductSize" type="button">+ Otro tamaño</button></div><div id="productSizesEditor" class="product-size-rows"></div></div>
+                <div class="field-group span-2 product-inventory-card">
+                  <div class="product-inventory-card-head"><div><span>Inventario por bodega</span><small>Stock físico, reservado y disponible del producto.</small></div><button class="btn btn-light btn-compact" id="manageProductInventory" type="button"><i class="bi bi-box-seam"></i> Gestionar inventario</button></div>
+                  <div id="productWarehouseInventoryPreview" class="product-warehouse-inventory-preview"></div>
+                </div>
+                <div class="field-group span-2 product-ingredient-editor"><div class="product-size-editor-head"><div><span>Ingredientes y costo estimado</span><small>Define qué insumos utiliza este producto y la cantidad de cada uno. El costo se calcula con el costo promedio de mercadería.</small></div><button class="btn btn-light btn-compact" id="addProductIngredient" type="button">+ Ingrediente</button></div><div id="productIngredientsEditor" class="product-ingredient-rows"></div><div class="ingredient-cost-total">Costo estimado por producto: <strong id="productEstimatedCost">$0</strong></div></div>
+                <label class="field-group product-status-field"><span>Estado de venta</span><select id="pActive" aria-describedby="pActiveHint"><option value="SI">Activo</option><option value="NO">Inactivo</option></select><small class="field-hint" id="pActiveHint">Activo: el producto se muestra y puede comprarse en la Web.</small></label>
+                <input id="pAllowNegativeStock" type="hidden" value="NO">
+                <label class="field-group"><span>Ocasión</span><input id="pOccasion" placeholder="Celebraciones, regalos..."></label>
+                <div class="field-group file-field" data-file-picker="image"><span>Foto</span><input id="pImage" class="file-input" type="file" accept="image/*"><label class="file-picker-btn" for="pImage"><i class="bi bi-camera"></i><span class="file-picker-text">Seleccionar imagen</span></label><small class="file-name">Sin archivo seleccionado</small><small class="current-product-image" id="pCurrentImageName"></small></div>
+                <label class="field-group span-2"><span>Descripción</span><textarea id="pDescription" placeholder="Descripción del producto"></textarea></label>
+              </div>
+              <label class="check"><input id="pFeatured" type="checkbox"> Mostrar como destacado</label>
+            </div>
+          </div>
+          <div class="editor-actions"><button class="btn btn-primary" id="saveProduct">Guardar</button><button class="btn btn-light" data-cancel="productEditor">Cancelar</button></div>
+        </div>
+        <div class="admin-toolbar product-toolbar"><input id="productSearch" placeholder="Buscar producto..."><select id="productFilter"><option value="">Todas las categorías</option></select><select id="productStatusFilter"><option value="">Todos los estados</option><option value="SI">Activo</option><option value="NO">Inactivo</option></select><button class="btn btn-light" id="clearProductFilter" type="button">Ver todos</button></div>
+        <div class="product-stock-visibility-bar" id="productStockVisibilityBar">
+          <div class="product-stock-visibility-copy"><span class="eyebrow">Visibilidad en tienda</span><strong>Mostrar stock a clientes</strong><small id="productShowStockClientsHint">FALSE: el inventario sigue funcionando, pero el cliente solo ve producto, tamaño y precio.</small></div>
+          <label class="product-global-stock-switch" for="productShowStockClients">
+            <span class="stock-policy-switch stock-visibility-switch"><input id="productShowStockClients" type="checkbox" aria-describedby="productShowStockClientsHint"><span class="stock-policy-slider" aria-hidden="true"></span></span>
+            <span class="stock-visibility-value is-false" id="productShowStockClientsValue">FALSE</span>
+          </label>
+        </div>
+        <div class="product-results-meta" id="productResultsMeta">Mostrando todos los productos</div>
+        <div class="bulk-actions hidden" id="productsBulkBar">
+          <div class="bulk-actions-info"><i class="bi bi-check2-square"></i><strong id="productsSelectedCount">0 seleccionados</strong><span>Puedes seleccionar varias filas y eliminarlas en una sola operación.</span></div>
+          <button class="btn btn-danger-soft" id="deleteSelectedProducts" type="button"><i class="bi bi-trash3"></i> Eliminar seleccionados</button>
+        </div>
+        <div class="table-wrap" id="productsTable"></div>
+      </div>
+    </section>
+
+    <div class="editor hidden import-editor" id="productImportEditor" role="dialog" aria-modal="true" aria-labelledby="productImportTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Importación masiva</span><h3 id="productImportTitle">Importar productos desde XLSX</h3></div><button type="button" class="editor-close-x" id="closeProductImportX" aria-label="Cerrar">×</button></div>
+      <div class="import-help"><strong>1.</strong> Descarga la plantilla · <strong>2.</strong> completa tus productos · <strong>3.</strong> selecciona el XLSX · <strong>4.</strong> revisa la vista previa y confirma.</div>
+      <div class="field-group file-field" data-file-picker="xlsx"><span>Archivo XLSX</span><input id="productImportFile" class="file-input" type="file" accept=".xlsx,.xls"><label class="file-picker-btn" for="productImportFile"><i class="bi bi-file-earmark-excel"></i><span class="file-picker-text">Seleccionar XLSX</span></label><small class="file-name">Sin archivo seleccionado</small></div>
+      <div class="import-summary" id="productImportSummary">Aún no se ha seleccionado un archivo.</div>
+      <div class="table-wrap import-preview" id="productImportPreview"></div>
+      <div class="editor-actions"><button class="btn btn-primary" id="confirmProductImport" type="button" disabled><i class="bi bi-cloud-arrow-up"></i> Importar productos</button><button class="btn btn-light" id="cancelProductImport" type="button">Cancelar</button></div>
+    </div>
+
+    <section class="admin-view" id="view-categories">
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Organización</span><h2>Categorías</h2></div><button class="btn btn-primary" id="newCategory">+ Nueva categoría</button></div>
+        <div class="editor hidden" id="categoryEditor"><input type="hidden" id="cId"><input type="hidden" id="cImageId"><input type="hidden" id="cImageUrl"><div class="form-grid">
+          <label class="field-group"><span>Nombre de categoría</span><input id="cName" placeholder="Ej. Tortas"></label>
+          <label class="field-group"><span>Orden</span><input id="cOrder" type="number" min="0" placeholder="0"></label>
+          <div class="field-group file-field span-2" data-file-picker="image"><span>Imagen</span><input id="cImage" class="file-input" type="file" accept="image/*"><label class="file-picker-btn" for="cImage"><i class="bi bi-image"></i><span class="file-picker-text">Seleccionar imagen</span></label><small class="file-name">Sin archivo seleccionado</small></div>
+          <label class="field-group span-2"><span>Descripción</span><textarea id="cDescription" placeholder="Descripción de la categoría"></textarea></label>
+        </div><div class="editor-actions"><button class="btn btn-primary" id="saveCategory">Guardar</button><button class="btn btn-light" data-cancel="categoryEditor">Cancelar</button></div></div>
+        <div class="table-wrap" id="categoriesTable"></div>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-banners">
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Portada</span><h2>Carrusel</h2></div><button class="btn btn-primary" id="newBanner">+ Nuevo banner</button></div>
+        <div class="editor hidden" id="bannerEditor"><input type="hidden" id="bId"><input type="hidden" id="bImageId"><input type="hidden" id="bImageUrl"><div class="form-grid">
+          <label class="field-group"><span>Título</span><input id="bTitle" placeholder="Título principal"></label>
+          <label class="field-group"><span>Subtítulo</span><input id="bSubtitle" placeholder="Texto secundario"></label>
+          <label class="field-group"><span>Texto del botón</span><input id="bCta" placeholder="Solicitar"></label>
+          <label class="field-group"><span>Enlace</span><input id="bLink" placeholder="#solicitud"></label>
+          <label class="field-group"><span>Orden</span><input id="bOrder" type="number" min="0" placeholder="0"></label>
+          <div class="field-group file-field" data-file-picker="image"><span>Imagen</span><input id="bImage" class="file-input" type="file" accept="image/*"><label class="file-picker-btn" for="bImage"><i class="bi bi-image"></i><span class="file-picker-text">Seleccionar imagen</span></label><small class="file-name">Sin archivo seleccionado</small></div>
+        </div><div class="editor-actions"><button class="btn btn-primary" id="saveBanner">Guardar</button><button class="btn btn-light" data-cancel="bannerEditor">Cancelar</button></div></div>
+        <div class="table-wrap" id="bannersTable"></div>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-orders">
+      <div class="admin-card">
+        <div class="card-head"><div><span class="eyebrow">Ventas</span><h2>Pedidos</h2></div><button class="btn btn-primary" id="newOrder"><i class="bi bi-bag-plus"></i> Crear pedido</button></div>
+        <div class="module-filter-bar" data-filter-kind="orders">
+          <div class="module-search-box"><i class="bi bi-search"></i><input id="ordersSearch" type="search" autocomplete="off" placeholder="Buscar en pedidos..."></div>
+          <label class="module-select-filter"><span>Tipo de venta</span><select id="ordersSaleType" aria-label="Tipo de venta"><option value="">Todos</option><option value="MINORISTA">Minorista</option><option value="MAYORISTA">Mayorista</option></select></label>
+          <label class="module-date-filter"><span>Desde</span><input id="ordersFrom" type="date" aria-label="Fecha desde"></label>
+          <label class="module-date-filter"><span>Hasta</span><input id="ordersTo" type="date" aria-label="Fecha hasta"></label>
+          <button class="btn btn-light module-filter-today" id="ordersToday" type="button"><i class="bi bi-calendar-check"></i> Hoy</button>
+          <button class="btn btn-light module-filter-all" id="ordersAll" type="button"><i class="bi bi-calendar3"></i> Ver todo</button>
+        </div>
+        <div class="module-filter-meta" id="ordersFilterMeta"></div>
+        <div class="table-wrap" id="ordersTable"></div>
+      <div class="editor hidden" id="orderCreateEditor" role="dialog" aria-modal="true" aria-labelledby="orderCreateTitle">
+        <div class="editor-modal-head"><div><span class="eyebrow">Venta asistida</span><h3 id="orderCreateTitle">Crear pedido</h3></div><button type="button" class="editor-close-x" id="closeOrderCreateX">×</button></div>
+        <div class="form-grid">
+          <label class="field-group span-2"><span>Desde cotización (opcional)</span><select id="ocQuote"><option value="">Pedido manual</option></select></label>
+          <label class="field-group"><span>Nombre</span><input id="ocName"></label><label class="field-group"><span>RUT</span><input id="ocRut" placeholder="12.345.678-5" inputmode="text"><small id="ocClientLookupState" class="client-rut-lookup-state">Ingresa un RUT válido para buscar en Clientes.</small></label>
+          <label class="field-group"><span>WhatsApp</span><input id="ocPhone"></label><label class="field-group"><span>Correo</span><input id="ocEmail" type="email"></label>
+          <label class="field-group"><span>Entrega</span><select id="ocDelivery"><option>Retiro</option><option>Despacho</option><option>Coordinar</option></select></label><label class="field-group"><span>Dirección</span><input id="ocAddress"></label>
+          <label class="field-group"><span>Comuna</span><input id="ocCommune" placeholder="Ej: Independencia"></label>
+          <label class="field-group"><span>Medio de pago</span><select id="ocPayment"><option value="EFECTIVO">Efectivo</option><option value="TRANSFERENCIA">Transferencia</option><option value="TRANSBANK">Transbank</option></select></label><label class="field-group"><span>Bodega de salida</span><select id="ocWarehouse"></select></label><label class="field-group"><span>Despacho · CLP</span><input id="ocDispatch" type="text" inputmode="numeric" autocomplete="off" value="0" placeholder="Ej: 5.000"></label>
+          <label class="field-group span-2"><span>Productos / líneas</span><textarea id="ocItems" rows="7" placeholder="Formato: Producto | cantidad | precio
+Torta chocolate | 1 | 25000"></textarea></label>
+          <label class="field-group span-2"><span>Observaciones</span><textarea id="ocNotes"></textarea></label>
+        </div>
+        <div class="editor-actions"><button class="btn btn-primary" id="saveOrderFromCpanel"><i class="bi bi-check2-circle"></i> Crear pedido</button><button class="btn btn-light" id="cancelOrderCreate">Cancelar</button></div>
+      </div>
+
+      </div>
+      <div class="editor hidden order-detail-editor" id="orderDetailEditor" role="dialog" aria-modal="true" aria-labelledby="orderDetailTitle">
+        <div class="editor-modal-head">
+          <div><span class="eyebrow">Pedido registrado</span><h3 id="orderDetailTitle">Detalle del pedido</h3><small id="orderDetailNumber"></small></div>
+          <button type="button" class="editor-close-x" id="closeOrderDetailX" aria-label="Cerrar">×</button>
+        </div>
+        <div class="order-detail-summary" id="orderDetailSummary"></div>
+        <div class="order-detail-lines">
+          <div class="order-detail-lines-head"><span>Producto</span><span>Cant.</span><span>Precio unitario</span><span>Subtotal</span></div>
+          <div id="orderDetailItems"></div>
+        </div>
+        <div class="order-detail-totals" id="orderDetailTotals"></div>
+        <div class="order-transfer-proof hidden" id="orderTransferProof"><span class="eyebrow">Transferencia</span><h4>Comprobante de pago</h4><a id="orderTransferProofLink" class="btn btn-light" target="_blank" rel="noopener"><i class="bi bi-image"></i> Ver comprobante</a><span id="orderTransferProofState"></span><button class="btn btn-primary hidden" id="approveTransferPayment"><i class="bi bi-check2-circle"></i> Confirmar pago y pedido</button></div>
+        <div class="order-detail-history"><span class="eyebrow">Trazabilidad</span><h4>Línea de tiempo del pedido</h4><div id="orderDetailHistory"></div></div>
+        <div class="editor-actions">
+          <a class="btn btn-light hidden" id="orderDetailPdfLink" href="#" target="_blank" rel="noopener"><i class="bi bi-file-earmark-pdf"></i> Abrir PDF</a>
+          <button class="btn btn-primary" id="regenerateOrderPdf" type="button"><i class="bi bi-file-earmark-pdf"></i> Generar / actualizar PDF</button>
+          <button class="btn btn-light" id="reprintOrderPdf" type="button"><i class="bi bi-printer"></i> Reimprimir</button>
+          <button class="btn btn-light" id="copyOrderTracking" type="button"><i class="bi bi-link-45deg"></i> Copiar seguimiento</button>
+          <button class="btn btn-primary hidden" id="confirmCashPayment" type="button"><i class="bi bi-cash-coin"></i> Marcar PAGADO · Efectivo</button>
+          <button class="btn btn-light hidden" id="sendOrderPaymentWhatsApp" type="button"><i class="bi bi-credit-card-2-front"></i> Asignar enlace de pago</button>
+          <button class="btn btn-light" id="sendOrderTrackingWhatsApp" type="button"><i class="bi bi-whatsapp"></i> Enviar seguimiento</button>
+          <button class="btn btn-light sii-order-doc-btn" id="orderEmitBoleta" type="button"><i class="bi bi-receipt"></i> Emitir Boleta</button>
+          <button class="btn btn-primary sii-order-doc-btn" id="orderEmitFactura" type="button"><i class="bi bi-file-earmark-text"></i> Emitir Factura</button>
+          <button class="btn btn-danger-soft" id="cancelOrderBtn" type="button"><i class="bi bi-x-octagon"></i> Anular pedido</button>
+          <button class="btn btn-light" id="closeOrderDetail" type="button">Cerrar</button>
+        </div>
+      </div>
+      <div class="editor hidden order-cancel-editor" id="orderCancelEditor" role="dialog" aria-modal="true" aria-labelledby="orderCancelTitle">
+        <div class="editor-modal-head">
+          <div><span class="eyebrow">Anulación de pedido</span><h3 id="orderCancelTitle">Anular pedido</h3><small id="orderCancelNumber">—</small></div>
+          <button type="button" class="editor-close-x" id="closeOrderCancelX" aria-label="Cerrar">×</button>
+        </div>
+        <div class="order-cancel-warning"><i class="bi bi-exclamation-triangle"></i><div><strong>Esta acción es final e irreversible.</strong><span>El pedido quedará CANCELADO y ya no podrá modificarse. El motivo, usuario, fecha y hora quedarán registrados en la trazabilidad.</span></div></div>
+        <label class="field-group order-cancel-reason"><span>Motivo de anulación <b>*</b></span><textarea id="orderCancelReason" rows="5" maxlength="500" placeholder="Ej: Cliente solicitó cancelar el pedido por cambio de fecha." required></textarea><small>Obligatorio. Escribe un motivo claro para la auditoría.</small></label>
+        <div class="editor-actions">
+          <button class="btn btn-danger-soft" id="confirmCancelOrder" type="button"><i class="bi bi-x-octagon"></i> Confirmar anulación</button>
+          <button class="btn btn-light" id="closeOrderCancel" type="button">Volver</button>
+        </div>
+      </div>
+      <div class="editor hidden payment-link-editor" id="orderPaymentLinkEditor" role="dialog" aria-modal="true" aria-labelledby="orderPaymentLinkTitle">
+        <div class="editor-modal-head"><div><span class="eyebrow">Transbank</span><h3 id="orderPaymentLinkTitle">Asignar enlace de pago</h3></div><button type="button" class="editor-close-x" id="closeOrderPaymentLinkX" aria-label="Cerrar">×</button></div>
+        <p class="module-help">Define exactamente hasta qué fecha y hora podrá utilizarse este enlace. La vigencia se asigna manualmente para cada pedido.</p>
+        <div class="payment-link-order-summary">
+          <div><span>Pedido</span><strong id="orderPaymentOrderNumber">—</strong></div>
+          <div><span>Monto a cobrar</span><strong id="orderPaymentAmount">CLP $0</strong><small>Peso chileno · CLP</small></div>
+        </div>
+        <div class="payment-expiry-grid">
+          <label class="payment-expiry-field"><span><i class="bi bi-calendar3"></i> Fecha de vencimiento</span><div class="payment-expiry-control"><input id="orderPaymentExpiryDate" type="date" required></div></label>
+          <label class="payment-expiry-field"><span><i class="bi bi-clock"></i> Hora de vencimiento</span><div class="payment-expiry-control"><input id="orderPaymentExpiryTime" type="time" step="60" required></div></label>
+        </div>
+        <small class="payment-expiry-help"><i class="bi bi-info-circle"></i> Fecha y hora obligatorias. El enlace deja de funcionar al vencer, pero el pedido se conserva.</small>
+        <div class="payment-link-warning"><i class="bi bi-shield-check"></i><span>El cobro se envía a Transbank en <strong>pesos chilenos (CLP)</strong>, sin conversión a dólares. El enlace siempre apunta al mismo pedido y no genera duplicados.</span></div>
+        <div class="editor-actions">
+          <button class="btn btn-primary" id="generatePaymentLinkWhatsapp" type="button"><i class="bi bi-whatsapp"></i> Generar y enviar</button>
+          <button class="btn btn-light" id="generatePaymentLinkCopy" type="button"><i class="bi bi-link-45deg"></i> Generar y copiar</button>
+          <button class="btn btn-light" id="cancelOrderPaymentLink" type="button">Cancelar</button>
+        </div>
+      </div>
+    </section>
+    <section class="admin-view" id="view-requests"><div class="admin-card"><div class="card-head"><div><span class="eyebrow">Cotizaciones</span><h2>Solicitudes</h2></div></div>
+        <div class="module-filter-bar" data-filter-kind="requests">
+          <div class="module-search-box"><i class="bi bi-search"></i><input id="requestsSearch" type="search" autocomplete="off" placeholder="Buscar en solicitudes..."></div>
+          <label class="module-date-filter"><span>Desde</span><input id="requestsFrom" type="date" aria-label="Fecha desde"></label>
+          <label class="module-date-filter"><span>Hasta</span><input id="requestsTo" type="date" aria-label="Fecha hasta"></label>
+          <button class="btn btn-light module-filter-today" id="requestsToday" type="button"><i class="bi bi-calendar-check"></i> Hoy</button>
+          <button class="btn btn-light module-filter-all" id="requestsAll" type="button"><i class="bi bi-calendar3"></i> Ver todo</button>
+        </div>
+        <div class="module-filter-meta" id="requestsFilterMeta"></div>
+      <div class="bulk-actions hidden" id="requestsBulkBar">
+        <div class="bulk-actions-info"><i class="bi bi-check2-square"></i><strong id="requestsSelectedCount">0 seleccionadas</strong><span>Las solicitudes CERRADAS están protegidas y no se incluyen en la eliminación masiva.</span></div>
+        <button class="btn btn-danger-soft" id="deleteSelectedRequests" type="button"><i class="bi bi-trash3"></i> Eliminar seleccionadas</button>
+      </div>
+      <div class="table-wrap" id="requestsTable"></div></div>
+      <div class="editor hidden request-client-editor" id="requestClientEditor" role="dialog" aria-modal="true" aria-labelledby="requestClientEditorTitle">
+        <div class="editor-modal-head">
+          <div><span class="eyebrow">Solicitud · Cliente</span><h3 id="requestClientEditorTitle">Datos del cliente</h3><small id="requestClientEditorNumber">—</small></div>
+          <button type="button" class="editor-close-x" id="closeRequestClientEditorX" aria-label="Cerrar">×</button>
+        </div>
+        <input type="hidden" id="requestClientRequestId">
+        <div class="request-client-state" id="requestClientLockNotice"></div>
+        <div class="form-grid">
+          <label class="field-group"><span>Nombre</span><input id="requestClientName" autocomplete="name"></label>
+          <label class="field-group"><span>RUT</span><input id="requestClientRut" placeholder="12.345.678-5" inputmode="text"><small id="requestClientLookupState" class="client-rut-lookup-state">Ingresa un RUT válido para buscar en Clientes.</small></label>
+          <label class="field-group"><span>WhatsApp</span><input id="requestClientPhone" autocomplete="tel"></label>
+          <label class="field-group"><span>Correo</span><input id="requestClientEmail" type="email" autocomplete="email"></label>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn-primary" id="saveRequestClient" type="button"><i class="bi bi-floppy"></i> Guardar datos</button>
+          <button class="btn btn-light" id="requestClientPdf" type="button"><i class="bi bi-file-earmark-pdf"></i> PDF / reimprimir</button>
+          <button class="btn btn-light" id="closeRequestClientEditor" type="button">Cerrar</button>
+        </div>
+      </div>
+    </section>
+
+
+
+    <section class="admin-view" id="view-quotes">
+      <div class="admin-card">
+        <div class="card-head">
+          <div><span class="eyebrow">Ventas</span><h2>Cotizaciones</h2></div>
+          <button class="btn btn-primary" id="newQuote"><i class="bi bi-file-earmark-plus"></i> Nueva cotización</button>
+        </div>
+        <div class="module-filter-bar" data-filter-kind="quotes">
+          <div class="module-search-box"><i class="bi bi-search"></i><input id="quotesSearch" type="search" autocomplete="off" placeholder="Buscar en cotizaciones..."></div>
+          <label class="module-date-filter"><span>Desde</span><input id="quotesFrom" type="date" aria-label="Fecha desde"></label>
+          <label class="module-date-filter"><span>Hasta</span><input id="quotesTo" type="date" aria-label="Fecha hasta"></label>
+          <button class="btn btn-light module-filter-today" id="quotesToday" type="button"><i class="bi bi-calendar-check"></i> Hoy</button>
+          <button class="btn btn-light module-filter-all" id="quotesAll" type="button"><i class="bi bi-calendar3"></i> Ver todo</button>
+        </div>
+        <div class="module-filter-meta" id="quotesFilterMeta"></div>
+
+        <div class="editor hidden" id="quoteEditor" role="dialog" aria-modal="true" aria-labelledby="quoteEditorTitle">
+          <div class="editor-modal-head">
+            <div><span class="eyebrow">Documento comercial</span><h3 id="quoteEditorTitle">Cotización</h3></div>
+            <button type="button" class="editor-close-x" id="closeQuoteEditorX" aria-label="Cerrar">×</button>
+          </div>
+
+          <input type="hidden" id="qId">
+          <input type="hidden" id="qRequestId">
+          <input type="hidden" id="qPdfUrl">
+
+          <div class="quote-reference">
+            <div><span>N.º cotización</span><strong id="qNumber">Se asignará al guardar</strong></div>
+            <div><span>N.º solicitud</span><strong id="qRequestNumber">Sin solicitud asociada</strong></div>
+          </div>
+
+          <div class="quote-request-association">
+            <div class="field-group quote-request-field">
+              <span>Solicitud asociada</span>
+              <div class="request-combobox" id="requestCombobox">
+                <div class="request-combobox-control">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  <input id="qRequestSearch" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="qRequestResults" placeholder="Buscar por N.º solicitud, cliente, RUT, teléfono o correo...">
+                  <button type="button" id="clearQuoteRequest" class="request-combobox-clear" title="Quitar solicitud asociada" aria-label="Quitar solicitud asociada"><i class="bi bi-x-lg"></i></button>
+                  <button type="button" id="toggleQuoteRequest" class="request-combobox-toggle" title="Ver solicitudes" aria-label="Ver solicitudes"><i class="bi bi-chevron-down"></i></button>
+                </div>
+                <div id="qRequestResults" class="request-combobox-results hidden" role="listbox"></div>
+              </div>
+              <small id="qRequestHelp" class="request-combobox-help">Busca por número, cliente, RUT, teléfono o correo. Puedes dejar la cotización sin solicitud asociada.</small>
+            </div>
+          </div>
+
+          <div class="form-grid quote-client-grid">
+            <label class="field-group"><span>Cliente</span><input id="qClient" placeholder="Nombre del cliente"></label>
+            <label class="field-group"><span>RUT</span><input id="qRut" placeholder="12.345.678-5" inputmode="text"><small id="qClientLookupState" class="client-rut-lookup-state">Ingresa un RUT válido para buscar en Clientes.</small></label>
+            <label class="field-group"><span>Teléfono / WhatsApp</span><input id="qPhone" placeholder="+56..."></label>
+            <label class="field-group"><span>Correo</span><input id="qEmail" type="email" placeholder="correo@cliente.cl"></label>
+            <label class="field-group"><span>Validez (días)</span><input id="qValidity" type="number" min="1" max="365" value="15"></label>
+            <label class="field-group"><span>IVA (%)</span><input id="qIva" type="number" min="0" max="100" step="0.01" value="19"></label>
+            <label class="field-group"><span>Estado</span><select id="qStatus"><option>BORRADOR</option><option>ENVIADA</option><option>ACEPTADA</option><option>RECHAZADA</option><option>VENCIDA</option><option>ANULADA</option><option disabled>UTILIZADA</option></select></label>
+          </div>
+
+          <div class="quote-add-line">
+            <select id="quoteProductPicker"><option value="">Seleccionar producto del catálogo...</option></select>
+            <button class="btn btn-light" id="addQuoteProduct" type="button"><i class="bi bi-plus-lg"></i> Agregar producto</button>
+            <button class="btn btn-light" id="addQuoteLine" type="button"><i class="bi bi-pencil-square"></i> Línea libre</button>
+          </div>
+
+          <div class="quote-items-head"><span>Descripción</span><span>Cant.</span><span>Precio unitario</span><span>Total</span><span></span></div>
+          <div class="quote-items" id="quoteItems"></div>
+
+          <div class="quote-bottom-grid">
+            <label class="field-group"><span>Observaciones</span><textarea id="qObservations" placeholder="Condiciones, plazo de entrega, indicaciones..."></textarea></label>
+            <div class="quote-totals">
+              <div><span>Subtotal neto</span><strong id="qSubtotal">$0</strong></div>
+              <div><span id="qIvaLabel">IVA 19%</span><strong id="qIvaAmount">$0</strong></div>
+              <div class="quote-grand-total"><span>Total</span><strong id="qTotal">$0</strong></div>
+            </div>
+          </div>
+
+          <div class="editor-actions quote-actions">
+            <button class="btn btn-primary" id="saveQuote" type="button"><i class="bi bi-floppy"></i> Guardar cotización</button>
+            <button class="btn btn-light" id="generateQuotePdf" type="button"><i class="bi bi-file-earmark-pdf"></i> Generar / reimprimir PDF</button>
+            <button class="btn btn-whatsapp" id="sendQuoteWhatsapp" type="button"><i class="bi bi-whatsapp"></i> Enviar por WhatsApp</button>
+            <button class="btn btn-light" data-cancel="quoteEditor" type="button">Cerrar</button>
+          </div>
+        </div>
+
+        <div class="bulk-actions hidden" id="quotesBulkBar">
+          <div class="bulk-actions-info"><i class="bi bi-check2-square"></i><strong id="quotesSelectedCount">0 seleccionadas</strong><span>Se eliminarán también los PDF guardados en Supabase Storage cuando correspondan.</span></div>
+          <button class="btn btn-danger-soft" id="deleteSelectedQuotes" type="button"><i class="bi bi-trash3"></i> Eliminar seleccionadas</button>
+        </div>
+        <div class="table-wrap" id="quotesTable"></div>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-clients">
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Base comercial</span><h2>Clientes</h2></div><div class="card-head-actions"><button class="btn btn-primary" id="createClient" type="button"><i class="bi bi-person-plus"></i> Crear cliente</button><button class="btn btn-light" id="exportClientsXlsx" type="button"><i class="bi bi-file-earmark-excel"></i> XLSX</button><button class="btn btn-light" id="exportClientsPdf" type="button"><i class="bi bi-file-earmark-pdf"></i> PDF</button></div></div>
+        <div class="admin-toolbar client-toolbar"><div class="client-search-shell"><i class="bi bi-search"></i><input id="clientSearch" placeholder="Buscar por nombre, RUT, teléfono, correo, dirección, ciudad, comuna o transporte..."></div><button class="btn btn-light" id="clearClientSearch" type="button"><i class="bi bi-x-circle"></i> Limpiar</button></div>
+        <div class="product-results-meta" id="clientResultsMeta">Base de clientes</div>
+        <div class="table-wrap" id="clientsTable"></div>
+        <div class="editor hidden client-editor" id="clientEditor" role="dialog" aria-modal="true" aria-labelledby="clientEditorTitle">
+          <div class="editor-modal-head"><div><span class="eyebrow">Ficha comercial</span><h3 id="clientEditorTitle">Cliente</h3><small id="clientEditorNumber">Cliente nuevo</small></div><button type="button" class="editor-close-x" id="closeClientEditorX" aria-label="Cerrar">×</button></div>
+          <input type="hidden" id="clientId">
+          <div class="form-grid client-form-grid">
+            <label>RUT<input id="clientRut" inputmode="text" autocomplete="off" placeholder="12.345.678-5" required></label>
+            <label>Nombre<input id="clientName" autocomplete="name" placeholder="Nombre del cliente" required></label>
+            <label>Teléfono<input id="clientPhone" inputmode="tel" autocomplete="tel" placeholder="+56 9 ..."></label>
+            <label>Correo<input id="clientEmail" type="email" autocomplete="email" placeholder="cliente@correo.cl"></label>
+            <label class="span-2">Dirección<input id="clientAddress" autocomplete="street-address" placeholder="Calle, número, depto."></label>
+            <label>Ciudad / localidad<input id="clientCity" list="clientCityList" autocomplete="off" placeholder="Escribe para buscar ciudad"></label>
+            <label>Comuna<input id="clientCommune" list="clientCommuneList" autocomplete="off" placeholder="Escribe para buscar comuna"><small class="geo-field-help" id="clientCommuneHelp">Al elegir una ciudad/área se filtran sus comunas asociadas.</small></label>
+            <datalist id="clientCityList"></datalist><datalist id="clientCommuneList"></datalist>
+            <label>Tipo de transporte / entrega<select id="clientTransport"><option value="POR DEFINIR">Por definir</option><option value="RETIRO">Retiro</option><option value="DESPACHO">Despacho</option><option value="OTRO">Otro</option></select></label>
+            <label>Tipo de cliente<select id="clientType"><option value="MINORISTA">Minorista</option><option value="MAYORISTA">Mayorista</option></select></label>
+            <label>Estado mayorista<select id="clientWholesaleStatus"><option value="NO_APLICA">No aplica</option><option value="PENDIENTE">Pendiente</option><option value="APROBADO">Aprobado</option><option value="SUSPENDIDO">Suspendido</option></select></label>
+            <label>Lista de precios<select id="clientPriceList"><option value="">Sin lista</option></select></label>
+            <label>Razón social<input id="clientBusinessName" placeholder="Razón social"></label>
+            <label class="span-2">Giro<input id="clientBusinessActivity" placeholder="Giro comercial"></label>
+          </div>
+          <div class="client-summary-strip"><div><small>Solicitudes</small><strong id="clientStatRequests">0</strong></div><div><small>Pedidos</small><strong id="clientStatOrders">0</strong></div><div><small>Cotizaciones</small><strong id="clientStatQuotes">0</strong></div><div><small>Total comprado</small><strong id="clientStatTotal">$0</strong></div></div>
+          <div class="editor-actions"><button class="btn btn-primary" id="saveClient" type="button"><i class="bi bi-floppy"></i> Guardar cliente</button><button class="btn btn-light" id="cancelClientEditor" type="button">Cancelar</button></div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="admin-view" id="view-wholesale">
+      <div class="admin-card wholesale-admin-shell">
+        <div class="card-head"><div><span class="eyebrow">Canal privado B2B</span><h2>Mayoristas y listas de precios</h2><p class="module-help">Administra aquí solicitudes de registro, perfiles aprobados, usuarios y listas autorizadas. El autoregistro desde el portal queda PENDIENTE hasta que un administrador lo apruebe, asigne una lista activa y habilite el acceso.</p></div><div class="card-head-actions"><button class="btn btn-primary" id="newWholesaleProfile" type="button"><i class="bi bi-person-plus"></i> Nuevo mayorista</button><a class="btn btn-light" href="mayoristas.html" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Portal mayorista</a><button class="btn btn-light" id="newPriceList" type="button"><i class="bi bi-plus-lg"></i> Nueva lista</button></div></div>
+        <div class="kpi-grid wholesale-kpis"><div class="kpi-card"><span>Listas activas</span><strong id="whKpiLists">0</strong></div><div class="kpi-card"><span>Mayoristas</span><strong id="whKpiClients">0</strong></div><div class="kpi-card"><span>Solicitudes pendientes</span><strong id="whKpiRequests">0</strong></div><div class="kpi-card"><span>Perfiles con acceso</span><strong id="whKpiProfiles">0</strong></div><div class="kpi-card"><span>Crédito habilitado</span><strong id="whKpiCreditEnabled">0</strong></div><div class="kpi-card"><span>Documentos</span><strong id="whKpiDocs">0</strong></div></div>
+      </div>
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Tarifas</span><h3>Listas de precios</h3></div></div><div class="table-wrap" id="priceListsTable"></div></div>
+      <div class="editor hidden price-list-editor" id="priceListEditor" role="dialog" aria-modal="true"><div class="editor-modal-head"><div><span class="eyebrow">Lista de precios</span><h3 id="priceListEditorTitle">Nueva lista</h3></div><button type="button" class="editor-close-x" id="closePriceListEditor">×</button></div><input type="hidden" id="plId"><div class="form-grid"><label>Nombre<input id="plName" placeholder="Mayorista General"></label><label>Código<input id="plCode" placeholder="MAY-GEN"></label><label class="span-2">Descripción<input id="plDescription" placeholder="Condiciones de esta lista"></label><label>Estado<select id="plActive"><option value="SI">Activa</option><option value="NO">Inactiva</option></select></label></div><div class="price-list-help">Cada lista incluye automáticamente todos los productos y tamaños activos del catálogo. Puedes modificar aquí el precio Mayorista de cada tamaño; si aún no fue personalizado, se propone el precio normal como valor inicial.</div><div class="price-list-filterbar"><input id="plSearch" type="search" placeholder="Buscar producto o tamaño"><select id="plCategory"><option value="">Todas las categorías</option></select><button class="btn btn-light btn-compact" type="button" id="plResetFilters">Limpiar</button></div><div class="price-list-summary" id="plSummary"></div><div class="table-wrap price-list-items" id="priceListItemsEditor"></div><div class="editor-actions"><button class="btn btn-primary" id="savePriceList">Guardar lista</button><button class="btn btn-light" id="cancelPriceList">Cancelar</button></div></div>
+      <div class="editor hidden wholesale-profile-editor" id="wholesaleProfileEditor" role="dialog" aria-modal="true" aria-labelledby="wholesaleProfileEditorTitle"><div class="editor-modal-head"><div><span class="eyebrow">Acceso privado B2B</span><h3 id="wholesaleProfileEditorTitle">Nuevo mayorista</h3><small>El cliente y su usuario de acceso se crean desde cPanel.</small></div><button type="button" class="editor-close-x" id="closeWholesaleProfileEditor">×</button></div><input type="hidden" id="wmClientId"><div class="form-grid"><label>RUT empresa<input id="wmRut" placeholder="12.345.678-5" autocomplete="off"></label><label>Razón social<input id="wmBusinessName" placeholder="Empresa SpA"></label><label>Contacto / nombre<input id="wmContact" placeholder="Nombre de contacto"></label><label>Giro<input id="wmBusinessActivity" placeholder="Giro comercial"></label><label>Teléfono<input id="wmPhone" placeholder="+56 9 ..."></label><label>Correo<input id="wmEmail" type="email" placeholder="compras@empresa.cl"></label><label class="span-2">Dirección<input id="wmAddress" placeholder="Dirección comercial"></label><label>Comuna<input id="wmCommune" placeholder="Comuna"></label><label>Lista de precios <small>(opcional al crear)</small><select id="wmPriceList"><option value="">Sin lista por ahora · acceso pendiente</option></select></label><label>Usuario<input id="wmUsername" autocomplete="off" placeholder="usuario.mayorista"></label><label>Contraseña inicial<input id="wmPassword" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label><label>Estado<select id="wmActive"><option value="SI">Activo</option><option value="NO">Inactivo</option></select></label></div><div class="integration-note"><i class="bi bi-shield-check"></i><span>También puedes crear perfiles manualmente desde cPanel. Las solicitudes hechas desde el login Mayorista aparecen en “Solicitudes de alta” y no se activan hasta que las apruebes y asignes una lista de precios.</span></div><div class="editor-actions"><button class="btn btn-primary" id="saveWholesaleProfile">Crear perfil mayorista</button><button class="btn btn-light" id="cancelWholesaleProfile">Cancelar</button></div></div>
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Registro público controlado</span><h3>Solicitudes de alta Mayorista</h3><p class="module-help">Revisa los datos enviados desde el login Mayorista. Para aprobar debes asignar una lista de precios activa; el usuario queda habilitado automáticamente con la contraseña registrada por el solicitante.</p></div></div><div class="table-wrap" id="wholesaleRequestsTable"></div></div>
+      <div class="editor hidden wholesale-request-editor" id="wholesaleRequestEditor" role="dialog" aria-modal="true"><div class="editor-modal-head"><div><span class="eyebrow">Solicitud Mayorista</span><h3 id="wrTitle">Revisar solicitud</h3></div><button type="button" class="editor-close-x" id="closeWholesaleRequestEditor">×</button></div><input type="hidden" id="wrId"><div class="wholesale-request-detail" id="wrDetail"></div><div class="form-grid"><label>Lista de precios para aprobar<select id="wrPriceList"><option value="">Seleccionar lista activa</option></select></label><label class="span-2">Motivo / observación de rechazo<textarea id="wrRejectReason" rows="3" placeholder="Opcional al rechazar"></textarea></label></div><div class="editor-actions"><button class="btn btn-primary" id="approveWholesaleRequest"><i class="bi bi-check2-circle"></i> Aprobar y activar usuario</button><button class="btn btn-danger" id="rejectWholesaleRequest"><i class="bi bi-x-circle"></i> Rechazar</button><button class="btn btn-light" id="cancelWholesaleRequest">Cerrar</button></div></div>
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Clientes B2B</span><h3>Mayoristas aprobados</h3></div></div><div class="table-wrap" id="wholesalersTable"></div></div>
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Documentación privada</span><h3>Facturas y documentos</h3></div></div><div class="form-grid wholesale-document-form"><label>Mayorista<select id="whDocClient"><option value="">Seleccionar</option></select></label><label>Tipo<select id="whDocType"><option value="FACTURA">Factura</option><option value="CONTRATO">Contrato</option><option value="FICHA">Ficha</option><option value="OTRO">Otro</option></select></label><label>Nombre<input id="whDocName" placeholder="Factura N.º 123"></label><label class="field-group file-field" data-file-picker="document"><span>Archivo privado</span><input id="whDocFile" class="file-input" type="file" accept=".pdf,image/*"><label class="file-picker-btn" for="whDocFile"><i class="bi bi-paperclip"></i><span class="file-picker-text">Seleccionar archivo</span></label><small class="file-name">Sin archivo seleccionado</small></label></div><button class="btn btn-primary" id="uploadWhDocument" type="button"><i class="bi bi-cloud-arrow-up"></i> Subir y notificar</button><div class="table-wrap" id="wholesaleDocumentsTable"></div></div>
+    </section>
+
+
+    <section class="admin-view" id="view-wholesale-credits">
+      <div class="admin-card">
+        <div class="card-head"><div><span class="eyebrow">Línea de crédito B2B</span><h2>Créditos Mayoristas</h2><p class="module-help">Asigna y administra una línea de crédito por empresa Mayorista. Define plazo por compra (15, 30, 45 días o personalizado), recargo porcentual por uso y política de mora. Cada pedido a crédito conserva su propio vencimiento y los abonos liberan saldo de forma trazable.</p></div><div class="card-head-actions"><button class="btn btn-light" id="refreshWholesaleCredits" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div></div>
+        <div class="kpi-grid wholesale-credit-kpis"><div class="kpi-card"><span>Límite asignado</span><strong id="whCreditKpiLimit">$0</strong></div><div class="kpi-card"><span>Saldo disponible</span><strong id="whCreditKpiAvailable">$0</strong></div><div class="kpi-card"><span>Crédito utilizado</span><strong id="whCreditKpiUsed">$0</strong></div><div class="kpi-card"><span>En mora</span><strong id="whCreditKpiOverdue">0</strong></div></div>
+      </div>
+      <div class="admin-card wholesale-credit-actions-card">
+        <div class="card-head"><div><span class="eyebrow">Administración</span><h3>Acciones de crédito</h3><p class="module-help">Mantén el módulo limpio y abre solo la gestión que necesites. Cada botón despliega su propio modal.</p></div></div>
+        <div class="wholesale-credit-action-buttons">
+          <button class="credit-action-btn credit-action-config" id="openWholesaleCreditEditor" type="button"><span class="credit-action-icon"><i class="bi bi-wallet2"></i></span><span><strong>Configurar línea</strong><small>Asignar límite, plazo, recargo y política de mora.</small></span><i class="bi bi-chevron-right credit-action-arrow"></i></button>
+          <button class="credit-action-btn credit-action-payment" id="openWholesaleCreditPaymentEditor" type="button"><span class="credit-action-icon"><i class="bi bi-cash-coin"></i></span><span><strong>Registrar abono</strong><small>Disminuir deuda y liberar saldo disponible.</small></span><i class="bi bi-chevron-right credit-action-arrow"></i></button>
+          <button class="credit-action-btn credit-action-increase" id="openWholesaleCreditIncreaseEditor" type="button"><span class="credit-action-icon"><i class="bi bi-graph-up-arrow"></i></span><span><strong>Aumentar cupo</strong><small>Evaluar comportamiento y proponer un nuevo cupo antes de aplicarlo.</small></span><i class="bi bi-chevron-right credit-action-arrow"></i></button>
+        </div>
+      </div>
+
+      <div class="editor hidden wholesale-credit-modal" id="wholesaleCreditEditor" role="dialog" aria-modal="true" aria-labelledby="wholesaleCreditEditorTitle">
+        <div class="editor-modal-head"><div><span class="eyebrow">Asignación</span><h3 id="wholesaleCreditEditorTitle">Configurar línea de crédito</h3><small>Define límite, vigencia y estado para un Mayorista.</small></div><button type="button" class="editor-close-x" id="closeWholesaleCreditEditor" aria-label="Cerrar">×</button></div>
+        <div class="form-grid">
+          <label class="span-2">Mayorista<select id="whCreditClient"><option value="">Seleccionar Mayorista</option></select></label>
+          <label>Límite de crédito<input id="whCreditLimit" inputmode="numeric" placeholder="$0"></label>
+          <label>Estado<select id="whCreditActive"><option value="SI">Activo</option><option value="NO">Suspendido</option></select></label>
+          <label>Fecha de asignación<input id="whCreditAssigned" type="date"></label>
+          <label>Plazo de pago<select id="whCreditTermPreset"><option value="15">15 días</option><option value="30" selected>30 días</option><option value="45">45 días</option><option value="CUSTOM">Personalizado</option></select></label>
+          <label>Días de plazo<input id="whCreditTermDays" type="number" min="1" max="365" step="1" value="30" inputmode="numeric"><small>Cada compra calcula su propio vencimiento desde la fecha del pedido.</small></label>
+          <label>Recargo por uso (%)<input id="whCreditSurchargePct" type="number" min="0" max="100" step="0.01" value="0" inputmode="decimal"><small>Se suma al total solo cuando el Mayorista paga con Crédito.</small></label>
+          <label>Aviso automático de mora<select id="whCreditMoraNotice"><option value="SI">Sí, avisar</option><option value="NO">No avisar</option></select></label>
+          <label>Compras nuevas estando en mora<select id="whCreditMoraBlock"><option value="SI">Bloquear hasta regularizar</option><option value="NO">Permitir y solo alertar</option></select></label>
+          <label class="span-2">Observaciones<textarea id="whCreditNotes" rows="3" placeholder="Condiciones internas de la línea de crédito"></textarea></label>
+        </div>
+        <div class="credit-live-summary" id="whCreditLiveSummary">Selecciona un Mayorista para ver su situación actual.</div>
+        <div class="editor-actions"><button class="btn btn-primary" id="saveWholesaleCredit" type="button"><i class="bi bi-floppy"></i> Guardar línea</button><button class="btn btn-light" id="clearWholesaleCredit" type="button"><i class="bi bi-eraser"></i> Limpiar</button><button class="btn btn-light" id="cancelWholesaleCreditEditor" type="button">Cancelar</button></div>
+      </div>
+
+      <div class="editor hidden wholesale-credit-modal" id="wholesaleCreditPaymentEditor" role="dialog" aria-modal="true" aria-labelledby="wholesaleCreditPaymentEditorTitle">
+        <div class="editor-modal-head"><div><span class="eyebrow">Cobranza</span><h3 id="wholesaleCreditPaymentEditorTitle">Registrar abono</h3><small>Registra un pago recibido y libera saldo de la línea.</small></div><button type="button" class="editor-close-x" id="closeWholesaleCreditPaymentEditor" aria-label="Cerrar">×</button></div>
+        <div class="form-grid">
+          <label class="span-2">Mayorista<select id="whCreditPaymentClient"><option value="">Seleccionar Mayorista</option></select></label>
+          <label>Monto abonado<input id="whCreditPaymentAmount" inputmode="numeric" placeholder="$0"></label>
+          <label>Referencia<input id="whCreditPaymentRef" placeholder="Transferencia, recibo, comprobante..."></label>
+        </div>
+        <div class="credit-live-summary" id="whCreditPaymentSummary">Selecciona un Mayorista con deuda pendiente.</div>
+        <div class="editor-actions"><button class="btn btn-primary" id="registerWholesaleCreditPayment" type="button"><i class="bi bi-cash-coin"></i> Registrar abono</button><button class="btn btn-light" id="cancelWholesaleCreditPaymentEditor" type="button">Cancelar</button></div>
+      </div>
+
+      <div class="editor hidden wholesale-credit-modal" id="wholesaleCreditIncreaseEditor" role="dialog" aria-modal="true" aria-labelledby="wholesaleCreditIncreaseEditorTitle">
+        <div class="editor-modal-head"><div><span class="eyebrow">Ampliación controlada</span><h3 id="wholesaleCreditIncreaseEditorTitle">Aumentar cupo de crédito</h3><small>Primero evalúa el comportamiento del Mayorista. El sistema sugerirá un monto; la aplicación final siempre requiere aprobación administrativa.</small></div><button type="button" class="editor-close-x" id="closeWholesaleCreditIncreaseEditor" aria-label="Cerrar">×</button></div>
+        <div class="form-grid">
+          <label class="span-2">Mayorista<select id="whCreditIncreaseClient"><option value="">Seleccionar Mayorista</option></select></label>
+          <div class="span-2 credit-increase-evaluate-strip">
+            <button class="btn credit-evaluate-btn" id="evaluateWholesaleCreditIncrease" type="button"><i class="bi bi-stars"></i> Evaluar aumento de cupo</button>
+            <small>Analiza pagos puntuales, mora, frecuencia de compras, historial y actividad reciente. No modifica el cupo por sí solo.</small>
+          </div>
+          <label>Monto del aumento<input id="whCreditIncreaseAmount" inputmode="numeric" placeholder="$0"><small>Se completa automáticamente cuando existe una recomendación.</small></label>
+          <label>Motivo / referencia<input id="whCreditIncreaseRef" placeholder="Evaluación de cupo, aumento aprobado..."></label>
+        </div>
+        <div class="credit-live-summary" id="whCreditIncreaseSummary">Selecciona un Mayorista con línea de crédito.</div>
+        <div class="credit-increase-evaluation is-empty" id="whCreditIncreaseEvaluation"><span class="credit-evaluation-placeholder">Pulsa “Evaluar aumento de cupo” para obtener una recomendación.</span></div>
+        <div class="editor-actions"><button class="btn btn-light" id="cancelWholesaleCreditIncreaseEditor" type="button">Cancelar</button><button class="btn btn-primary" id="increaseWholesaleCreditLimit" type="button"><i class="bi bi-arrow-up-circle"></i> Aplicar aumento de cupo</button></div>
+      </div>
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Cuentas</span><h3>Estado de líneas de crédito</h3></div></div><div class="table-wrap" id="wholesaleCreditsTable"></div></div>
+      <div class="admin-card wholesale-payment-review-card"><div class="card-head"><div><span class="eyebrow">Cobranza Mayorista</span><h3>Comprobantes y pagos de línea de crédito</h3><p>Las transferencias quedan pendientes hasta aprobación. Los pagos Transbank se aplican automáticamente cuando Webpay confirma la transacción.</p></div></div><div class="table-wrap wholesale-credit-payments-table" id="wholesaleCreditPaymentsTable"></div></div>
+      <div class="admin-card credit-rating-card"><div class="card-head"><div><span class="eyebrow">Evaluación crediticia</span><h3>Historial y recomendación de cupo</h3><p>Calificación base de 1 a 5 estrellas. Para decidir un aumento, usa “Evaluar aumento de cupo”: además incorpora frecuencia de compras y actividad comercial reciente antes de sugerir un valor.</p></div></div><div id="wholesaleCreditRatings" class="credit-rating-grid"></div></div>
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Trazabilidad</span><h3>Movimientos de crédito</h3></div></div><div class="table-wrap" id="wholesaleCreditMovementsTable"></div></div>
+    </section>
+
+
+    <section class="admin-view" id="view-purchases">
+      <div class="admin-card sii-shell">
+        <div class="card-head"><div><span class="eyebrow">Compras y proveedores</span><h2>Compras / DTE recibidos</h2><p class="module-help">Recepción de facturas de proveedores, control del plazo SII, respuestas de intercambio y registro de la compra sin duplicaciones.</p></div><div class="card-head-actions"><button class="btn btn-primary" type="button" data-sii-open="siiExchangeModal"><i class="bi bi-file-earmark-arrow-up"></i> Recibir DTE</button><button class="btn btn-light" id="purchaseDteRefresh" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div></div>
+        <div class="sii-runtime-grid purchase-dte-kpis">
+          <div><span>DTE recibidos</span><strong id="purchaseDteCount">0</strong><small>Facturas y documentos recibidos</small></div>
+          <div><span>Pendientes SII</span><strong id="purchaseDtePending">0</strong><small>Sin evento legal registrado</small></div>
+          <div><span>Por registrar</span><strong id="purchaseDteUnregistered">0</strong><small>Facturas aún no llevadas a compras</small></div>
+          <div><span>Total recibido</span><strong id="purchaseDteTotal">$0</strong><small>Según XML importados</small></div>
+        </div>
+        <div class="integration-note"><i class="bi bi-info-circle"></i><span><strong>Importante:</strong> “Aceptar contenido” (ACD) y “Recibo de mercaderías/servicios” (ERM) son eventos diferentes. El estado legal se registra contra el WebService del SII y se mantiene separado de la respuesta XML de intercambio.</span></div>
+        <div class="table-wrap sii-table-wrap"><table class="sii-table purchase-dte-table"><thead><tr><th>Recepción</th><th>Proveedor</th><th>DTE / Folio</th><th>Neto / IVA / Total</th><th>Intercambio</th><th>Registro SII</th><th>Compra</th><th>Acciones</th></tr></thead><tbody id="purchaseDteTable"></tbody></table></div>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-suppliers">
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Abastecimiento</span><h2>Proveedores</h2><p class="module-help">Mantén los datos de quienes abastecen materias primas, envases y otros insumos.</p></div><div class="card-head-actions"><button class="btn btn-primary" id="newSupplier" type="button"><i class="bi bi-plus-lg"></i> Nuevo proveedor</button></div></div>
+        <div class="table-wrap" id="suppliersTable"></div>
+        <div class="editor hidden" id="supplierEditor" role="dialog" aria-modal="true"><div class="editor-modal-head"><div><span class="eyebrow">Proveedor</span><h3 id="supplierEditorTitle">Nuevo proveedor</h3></div><button type="button" class="editor-close-x" id="closeSupplierEditor">×</button></div><input type="hidden" id="supplierId"><div class="form-grid"><label>RUT<input id="supplierRut" placeholder="12.345.678-5"></label><label>Nombre / Razón social<input id="supplierName" placeholder="Proveedor"></label><label>Contacto<input id="supplierContact" placeholder="Nombre contacto"></label><label>Teléfono<input id="supplierPhone" placeholder="+56 9 ..."></label><label>Correo<input id="supplierEmail" type="email" placeholder="proveedor@correo.cl"></label><label>Estado<select id="supplierActive"><option value="SI">Activo</option><option value="NO">Inactivo</option></select></label><label class="span-2">Dirección<input id="supplierAddress" placeholder="Dirección"></label><label class="span-2">Observaciones<textarea id="supplierNotes" placeholder="Condiciones, productos que suministra, plazos..."></textarea></label></div><div class="editor-actions"><button class="btn btn-primary" id="saveSupplier" type="button">Guardar proveedor</button><button class="btn btn-light" id="cancelSupplier" type="button">Cancelar</button></div></div>
+      </div>
+    </section>
+
+
+    <section class="admin-view" id="view-warehouses">
+      <div class="admin-card warehouse-main-card">
+        <div class="card-head warehouse-head"><div><span class="eyebrow">Operación</span><h2>Bodegas</h2></div><div class="card-head-actions">
+          <button class="btn btn-light" id="openWarehouseChannels" type="button"><i class="bi bi-sliders"></i> Configurar canales</button>
+          <button class="btn btn-primary" id="newWarehouse" type="button"><i class="bi bi-plus-lg"></i> Nueva bodega</button>
+        </div></div>
+        <div class="kpi-grid warehouse-kpis"><div class="kpi-card"><span>Bodegas</span><strong id="warehouseKpiTotal">0</strong></div><div class="kpi-card"><span>Activas</span><strong id="warehouseKpiActive">0</strong></div><div class="kpi-card"><span>Inactivas</span><strong id="warehouseKpiInactive">0</strong></div></div>
+        <div class="warehouse-channel-summary" id="warehouseChannelSummary"></div>
+        <div class="table-wrap warehouse-table-wrap" id="warehousesTable"></div>
+      </div>
+
+      <div class="editor hidden operational-modal warehouse-editor-modal" id="warehouseEditor" role="dialog" aria-modal="true">
+        <div class="editor-modal-head"><div><span class="eyebrow">Bodega</span><h3 id="warehouseEditorTitle">Nueva bodega</h3></div><button type="button" class="editor-close-x" id="closeWarehouseEditor">×</button></div>
+        <input type="hidden" id="warehouseId">
+        <div class="form-grid compact-form-grid">
+          <label class="field-group"><span>Código</span><input id="warehouseCode" value="Automático" disabled></label>
+          <label class="field-group"><span>Estado</span><select id="warehouseActive"><option value="SI">Activa</option><option value="NO">Inactiva</option></select></label>
+          <label class="field-group span-2"><span>Nombre</span><input id="warehouseName" placeholder="Nombre de la bodega"></label>
+          <label class="field-group span-2"><span>Dirección / ubicación</span><input id="warehouseAddress" placeholder="Dirección o ubicación interna"></label>
+          <label class="field-group"><span>Responsable</span><input id="warehouseManager" placeholder="Responsable"></label>
+          <label class="field-group span-2"><span>Observaciones</span><textarea id="warehouseNotes" placeholder="Observaciones opcionales"></textarea></label>
+        </div>
+        <div class="editor-actions"><button class="btn btn-primary" id="saveWarehouse" type="button"><i class="bi bi-check2"></i> Guardar bodega</button><button class="btn btn-light" id="cancelWarehouse" type="button">Cancelar</button></div>
+      </div>
+
+      <div class="editor hidden operational-modal warehouse-channel-modal" id="warehouseChannelEditor" role="dialog" aria-modal="true">
+        <div class="editor-modal-head"><div><span class="eyebrow">Bodegas</span><h3>Canales de venta</h3></div><button type="button" class="editor-close-x" id="closeWarehouseChannels">×</button></div>
+        <div class="warehouse-channel-grid modal-channel-grid">
+          <label class="channel-config-card"><span class="channel-icon"><i class="bi bi-globe2"></i></span><span class="channel-label">Web / eCommerce</span><select id="warehouseChannelWeb"></select></label>
+          <label class="channel-config-card"><span class="channel-icon"><i class="bi bi-shop"></i></span><span class="channel-label">Venta presencial</span><select id="warehouseChannelPresencial"></select></label>
+          <label class="channel-config-card"><span class="channel-icon"><i class="bi bi-people"></i></span><span class="channel-label">Mayorista</span><select id="warehouseChannelMayorista"></select></label>
+          <label class="channel-config-card"><span class="channel-icon"><i class="bi bi-window"></i></span><span class="channel-label">Pedido cPanel</span><select id="warehouseChannelCpanel"></select></label>
+        </div>
+        <div class="editor-actions"><button class="btn btn-primary" id="saveWarehouseChannels" type="button"><i class="bi bi-check2"></i> Guardar configuración</button><button class="btn btn-light" id="cancelWarehouseChannels" type="button">Cancelar</button></div>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-stock">
+      <div class="admin-card stock-control-card">
+        <div class="card-head module-premium-head"><div><span class="eyebrow">Existencias</span><h2>Inventario</h2></div><div class="card-head-actions">
+          <a class="btn btn-light" href="PLANTILLA_CARGA_INVENTARIO_ALE_ATENCIO.xlsx" download><i class="bi bi-file-earmark-excel"></i> Plantilla XLSX</a>
+          <button class="btn btn-light" id="openInventoryImport" type="button"><i class="bi bi-upload"></i> Importar XLSX</button>
+          <button class="btn btn-primary" id="openInventoryPart" type="button"><i class="bi bi-arrow-left-right"></i> Nuevo movimiento</button>
+        </div></div>
+        <div class="kpi-grid"><div class="kpi-card"><span>Stock físico</span><strong id="stockKpiPhysical">0</strong></div><div class="kpi-card"><span>Reservado</span><strong id="stockKpiReserved">0</strong></div><div class="kpi-card"><span>Disponible</span><strong id="stockKpiAvailable">0</strong></div><div class="kpi-card"><span>Movimientos</span><strong id="stockKpiMovements">0</strong></div></div>
+        <div class="admin-toolbar inventory-toolbar">
+          <select id="stockWarehouseFilter"></select>
+          <input id="stockSearch" type="search" placeholder="Buscar producto...">
+          <button class="btn btn-light" id="refreshStock" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button>
+        </div>
+        <div class="table-wrap inventory-stock-table" id="warehouseStockTable"></div>
+      </div>
+      <div class="admin-card">
+        <div class="card-head"><div><span class="eyebrow">Kardex</span><h3>Movimientos de inventario</h3></div><button class="btn btn-light btn-compact" id="exportInventoryMoves" type="button"><i class="bi bi-file-earmark-excel"></i> XLSX</button></div>
+        <div class="table-wrap" id="warehouseMovementsTable"></div>
+      </div>
+
+      <div class="editor hidden operational-modal inventory-import-editor" id="inventoryImportEditor" role="dialog" aria-modal="true">
+        <div class="editor-modal-head"><div><span class="eyebrow">Inventario</span><h3>Cargar XLSX</h3></div><button type="button" class="editor-close-x" id="closeInventoryImport">×</button></div>
+        <div class="form-grid">
+          <label class="field-group"><span>Operación</span><select id="inventoryImportType"><option value="">Seleccionar</option><option value="CARGA_INICIAL">Carga inicial</option><option value="AJUSTE">Ajuste de inventario</option></select></label>
+          <label class="field-group"><span>Bodega</span><select id="inventoryImportWarehouse"></select></label>
+          <label class="field-group span-2"><span>Motivo / referencia</span><input id="inventoryImportReason" placeholder="Inventario físico, apertura..."></label>
+          <div class="field-group file-field span-2" data-file-picker="xlsx"><span>Archivo XLSX</span><input id="inventoryImportFile" class="file-input" type="file" accept=".xlsx,.xls"><label class="file-picker-btn" for="inventoryImportFile"><i class="bi bi-file-earmark-excel"></i><span class="file-picker-text">Seleccionar XLSX</span></label><small class="file-name">Sin archivo seleccionado</small></div>
+          <label class="inventory-force-row hidden span-2" id="inventoryImportForceRow"><input id="inventoryImportForce" type="checkbox"> Reaplicar carga inicial sobre registros ya inicializados</label>
+        </div>
+        <div class="inventory-import-summary" id="inventoryImportSummary"></div>
+        <div class="table-wrap inventory-import-preview" id="inventoryImportPreview"></div>
+        <div class="editor-actions"><button class="btn btn-primary" id="applyInventoryImport" type="button" disabled>Aplicar inventario</button><button class="btn btn-light" id="cancelInventoryImport" type="button">Cancelar</button></div>
+      </div>
+
+      <div class="editor hidden operational-modal inventory-part-editor" id="inventoryPartEditor" role="dialog" aria-modal="true">
+        <div class="editor-modal-head"><div><span class="eyebrow">Inventario</span><h3>Movimiento de inventario</h3><small class="inventory-folio-preview">Folio automático: <strong id="inventoryPartFolio">PE-#</strong></small></div><button type="button" class="editor-close-x" id="closeInventoryPart">×</button></div>
+        <details class="inventory-part-meta" id="inventoryPartMeta" open>
+          <summary><span><i class="bi bi-sliders"></i> Datos del movimiento</span><strong id="inventoryPartMetaSummary">Parte de entrada</strong><i class="bi bi-chevron-down inventory-part-meta-chevron"></i></summary>
+          <div class="form-grid inventory-part-meta-grid">
+            <label class="field-group"><span>Tipo</span><select id="inventoryPartType"><option value="ENTRADA">Parte de entrada</option><option value="SALIDA">Parte de salida</option><option value="AJUSTE">Ajuste de inventario</option><option value="TRANSFERENCIA">Transferencia entre bodegas</option><option value="RECEPCION_IMPORTACION">Recepción de importación</option><option value="RECEPCION_EXPORTACION">Recepción de exportación</option></select></label>
+            <label class="field-group"><span>Bodega origen</span><select id="inventoryPartWarehouse"></select></label>
+            <label class="field-group inventory-destination-field hidden"><span>Bodega destino</span><select id="inventoryPartDestination"></select></label>
+            <label class="field-group"><span>Folio</span><input id="inventoryPartFolioField" value="PE-# · automático" readonly></label>
+            <label class="field-group"><span>Documento / referencia</span><input id="inventoryPartDocument" placeholder="Opcional"></label>
+            <label class="field-group"><span>Motivo</span><input id="inventoryPartReason" placeholder="Motivo del movimiento"></label>
+          </div>
+        </details>
+        <div class="receipt-items-head inventory-part-detail-head"><div><strong>Detalle</strong><small>Escribe o selecciona un producto. Usa Enter para avanzar por la línea.</small></div><button class="btn btn-light btn-compact" id="addInventoryPartItem" type="button">+ Línea</button></div>
+        <div class="inventory-part-columns" aria-hidden="true"><span>Producto</span><span>Tamaño</span><span id="inventoryPartQtyHeading">Cantidad</span><span>Costo unitario</span><span></span></div>
+        <datalist id="inventoryPartProductList"></datalist>
+        <div id="inventoryPartItems" class="inventory-part-rows"></div>
+        <div class="inventory-keyboard-hint"><i class="bi bi-keyboard"></i><span>Enter: Producto → Tamaño → Cantidad → Costo → nueva línea.</span></div>
+        <div class="editor-actions"><button class="btn btn-primary" id="saveInventoryPart" type="button">Aplicar movimiento</button><button class="btn btn-light" id="cancelInventoryPart" type="button">Cancelar</button></div>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-ledger">
+      <div class="admin-card auxiliary-ledger-card">
+        <div class="card-head module-premium-head"><div><span class="eyebrow">Trazabilidad</span><h2>Libro Mayor Auxiliar</h2></div><div class="card-head-actions"><button class="btn btn-light" id="exportLedgerXlsx" type="button"><i class="bi bi-file-earmark-excel"></i> XLSX</button></div></div>
+        <div class="admin-toolbar ledger-toolbar">
+          <input id="ledgerSearch" type="search" placeholder="Pedido, folio, documento, RUT...">
+          <select id="ledgerTypeFilter"><option value="">Todos los movimientos</option><option value="VENTA">Ventas</option><option value="FACTURA">Facturas</option><option value="BOLETA">Boletas</option><option value="GUÍA">Guías</option><option value="NOTA">Notas de crédito/débito</option><option value="INVENTARIO">Inventario</option></select>
+          <button class="btn btn-primary" id="ledgerConsult" type="button"><i class="bi bi-search"></i> Consultar documento</button>
+        </div>
+        <div class="ledger-date-panel">
+          <div class="ledger-date-fields">
+            <label>Desde<input id="ledgerDateFrom" type="date"></label>
+            <label>Hasta<input id="ledgerDateTo" type="date"></label>
+          </div>
+          <div class="ledger-date-shortcuts" role="group" aria-label="Filtros rápidos de fecha">
+            <button class="btn btn-light ledger-date-chip" id="ledgerDateToday" type="button"><i class="bi bi-calendar-day"></i> Hoy</button>
+            <button class="btn btn-light ledger-date-chip" id="ledgerDateMonth" type="button"><i class="bi bi-calendar3"></i> Este mes</button>
+            <button class="btn btn-light ledger-date-chip" id="ledgerDatePrevMonth" type="button"><i class="bi bi-calendar2-minus"></i> Mes anterior</button>
+            <button class="btn btn-light ledger-date-chip" id="ledgerDateClear" type="button"><i class="bi bi-x-circle"></i> Limpiar</button>
+          </div>
+        </div>
+        <div class="ledger-filter-summary" id="ledgerFilterSummary">Todos los movimientos</div>
+        <div class="table-wrap" id="ledgerTable"></div>
+      </div>
+      <div class="editor hidden operational-modal ledger-history-editor" id="ledgerHistoryEditor" role="dialog" aria-modal="true">
+        <div class="editor-modal-head"><div><span class="eyebrow">Documento</span><h3 id="ledgerHistoryTitle">Historial</h3></div><button type="button" class="editor-close-x" id="closeLedgerHistory">×</button></div>
+        <div class="ledger-document-summary" id="ledgerDocumentSummary"></div>
+        <div class="ledger-timeline" id="ledgerTimeline"></div>
+        <div class="editor-actions"><button class="btn btn-light" id="closeLedgerHistoryBottom" type="button">Cerrar</button></div>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-inventory">
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Control de costos</span><h2>Mercadería e insumos</h2><p class="module-help">Registra compras, actualiza existencias y costo promedio, y calcula el costo de elaboración según los ingredientes configurados en Productos.</p></div><div class="card-head-actions"><button class="btn btn-light" id="newSupply" type="button"><i class="bi bi-plus-lg"></i> Nuevo insumo</button><button class="btn btn-primary" id="newInventoryReceipt" type="button"><i class="bi bi-box-arrow-in-down"></i> Ingreso de mercadería</button></div></div>
+        <div class="kpi-grid"><div class="kpi-card"><span>Valor inventario</span><strong id="inventoryKpiValue">$0</strong></div><div class="kpi-card"><span>Insumos bajo mínimo</span><strong id="inventoryKpiLow">0</strong></div><div class="kpi-card"><span>Compras del mes</span><strong id="inventoryKpiMonth">$0</strong></div></div>
+        <h3>Insumos</h3><div class="table-wrap" id="suppliesTable"></div>
+      </div>
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Historial</span><h3>Compras / ingresos de mercadería</h3></div></div><div class="table-wrap" id="purchasesTable"></div></div>
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Rentabilidad</span><h3>Costo estimado por producto</h3></div></div><div class="table-wrap" id="productCostTable"></div></div>
+      <div class="editor hidden" id="supplyEditor" role="dialog" aria-modal="true"><div class="editor-modal-head"><div><span class="eyebrow">Insumo</span><h3 id="supplyEditorTitle">Nuevo insumo</h3></div><button type="button" class="editor-close-x" id="closeSupplyEditor">×</button></div><input type="hidden" id="supplyId"><div class="form-grid"><label>Nombre<input id="supplyName" placeholder="Harina"></label><label>Unidad<input id="supplyUnit" placeholder="KG" value="KG"></label><label>Stock actual<input id="supplyStock" type="number" min="0" step="0.001"></label><label>Costo promedio CLP<input id="supplyCost" inputmode="numeric" placeholder="0"></label><label>Stock mínimo<input id="supplyMin" type="number" min="0" step="0.001"></label><label>Estado<select id="supplyActive"><option value="SI">Activo</option><option value="NO">Inactivo</option></select></label></div><div class="editor-actions"><button class="btn btn-primary" id="saveSupply" type="button">Guardar insumo</button><button class="btn btn-light" id="cancelSupply" type="button">Cancelar</button></div></div>
+      <div class="editor hidden inventory-receipt-editor" id="inventoryReceiptEditor" role="dialog" aria-modal="true"><div class="editor-modal-head"><div><span class="eyebrow">Ingreso de mercadería</span><h3>Registrar compra</h3><small>Al guardar se incrementa el stock y se recalcula el costo promedio.</small></div><button type="button" class="editor-close-x" id="closeInventoryReceipt">×</button></div><div class="form-grid"><label>Proveedor<select id="receiptSupplier"><option value="">Sin proveedor</option></select></label><label>Fecha<input id="receiptDate" type="datetime-local"></label><label>Tipo documento<select id="receiptType"><option value="COMPRA">Compra</option><option value="FACTURA">Factura</option><option value="BOLETA">Boleta</option><option value="GUIA">Guía</option></select></label><label>N.º documento<input id="receiptDocument" placeholder="Folio / referencia"></label><label class="span-2">Observaciones<textarea id="receiptNotes"></textarea></label></div><div class="receipt-items-head"><strong>Detalle</strong><button class="btn btn-light btn-compact" id="addReceiptItem" type="button">+ Línea</button></div><div id="receiptItemsEditor" class="receipt-item-rows"></div><div class="receipt-total">Total compra: <strong id="receiptTotal">$0</strong></div><div class="editor-actions"><button class="btn btn-primary" id="saveInventoryReceipt" type="button">Registrar mercadería</button><button class="btn btn-light" id="cancelInventoryReceipt" type="button">Cancelar</button></div></div>
+    </section>
+
+    <section class="admin-view" id="view-gallery">
+      <div class="admin-card"><div class="card-head"><div><span class="eyebrow">Trabajos realizados</span><h2>Galería</h2><p class="module-help">Carga fotografías de eventos, tortas y trabajos terminados. Puedes decidir cuáles se publican en la Web.</p></div><div class="card-head-actions"><button class="btn btn-primary" id="newGalleryItem" type="button"><i class="bi bi-image"></i> Nueva imagen</button></div></div><div class="gallery-admin-grid" id="galleryAdminGrid"></div>
+        <div class="editor hidden" id="galleryEditor" role="dialog" aria-modal="true"><div class="editor-modal-head"><div><span class="eyebrow">Galería</span><h3 id="galleryEditorTitle">Nueva imagen</h3></div><button type="button" class="editor-close-x" id="closeGalleryEditor">×</button></div><input type="hidden" id="galleryId"><input type="hidden" id="galleryImageId"><input type="hidden" id="galleryImageUrl"><div class="form-grid"><label>Título<input id="galleryTitle" placeholder="Matrimonio, torta temática..."></label><label>Categoría<input id="galleryCategory" placeholder="Eventos"></label><label>Fecha del evento<input id="galleryDate" type="date"></label><label>Orden<input id="galleryOrder" type="number" value="0"></label><label class="field-group file-field span-2" data-file-picker="image"><span>Imagen</span><input id="galleryImage" class="file-input" type="file" accept="image/*"><label class="file-picker-btn" for="galleryImage"><i class="bi bi-camera"></i><span class="file-picker-text">Seleccionar imagen</span></label><small class="file-name">Sin archivo seleccionado</small></label><label class="span-2">Descripción<textarea id="galleryDescription"></textarea></label><label>Visible en Web<select id="galleryPublic"><option value="SI">Sí</option><option value="NO">No</option></select></label><label>Estado<select id="galleryActive"><option value="SI">Activo</option><option value="NO">Inactivo</option></select></label></div><div class="editor-actions"><button class="btn btn-primary" id="saveGalleryItem" type="button">Guardar imagen</button><button class="btn btn-light" id="cancelGalleryEditor" type="button">Cancelar</button></div></div>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-reports">
+      <div class="admin-card report-dashboard-card report-pro">
+        <div class="card-head report-main-head">
+          <div><span class="eyebrow">Analítica comercial en vivo</span><h2>Ventas, demanda y clientes</h2><p class="report-subtitle">Solo considera ventas realmente pagadas. Los indicadores se calculan desde pedidos + detalle de productos, no desde datos visuales del cPanel.</p></div>
+          <div class="card-head-actions report-export-actions"><button class="btn btn-light" id="refreshReports" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button><button class="btn btn-light" id="exportSalesXlsx" type="button"><i class="bi bi-file-earmark-excel"></i> XLSX</button><button class="btn btn-light" id="exportSalesPdf" type="button"><i class="bi bi-file-earmark-pdf"></i> PDF</button></div>
+        </div>
+        <div class="report-filter-card">
+          <div class="report-filter-head"><div><span class="eyebrow">Filtros</span><h3>Período de ventas pagadas</h3><p>La fecha utilizada es la fecha efectiva de pago.</p></div><button class="btn btn-light report-reset-btn" id="resetReports" type="button"><i class="bi bi-arrow-counterclockwise"></i> Año actual</button></div>
+          <div class="report-filters report-filters-pro">
+            <label class="report-filter-field"><span>Desde</span><div class="report-input-shell"><i class="bi bi-calendar3"></i><input id="reportFrom" type="date"></div></label>
+            <label class="report-filter-field"><span>Hasta</span><div class="report-input-shell"><i class="bi bi-calendar3"></i><input id="reportTo" type="date"></div></label>
+            <label class="report-filter-field"><span>Estado operativo</span><div class="report-input-shell"><i class="bi bi-funnel"></i><select id="reportOrderStatus"><option value="" selected>Todos los pedidos pagados</option><option value="PENDIENTE">Pedido recibido</option><option value="CONFIRMADO">Pedido aceptado</option><option value="EN PREPARACION">En preparación</option><option value="LISTO">Listo para entrega</option><option value="ENTREGADO">Entregado</option><option value="CANCELADO">Cancelado</option></select></div></label>
+            <label class="report-filter-field"><span>Ranking productos</span><div class="report-input-shell"><i class="bi bi-trophy"></i><select id="reportTopLimit"><option value="1">Top 1</option><option value="10" selected>Top 10</option><option value="20">Top 20</option><option value="50">Top 50</option></select></div></label>
+            <button class="btn btn-primary report-apply-btn" id="applyReports" type="button"><i class="bi bi-funnel-fill"></i><span>Aplicar</span></button>
+          </div>
+          <div class="report-filter-summary" id="reportFilterSummary"><i class="bi bi-info-circle"></i><span>Cargando ventas pagadas…</span></div>
+        </div>
+
+        <div class="report-kpis report-kpis-pro">
+          <div class="report-kpi-card sales"><span class="report-kpi-icon"><i class="bi bi-cash-stack"></i></span><div><small>Ventas período</small><strong id="reportSalesTotal">$0</strong><em>Solo PAGADO</em></div></div>
+          <div class="report-kpi-card orders"><span class="report-kpi-icon"><i class="bi bi-bag-check"></i></span><div><small>Pedidos pagados</small><strong id="reportOrdersCount">0</strong><em>Período filtrado</em></div></div>
+          <div class="report-kpi-card clients"><span class="report-kpi-icon"><i class="bi bi-people"></i></span><div><small>Clientes compradores</small><strong id="reportClientsCount">0</strong><em>Únicos del período</em></div></div>
+          <div class="report-kpi-card repeat"><span class="report-kpi-icon"><i class="bi bi-arrow-repeat"></i></span><div><small>Clientes recurrentes</small><strong id="reportRepeatClients">0</strong><em>Más de una compra</em></div></div>
+          <div class="report-kpi-card"><span class="report-kpi-icon"><i class="bi bi-receipt"></i></span><div><small>Ticket promedio</small><strong id="reportAvgTicket">$0</strong><em>Promedio por pedido</em></div></div>
+          <div class="report-kpi-card"><span class="report-kpi-icon"><i class="bi bi-sun"></i></span><div><small>Ventas del día</small><strong id="reportTodaySales">$0</strong><em>Hoy</em></div></div>
+          <div class="report-kpi-card"><span class="report-kpi-icon"><i class="bi bi-calendar2-month"></i></span><div><small>Ventas del mes</small><strong id="reportMonthSales">$0</strong><em>Mes en curso</em></div></div>
+          <div class="report-kpi-card"><span class="report-kpi-icon"><i class="bi bi-trophy"></i></span><div><small>Producto N.º 1</small><strong id="reportTopProduct">—</strong><em id="reportTopProductMeta">Sin ventas</em></div></div>
+        </div>
+
+        <div class="report-circular-grid">
+          <article class="report-circle-card"><div class="report-circle" id="reportYearCircle" style="--pct:0"><div><strong id="reportYearPct">0%</strong><span>variación</span></div></div><div><small>Año actual vs anterior</small><strong id="reportYearSales">$0</strong><span id="reportPrevYearSales">Anterior: $0</span></div></article>
+          <article class="report-circle-card"><div class="report-circle" id="reportMonthCircle" style="--pct:0"><div><strong id="reportMonthPct">0%</strong><span>variación</span></div></div><div><small>Mes actual vs mismo mes anterior</small><strong id="reportMonthCompareSales">$0</strong><span id="reportPrevMonthSales">Anterior: $0</span></div></article>
+          <article class="report-highlight-card"><span class="eyebrow">Cliente con más compras</span><h3 id="reportTopCustomer">—</h3><strong id="reportTopCustomerTotal">$0</strong><small id="reportTopCustomerMeta">Sin compras</small></article>
+        </div>
+
+        <div class="report-grid-2">
+          <div class="report-section-card"><div class="report-section-head"><div><span class="eyebrow">Ranking</span><h3 id="topProductsTitle">Top 10 productos</h3></div><span class="report-section-badge" id="topProductsBadge">0</span></div><div class="table-wrap report-table-wrap" id="topProductsTable"></div></div>
+          <div class="report-section-card"><div class="report-section-head"><div><span class="eyebrow">Demanda</span><h3>Productos con alta demanda</h3></div><span class="report-section-badge">Últimos 30 días</span></div><div class="table-wrap report-table-wrap" id="highDemandTable"></div></div>
+        </div>
+        <div class="report-section-card"><div class="report-section-head"><div><span class="eyebrow">Clientes</span><h3>Clientes por compras pagadas</h3></div><span class="report-section-badge" id="clientRowsBadge">0 clientes</span></div><div class="table-wrap report-table-wrap" id="clientReportTable"></div></div>
+        <div class="report-section-card"><div class="report-section-head"><div><span class="eyebrow">Ventas</span><h3>Detalle de ventas pagadas</h3></div><span class="report-section-badge" id="salesRowsBadge">0 registros</span></div><div class="table-wrap report-table-wrap" id="salesReportTable"></div></div>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-users">
+      <div class="admin-card">
+        <div class="card-head"><div><span class="eyebrow">Acceso</span><h2>Usuarios del cPanel</h2></div><button class="btn btn-primary" id="newUser"><i class="bi bi-person-plus"></i> Nuevo usuario</button></div>
+        <div class="editor hidden" id="userEditor">
+          <input type="hidden" id="uId"><input type="hidden" id="uProfileId"><input type="hidden" id="uProfileUrl">
+          <div class="user-editor-grid">
+            <div class="profile-upload-box"><img id="uProfilePreview" src="favicon.png" alt="Foto de perfil"><div class="field-group file-field" data-file-picker="image"><span>Foto de perfil</span><input id="uProfile" class="file-input" type="file" accept="image/*"><label class="file-picker-btn" for="uProfile"><i class="bi bi-camera"></i><span class="file-picker-text">Seleccionar imagen</span></label><small class="file-name">Sin archivo seleccionado</small></div></div>
+            <div class="form-grid">
+              <label class="field-group"><span>Nombre completo</span><input id="uName" placeholder="Nombre completo"></label>
+              <label class="field-group"><span>Usuario</span><input id="uUsername" placeholder="Usuario" autocomplete="off"></label>
+              <label class="field-group"><span>Rol</span><select id="uRole"><option value="ADMIN">Administrador</option><option value="GERENCIA">Gerencia</option><option value="OPERADOR">Operador</option><option value="EDITOR">Editor</option><option value="LECTURA">Lectura</option><option value="MAYORISTA">Mayorista</option></select></label>
+              <label class="field-group wholesale-user-field hidden"><span>Cliente mayorista</span><select id="uClient"><option value="">Seleccionar cliente</option></select></label>
+              <label class="field-group wholesale-user-field hidden"><span>Lista de precios</span><select id="uPriceList"><option value="">Seleccionar lista</option></select></label>
+              <label class="field-group"><span>Estado</span><select id="uActive"><option value="SI">Activo</option><option value="NO">Inactivo</option></select></label>
+              <label class="field-group span-2"><span>Contraseña</span><input id="uPassword" type="password" placeholder="Mínimo 8 caracteres; dejar vacío para conservar"></label>
+            </div>
+          </div>
+          <div class="editor-actions"><button class="btn btn-primary" id="saveUser">Guardar usuario</button><button class="btn btn-light" data-cancel="userEditor">Cancelar</button></div>
+        </div>
+        <div class="table-wrap" id="usersTable"></div>
+      </div>
+      <div class="admin-card password-card">
+        <span class="eyebrow">Mi acceso</span><h2>Cambiar mi contraseña</h2>
+        <div class="password-row"><label class="field-group"><span>Nueva contraseña</span><input id="myNewPassword" type="password" placeholder="Mínimo 8 caracteres"></label><button class="btn btn-primary" id="changeMyPassword">Actualizar contraseña</button></div>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-integrations">
+      <div class="admin-card integration-shell">
+        <div class="card-head"><div><span class="eyebrow">Ecommerce</span><h2>Integraciones y canales</h2><p class="module-help">Centro único para dejar preparados los conectores ecommerce más comunes. Activa solamente los que realmente utilices.</p></div></div>
+        <div class="integration-grid">
+          <article class="integration-card"><div class="integration-provider"><i class="bi bi-shop"></i><div><strong>Shopify</strong><small>Tienda / catálogo</small></div></div><label class="integration-toggle"><input id="iShopifyEnabled" type="checkbox"><span>Activo</span></label><label class="field-group"><span>URL de tienda / endpoint</span><input id="iShopifyUrl" type="url" placeholder="https://..."></label></article>
+          <article class="integration-card"><div class="integration-provider"><i class="bi bi-wordpress"></i><div><strong>WooCommerce</strong><small>WordPress ecommerce</small></div></div><label class="integration-toggle"><input id="iWooEnabled" type="checkbox"><span>Activo</span></label><label class="field-group"><span>URL de tienda / endpoint</span><input id="iWooUrl" type="url" placeholder="https://..."></label></article>
+          <article class="integration-card"><div class="integration-provider"><i class="bi bi-bag"></i><div><strong>Mercado Libre</strong><small>Marketplace</small></div></div><label class="integration-toggle"><input id="iMercadoLibreEnabled" type="checkbox"><span>Activo</span></label><label class="field-group"><span>URL / endpoint</span><input id="iMercadoLibreUrl" type="url" placeholder="https://..."></label></article>
+          <article class="integration-card"><div class="integration-provider"><i class="bi bi-meta"></i><div><strong>Meta / Instagram Shopping</strong><small>Catálogo social</small></div></div><label class="integration-toggle"><input id="iMetaEnabled" type="checkbox"><span>Activo</span></label><label class="field-group"><span>URL / catálogo</span><input id="iMetaUrl" type="url" placeholder="https://..."></label></article>
+          <article class="integration-card"><div class="integration-provider"><i class="bi bi-google"></i><div><strong>Google Merchant Center</strong><small>Feed / catálogo</small></div></div><label class="integration-toggle"><input id="iGoogleMerchantEnabled" type="checkbox"><span>Activo</span></label><label class="field-group"><span>URL / feed</span><input id="iGoogleMerchantUrl" type="url" placeholder="https://..."></label></article>
+          <article class="integration-card"><div class="integration-provider"><i class="bi bi-tiktok"></i><div><strong>TikTok Shop</strong><small>Canal social</small></div></div><label class="integration-toggle"><input id="iTiktokShopEnabled" type="checkbox"><span>Activo</span></label><label class="field-group"><span>URL / endpoint</span><input id="iTiktokShopUrl" type="url" placeholder="https://..."></label></article>
+          <article class="integration-card"><div class="integration-provider"><i class="bi bi-whatsapp"></i><div><strong>WhatsApp Business Catalog</strong><small>Catálogo conversacional</small></div></div><label class="integration-toggle"><input id="iWhatsappCatalogEnabled" type="checkbox"><span>Activo</span></label><label class="field-group"><span>URL de catálogo</span><input id="iWhatsappCatalogUrl" type="url" placeholder="https://..."></label></article>
+          <article class="integration-card"><div class="integration-provider"><i class="bi bi-box-seam"></i><div><strong>Jumpseller</strong><small>Ecommerce</small></div></div><label class="integration-toggle"><input id="iJumpsellerEnabled" type="checkbox"><span>Activo</span></label><label class="field-group"><span>URL de tienda / endpoint</span><input id="iJumpsellerUrl" type="url" placeholder="https://..."></label></article>
+        </div>
+        <div class="integration-note"><i class="bi bi-shield-check"></i><span>Las URL quedan centralizadas en configuración. Las conexiones API que requieran credenciales deberán habilitarse con sus claves oficiales; no se guardan claves inventadas ni se simula una sincronización.</span></div>
+        <button class="btn btn-primary" id="saveIntegrations"><i class="bi bi-floppy"></i> Guardar integraciones</button>
+      </div>
+    </section>
+
+    <section class="admin-view" id="view-payments">
+      <div class="admin-card payment-gateway-shell">
+        <div class="card-head"><div><span class="eyebrow">Pagos online</span><h2>Pasarela de pago</h2><p class="module-help">Webpay Plus usa dos dominios configurables: el dominio donde vive el botón de pago y el dominio al que vuelve el cliente después de confirmar la transacción. El callback técnico hacia Supabase se genera automáticamente y no se edita.</p></div></div>
+        <div class="payment-provider-card">
+          <div class="payment-provider-head">
+            <div class="payment-provider-logo"><i class="bi bi-credit-card-2-front"></i></div>
+            <div><strong>Transbank · Webpay Plus</strong><small>Integración REST · token_ws · confirmación automática</small></div>
+            <span class="gateway-status" id="transbankStatus">Verificando…</span>
+          </div>
+          <div class="gateway-runtime-grid">
+            <div class="gateway-runtime-item"><span>Ambiente</span><strong id="transbankEnvironment">—</strong></div>
+            <div class="gateway-runtime-item"><span>Credenciales servidor</span><strong id="transbankCredentials">Verificando…</strong></div>
+            <div class="gateway-runtime-item"><span>Flujo</span><strong>Webpay Plus REST</strong></div>
+          </div>
+          <div class="form-grid payment-form-grid">
+            <label class="field-group span-2"><span>Dominio de tienda / botón de pago</span><input id="pTransbankCheckoutUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://aleatencioreposteria.cl/" aria-describedby="transbankCheckoutHelp"></label>
+            <div class="span-2 form-help" id="transbankCheckoutHelp">Es el dominio público donde está el carrito y el botón <b>Pagar con Transbank</b>. URL oficial de la tienda: <b>https://aleatencioreposteria.cl/</b>. Los enlaces de pago y retorno usan este dominio público.</div>
+            <label class="field-group span-2"><span>Dominio de regreso después del pago</span><input id="pTransbankReturnUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://aleatencioreposteria.cl/" aria-describedby="transbankReturnHelp"></label>
+            <div class="span-2 form-help" id="transbankReturnHelp">Después del commit de Webpay Plus, el backend redirige al cliente a esta dirección agregando el resultado del pago y el número de pedido. Debe ser una página de tu tienda; no uses aquí un enlace <b>webpay.cl/company/...</b>.</div>
+            <label class="field-group span-2"><span>Link Webpay manual / alternativo</span><input id="pTransbankManualUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://www.webpay.cl/company/..." aria-describedby="transbankManualHelp"></label>
+            <div class="span-2 form-help" id="transbankManualHelp">Guarda aquí el enlace real de <b>Link y Botón de Pago</b> entregado por Transbank. Se conserva como alternativa manual y <b>no participa</b> en el flujo Webpay Plus del carrito.</div>
+            <label class="field-group span-2"><span>Callback técnico Transbank → servidor</span><input id="pTransbankCallbackUrl" type="url" readonly aria-describedby="transbankCallbackHelp"></label>
+            <div class="span-2 form-help" id="transbankCallbackHelp">Se genera automáticamente desde Supabase con <b>/functions/v1/dynamic-processor?tbk_return=1</b>. No debes modificarlo ni copiarlo como dominio de regreso del cliente.</div>
+          </div>
+          <div class="integration-note transbank-secret-note"><i class="bi bi-shield-lock"></i><span><strong>Las credenciales no se guardan en el navegador ni en la base pública.</strong> En producción el servidor usa <code>TRANSBANK_COMMERCE_CODE</code> y <code>TRANSBANK_API_KEY_SECRET</code> como Secrets.</span></div>
+
+          <div class="payment-secrets-panel" id="paymentSecretsPanel">
+            <div class="payment-secrets-head">
+              <div><span class="eyebrow">Servidor seguro</span><h3>Credenciales y Secret Keys</h3><p>Agrega o reemplaza las claves de la pasarela directamente desde este cPanel. Después de guardar, el valor queda en el servidor y no vuelve a mostrarse en texto claro.</p></div>
+              <span class="secret-manager-status" id="paymentSecretsManagerStatus">Verificando…</span>
+            </div>
+            <div class="secret-bootstrap-note hidden" id="paymentSecretsBootstrap">
+              <i class="bi bi-key"></i><div><strong>Activación inicial única</strong><span>Para habilitar este gestor debes registrar una sola vez en Supabase el Secret <code>ALE_MANAGEMENT_TOKEN</code> con permisos de lectura/escritura de Edge Function Secrets. Después podrás administrar desde aquí las credenciales de pago sin volver al panel de Supabase.</span></div>
+            </div>
+            <div class="secret-editor-head"><span>Nombre</span><span>Valor</span><span></span></div>
+            <div class="payment-secret-rows" id="paymentSecretRows"></div>
+            <div class="payment-secret-toolbar">
+              <button class="btn btn-light" id="addPaymentSecret" type="button"><i class="bi bi-plus-lg"></i> Agregar otra</button>
+              <button class="btn btn-primary" id="savePaymentSecrets" type="button"><i class="bi bi-shield-lock"></i> Guardar secretos</button>
+              <button class="btn btn-light" id="refreshPaymentSecrets" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar lista</button>
+            </div>
+            <div class="stored-secrets-box">
+              <div class="stored-secrets-title"><strong>Secretos guardados en el servidor</strong><small>Los valores permanecen ocultos por seguridad.</small></div>
+              <div id="paymentSecretsExisting" class="stored-secrets-list"><span class="secret-empty">Cargando…</span></div>
+            </div>
+            <div class="integration-note secret-security-note"><i class="bi bi-shield-check"></i><span>Solo un usuario <strong>Administrador</strong> puede guardar o eliminar Secrets. No se permite administrar desde aquí <code>ALE_MANAGEMENT_TOKEN</code>, variables <code>SUPABASE_*</code> ni secretos internos del sistema.</span></div>
+          </div>
+
+          <div class="gateway-actions"><button class="btn btn-primary" id="savePayments"><i class="bi bi-floppy"></i> Guardar configuración</button><button class="btn btn-light" id="testTransbankLink" type="button"><i class="bi bi-shield-check"></i> Verificar Webpay Plus</button><button class="btn btn-light" id="openTransbankManualLink" type="button"><i class="bi bi-box-arrow-up-right"></i> Abrir Link Webpay manual</button></div>
+          <div class="gateway-flow"><span><b>1.</b> Pedido registrado</span><i class="bi bi-arrow-right"></i><span><b>2.</b> Backend crea transacción</span><i class="bi bi-arrow-right"></i><span><b>3.</b> Transbank entrega token_ws</span><i class="bi bi-arrow-right"></i><span><b>4.</b> Cliente paga</span><i class="bi bi-arrow-right"></i><span><b>5.</b> Backend confirma y marca PAGADO</span></div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="admin-view" id="view-folio-manager">
+      <div class="admin-card folio-manager-shell">
+        <div class="card-head">
+          <div><span class="eyebrow">Correlativos y empresa</span><h2>Mantenedor de Folios</h2><p class="module-help">Administra desde un solo lugar los folios internos del sistema y visualiza los folios tributarios autorizados. Los DTE dependientes del SII se solicitan y cargan exclusivamente desde Facturación SII.</p></div>
+          <div class="card-head-actions"><button class="btn btn-light" id="folioRefresh" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div>
+        </div>
+        <div class="folio-summary-grid">
+          <div><span>Series internas</span><strong id="folioInternalCount">0</strong><small>Correlativos administrados</small></div>
+          <div><span>Folios internos disponibles</span><strong id="folioInternalAvailable">0</strong><small>Según rangos configurados</small></div>
+          <div><span>CAF SII activos</span><strong id="folioSiiCafCount">0</strong><small>Rangos oficiales vigentes</small></div>
+          <div><span>Alertas</span><strong id="folioAlertCount">0</strong><small>Rangos bajos o agotados</small></div>
+        </div>
+      </div>
+
+      <div class="admin-card folio-company-card">
+        <div class="card-head"><div><span class="eyebrow">Empresa</span><h2>Parametrización de empresa</h2><p class="module-help">Estos datos alimentan documentos internos y, cuando corresponde, la configuración tributaria del emisor SII.</p></div></div>
+        <div class="form-grid folio-company-grid">
+          <label class="field-group"><span>Nombre comercial</span><input id="fmEmpresa" placeholder="Ale Atencio"></label>
+          <label class="field-group"><span>Razón social legal</span><input id="fmRazonSocial" placeholder="Razón social registrada"></label>
+          <label class="field-group"><span>RUT empresa</span><input id="fmRut" placeholder="76.123.456-7"></label>
+          <label class="field-group"><span>Giro</span><input id="fmGiro" placeholder="Giro comercial / tributario"></label>
+          <label class="field-group"><span>Actividad económica SII</span><input id="fmActeco" maxlength="6" inputmode="numeric" placeholder="107100"></label>
+          <label class="field-group"><span>Correo empresa</span><input id="fmEmail" type="email" placeholder="contacto@empresa.cl"></label>
+          <label class="field-group span-2"><span>Dirección casa matriz</span><input id="fmDireccion" placeholder="Dirección"></label>
+          <label class="field-group"><span>Comuna</span><input id="fmComuna" placeholder="Comuna"></label>
+          <label class="field-group"><span>Ciudad</span><input id="fmCiudad" placeholder="Ciudad"></label>
+        </div>
+        <div class="folio-company-sync" id="folioCompanySync"><i class="bi bi-link-45deg"></i><span>La información tributaria se sincroniza con Facturación SII cuando esa Edge Function está configurada.</span></div>
+        <div class="editor-actions folio-company-actions"><button class="btn btn-primary" id="folioSaveCompany" type="button"><i class="bi bi-floppy"></i> Guardar parametrización</button></div>
+      </div>
+
+      <div class="admin-card folio-series-card">
+        <div class="card-head"><div><span class="eyebrow">Control central</span><h2>Folios del sistema</h2><p class="module-help">Las series de origen SISTEMA se administran aquí. Las series SII se muestran para control, pero cualquier solicitud o CAF se gestiona desde el módulo SII.</p></div></div>
+        <div class="folio-legend"><span><i class="folio-dot local"></i> Sistema</span><span><i class="folio-dot sii"></i> SII / CAF</span><span><i class="bi bi-exclamation-triangle"></i> Alerta al 20% o menos</span></div>
+        <div class="table-wrap folio-table-wrap"><table class="folio-table"><thead><tr><th>Documento / serie</th><th>Origen</th><th>Prefijo</th><th>Rango</th><th>Próximo</th><th>Disponibles</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="folioSeriesTable"><tr><td colspan="8" class="empty-cell">Cargando folios…</td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <div class="editor hidden folio-modal" id="folioSeriesEditor" role="dialog" aria-modal="true" aria-labelledby="folioSeriesEditorTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Serie interna</span><h3 id="folioSeriesEditorTitle">Configurar folio</h3><small id="folioSeriesEditorSubtitle">—</small></div><button type="button" class="editor-close-x" data-folio-close>×</button></div>
+      <input type="hidden" id="folioSeriesKey">
+      <div class="form-grid">
+        <label class="field-group"><span>Prefijo</span><input id="folioSeriesPrefix" maxlength="24" placeholder="PED"></label>
+        <label class="field-group"><span>Dígitos</span><input id="folioSeriesDigits" type="number" min="2" max="12" value="6"></label>
+        <label class="field-group"><span>Próximo número</span><input id="folioSeriesNext" type="number" min="1" step="1"></label>
+        <label class="field-group"><span>Fin de rango</span><input id="folioSeriesEnd" type="number" min="1" step="1"></label>
+        <label class="field-group"><span>Estado</span><select id="folioSeriesActive"><option value="SI">Activo</option><option value="NO">Inactivo</option></select></label>
+      </div>
+      <div class="folio-warning-box"><i class="bi bi-shield-check"></i><span>El próximo número no puede retroceder por debajo de la numeración ya consumida. Esto evita reutilizar folios.</span></div>
+      <div class="editor-actions"><button class="btn btn-primary" id="folioSeriesSave" type="button">Guardar serie</button><button class="btn btn-light" type="button" data-folio-close>Cancelar</button></div>
+    </div>
+
+    <div class="editor hidden folio-modal" id="folioExtendEditor" role="dialog" aria-modal="true" aria-labelledby="folioExtendTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Folios internos</span><h3 id="folioExtendTitle">Solicitar más folios</h3><small id="folioExtendSubtitle">—</small></div><button type="button" class="editor-close-x" data-folio-close>×</button></div>
+      <input type="hidden" id="folioExtendKey">
+      <div class="form-grid"><label class="field-group"><span>Cantidad adicional</span><input id="folioExtendQty" type="number" min="1" max="1000000" step="1" value="1000"></label></div>
+      <div class="folio-warning-box"><i class="bi bi-plus-circle"></i><span>Para series internas, “solicitar” amplía el rango disponible sin reutilizar números anteriores.</span></div>
+      <div class="editor-actions"><button class="btn btn-primary" id="folioExtendSave" type="button">Agregar folios</button><button class="btn btn-light" type="button" data-folio-close>Cancelar</button></div>
+    </div>
+
+    <section class="admin-view" id="view-billing-sii">
+      <div class="admin-card sii-shell">
+        <div class="card-head"><div><span class="eyebrow">Tributación electrónica</span><h2>Facturación SII</h2><p class="module-help">Gestión tributaria centralizada. Los formularios se abren solo cuando los necesitas para mantener el módulo limpio y profesional.</p></div><div class="card-head-actions"><span class="sii-env-badge" id="siiEnvironmentBadge">Sin configurar</span><button class="btn btn-light" id="siiRefresh" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div></div>
+        <div class="sii-runtime-grid">
+          <div><span>Servicio</span><strong id="siiServiceStatus">Verificando…</strong><small id="siiServiceVersion">—</small></div>
+          <div><span>Certificado</span><strong id="siiCertificateStatus">—</strong><small id="siiCertificateExpiry">—</small></div>
+          <div><span>CAF / folios</span><strong id="siiCafStatus">—</strong><small>Por tipo de DTE</small></div>
+          <div><span>Último DTE</span><strong id="siiLastDteStatus">—</strong><small id="siiLastTrack">—</small></div>
+        </div>
+        <div class="sii-action-launcher" aria-label="Acciones de facturación SII">
+          <button class="sii-launch-btn" type="button" data-sii-open="siiConfigModal"><span class="sii-launch-icon"><i class="bi bi-building-gear"></i></span><span><strong>Configuración tributaria</strong><small>Emisor, ambiente y resolución SII</small></span><i class="bi bi-chevron-right"></i></button>
+          <button class="sii-launch-btn" type="button" data-sii-open="siiCertificateModal"><span class="sii-launch-icon"><i class="bi bi-patch-check"></i></span><span><strong>Certificado digital</strong><small>Cargar y seleccionar PFX / P12</small></span><i class="bi bi-chevron-right"></i></button>
+          <button class="sii-launch-btn" type="button" data-sii-open="siiCafModal"><span class="sii-launch-icon"><i class="bi bi-file-earmark-lock2"></i></span><span><strong>CAF y folios</strong><small>Importar CAF y revisar disponibilidad</small></span><i class="bi bi-chevron-right"></i></button>
+          <button class="sii-launch-btn sii-launch-primary" type="button" data-sii-open="siiEmitModal"><span class="sii-launch-icon"><i class="bi bi-receipt-cutoff"></i></span><span><strong>Emitir documento</strong><small>Factura, guía, nota o boleta habilitada</small></span><i class="bi bi-chevron-right"></i></button>
+          <button class="sii-launch-btn" type="button" data-sii-open="siiExchangeModal"><span class="sii-launch-icon"><i class="bi bi-arrow-left-right"></i></span><span><strong>Intercambio DTE</strong><small>Recibir XML, responder y emitir acuses</small></span><i class="bi bi-chevron-right"></i></button>
+          <button class="sii-launch-btn" type="button" data-sii-open="siiCertificationModal"><span class="sii-launch-icon"><i class="bi bi-list-check"></i></span><span><strong>Certificación SII</strong><small>Set, simulación, intercambio y cumplimiento</small></span><i class="bi bi-chevron-right"></i></button>
+        </div>
+      </div>
+
+      <div class="admin-card sii-documents-card">
+        <div class="card-head"><div><span class="eyebrow">Trazabilidad</span><h2>Documentos tributarios</h2><p class="module-help">Historial de documentos emitidos y enviados al SII.</p></div><button class="btn btn-light" id="siiRefreshDocuments" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div>
+        <div class="table-wrap sii-table-wrap"><table class="sii-table sii-doc-table"><thead><tr><th>Fecha</th><th>DTE</th><th>Folio</th><th>Pedido</th><th>Receptor</th><th>Total</th><th>Estado</th><th>TrackID</th><th>Acciones</th></tr></thead><tbody id="siiDocumentsTable"></tbody></table></div>
+      </div>
+    </section>
+
+    <div class="editor hidden sii-modal" id="siiConfigModal" role="dialog" aria-modal="true" aria-labelledby="siiConfigModalTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Emisor</span><h3 id="siiConfigModalTitle">Configuración tributaria</h3><small>Datos reales del contribuyente y ambiente SII.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <div class="form-grid">
+        <label class="field-group"><span>Ambiente</span><select id="siiEnvironment"><option value="CERTIFICACION">CERTIFICACIÓN</option><option value="PRODUCCION">PRODUCCIÓN</option></select></label>
+        <label class="field-group sii-enable-line"><span>Habilitar emisión</span><select id="siiEnabled"><option value="NO">No</option><option value="SI">Sí</option></select></label>
+        <label class="field-group"><span>RUT emisor</span><input id="siiRutEmisor" placeholder="76.123.456-7"></label>
+        <label class="field-group"><span>Razón social legal</span><input id="siiRazonSocial" placeholder="Razón social inscrita en SII"></label>
+        <label class="field-group"><span>Giro</span><input id="siiGiro" placeholder="Giro tributario"></label>
+        <label class="field-group"><span>Actividad económica SII</span><input id="siiActeco" maxlength="6" inputmode="numeric" placeholder="Ej. 107100"></label>
+        <label class="field-group"><span>Dirección origen</span><input id="siiDireccion" placeholder="Dirección casa matriz"></label>
+        <label class="field-group"><span>Comuna origen</span><input id="siiComuna" placeholder="Comuna"></label>
+        <label class="field-group"><span>Ciudad origen</span><input id="siiCiudad" placeholder="Ciudad"></label>
+        <label class="field-group"><span>Dirección Regional SII</span><input id="siiDireccionRegional" placeholder="Ej. DIRECCIÓN REGIONAL SANTIAGO CENTRO"><small>Se imprime bajo el recuadro tributario del DTE.</small></label>
+        <label class="field-group"><span>Email emisor</span><input id="siiEmail" type="email" placeholder="facturacion@empresa.cl"></label>
+        <label class="field-group"><span>N° resolución SII</span><input id="siiResolucionNumero" type="number" min="0" placeholder="0 en certificación"></label>
+        <label class="field-group"><span>Fecha resolución</span><input id="siiResolucionFecha" type="date"></label>
+        <label class="field-group"><span>API Boleta 39/41</span><select id="siiBoletaApiEnabled"><option value="NO">Mantener solo PRUEBA LOCAL</option><option value="SI">Habilitar CERTIFICACIÓN / PRODUCCIÓN real</option></select><small>La API REST de Boleta queda instalada, pero por seguridad parte deshabilitada.</small></label>
+        <label class="field-group"><span>Modelo de emisión Boleta declarado en SII</span><select id="siiBoletaEmissionModel"><option value="POR_DEFINIR">Por definir (bloquea emisión real)</option><option value="SIEMPRE_BOLETA">Siempre emito Boleta, incluso con pago electrónico</option><option value="VOUCHER_ES_BOLETA">Voucher/comprobante electrónico reemplaza Boleta en pago electrónico</option></select><small>Debe coincidir con el modelo que declares en el SII. PRUEBA LOCAL no depende de esta selección.</small></label>
+        <label class="field-group"><span>Formato predeterminado Boleta</span><select id="siiBoletaFormat"><option value="TICKET_57">Ticket 57 mm (mínimo SII)</option><option value="TICKET_58">Ticket 58 mm (térmica estándar)</option><option value="TICKET_80" selected>Ticket 80 mm (recomendado)</option><option value="A4">Hoja A4</option></select><small>El SII admite representación impresa desde 5,7 cm de ancho.</small></label>
+      </div>
+      <div class="integration-note"><i class="bi bi-shield-check"></i><span>Factura/Guía/Notas usan Maullín/Palena. Boletas 39/41 usan la <b>API REST específica del SII</b>: autenticación separada y envío Pangal (certificación) / Rahue (producción). PRUEBA LOCAL permanece independiente y es la opción automática mientras esté disponible.</span></div>
+      <div class="editor-actions"><button class="btn btn-primary" id="siiSaveConfig" type="button"><i class="bi bi-floppy"></i> Guardar configuración</button><button class="btn btn-light" id="siiTestAuth" type="button"><i class="bi bi-shield-check"></i> Probar DTE clásico</button><button class="btn btn-light" id="siiTestBoletaAuth" type="button"><i class="bi bi-receipt-cutoff"></i> Probar API Boleta</button><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
+    </div>
+
+    <div class="editor hidden sii-modal" id="siiCertificateModal" role="dialog" aria-modal="true" aria-labelledby="siiCertificateModalTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Firma electrónica</span><h3 id="siiCertificateModalTitle">Certificado digital</h3><small>PFX/P12 del firmante autorizado. El archivo y su clave se cifran en servidor.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <div class="form-grid">
+        <label class="field-group"><span>Alias</span><input id="siiCertAlias" value="Certificado SII principal"></label>
+        <label class="field-group"><span>RUT firmante</span><input id="siiCertRut" placeholder="12.345.678-5"></label>
+        <div class="field-group file-field"><span>Certificado PFX/P12</span><input id="siiCertFile" class="file-input" type="file" accept=".pfx,.p12,application/x-pkcs12"><label class="file-picker-btn" for="siiCertFile"><i class="bi bi-file-earmark-lock"></i><span class="file-picker-text">Seleccionar certificado</span></label><small class="file-name">Sin archivo seleccionado</small></div>
+        <label class="field-group"><span>Contraseña PFX</span><input id="siiCertPassword" type="password" autocomplete="new-password" placeholder="No se vuelve a mostrar"></label>
+      </div>
+      <div class="editor-actions"><button class="btn btn-primary" id="siiUploadCertificate" type="button"><i class="bi bi-cloud-arrow-up"></i> Cargar certificado</button><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
+      <div class="sii-list" id="siiCertificateList"></div>
+    </div>
+
+    <div class="editor hidden sii-modal" id="siiCafModal" role="dialog" aria-modal="true" aria-labelledby="siiCafModalTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Folios SII y pruebas</span><h3 id="siiCafModalTitle">CAF y mantenedor de folios</h3><small>Importa CAF XML oficial del SII o rangos XML generados por la herramienta PRUEBA LOCAL.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <div class="integration-note sii-local-note"><i class="bi bi-shield-check"></i><span><strong>Protección activa:</strong> PRUEBA LOCAL nunca se mezcla con CAF oficiales ni se envía al SII.</span></div>
+      <section class="sii-folio-generator">
+        <div class="sii-folio-generator-head"><div><strong>Generar folios de PRUEBA LOCAL</strong><small>Sin BAT ni XML. El sistema crea el siguiente rango disponible automáticamente.</small></div><span class="sii-status-pill local">NO AUTORIZADO SII</span></div>
+        <div class="sii-folio-generator-grid">
+          <label class="field-group"><span>Tipo DTE</span><select id="siiLocalFolioDte"><option value="33">33 · Factura Electrónica</option><option value="34">34 · Factura No Afecta o Exenta</option><option value="39">39 · Boleta Electrónica</option><option value="41">41 · Boleta No Afecta o Exenta</option><option value="52">52 · Guía de Despacho</option><option value="56">56 · Nota de Débito</option><option value="61">61 · Nota de Crédito</option></select></label>
+          <label class="field-group"><span>Cantidad</span><input id="siiLocalFolioQty" type="number" min="1" max="10000" step="1" value="100"></label>
+          <label class="field-group"><span>Vigencia</span><input id="siiLocalFolioValidity" type="number" min="1" max="120" step="1" value="3"></label>
+          <label class="field-group"><span>Unidad</span><select id="siiLocalFolioValidityUnit"><option value="DIAS">Días</option><option value="MESES" selected>Meses</option><option value="ANOS">Años</option></select></label>
+        </div>
+        <div class="editor-actions sii-folio-actions"><button class="btn btn-primary" id="siiGenerateLocalFolios" type="button"><i class="bi bi-plus-circle"></i> Generar folios de prueba</button><button class="btn btn-light" id="siiOpenFolioPortal" type="button"><i class="bi bi-box-arrow-up-right"></i> Solicitar nuevos folios en SII</button></div>
+      </section>
+      <details class="sii-caf-import"><summary>Importar CAF oficial o archivo XML existente</summary><div class="field-group file-field"><span>Archivo XML</span><input id="siiCafFile" class="file-input" type="file" accept=".xml,text/xml,application/xml"><label class="file-picker-btn" for="siiCafFile"><i class="bi bi-filetype-xml"></i><span class="file-picker-text">Seleccionar XML</span></label><small class="file-name">Sin archivo seleccionado</small></div><div class="editor-actions"><button class="btn btn-primary" id="siiUploadCaf" type="button"><i class="bi bi-cloud-arrow-up"></i> Importar archivo</button></div></details>
+      <div id="siiFolioAlert" class="integration-note hidden" aria-live="polite"></div>
+      <div class="table-wrap sii-table-wrap sii-caf-table-wrap"><table class="sii-table"><thead><tr><th>DTE</th><th>Rango</th><th>Próximo</th><th>Disponibles</th><th>Estado</th></tr></thead><tbody id="siiCafTable"></tbody></table></div>
+      <div class="editor-actions sii-caf-footer-actions"><button class="btn btn-light" type="button" data-sii-close><i class="bi bi-x-lg"></i> Cerrar</button></div>
+    </div>
+
+    <div class="editor hidden sii-modal sii-emit-modal" id="siiEmitModal" role="dialog" aria-modal="true" aria-labelledby="siiEmitModalTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Emisión SII</span><h3 id="siiEmitModalTitle">Emitir documento tributario</h3></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <div class="form-grid sii-emit-grid">
+        <label class="field-group"><span>Tipo de documento</span><select id="siiTipoDte"><option value="33">33 · Factura Electrónica</option><option value="34">34 · Factura No Afecta o Exenta Electrónica</option><option value="39">39 · Boleta Electrónica</option><option value="41">41 · Boleta No Afecta o Exenta Electrónica</option><option value="52">52 · Guía de Despacho Electrónica</option><option value="56">56 · Nota de Débito Electrónica</option><option value="61">61 · Nota de Crédito Electrónica</option></select></label>
+        <label class="field-group"><span>Modo de emisión</span><select id="siiIssueMode"><option value="AUTO">Automático</option><option value="PRUEBA_LOCAL">PRUEBA LOCAL</option><option value="SII">CAF oficial / SII</option></select></label>
+        <label class="field-group sii-boleta-format-field hidden"><span>Tamaño de Boleta</span><select id="siiBoletaPrintFormat"><option value="TICKET_57">Ticket 57 mm</option><option value="TICKET_58">Ticket 58 mm</option><option value="TICKET_80">Ticket 80 mm</option><option value="A4">A4</option></select></label>
+        <label class="field-group"><span>ID / N° pedido</span><input id="siiPedidoId" placeholder="PED-000055" autocomplete="off"></label>
+        <div class="field-group"><span>Datos del pedido</span><button class="btn btn-light" id="siiLoadOrder" type="button"><i class="bi bi-search"></i> Buscar / cargar pedido</button></div><div class="sii-order-preview hidden span-2" id="siiOrderPreview" aria-live="polite"></div>
+        <div class="sii-issue-status hidden span-2" id="siiIssueModeNotice" aria-live="polite"></div>
+        <label class="field-group"><span>RUT receptor</span><input id="siiRutReceptor" placeholder="76.123.456-7"></label>
+        <label class="field-group"><span>Razón social receptor</span><input id="siiRazonReceptor" placeholder="Razón social / nombre"></label>
+        <label class="field-group"><span>Giro receptor</span><input id="siiGiroReceptor" placeholder="Obligatorio para factura"></label>
+        <label class="field-group"><span>Dirección receptor</span><input id="siiDireccionReceptor" placeholder="Dirección tributaria"></label>
+        <label class="field-group"><span>Comuna receptor</span><input id="siiComunaReceptor" placeholder="Comuna"></label>
+        <label class="field-group"><span>Ciudad receptor</span><input id="siiCiudadReceptor" placeholder="Ciudad"></label>
+        <label class="field-group sii-reference-field hidden"><span>Tipo DTE referencia</span><input id="siiRefTipo" value="33" maxlength="3"></label>
+        <label class="field-group sii-reference-field hidden"><span>Folio referencia</span><input id="siiRefFolio" placeholder="123"></label>
+        <label class="field-group sii-reference-field hidden"><span>Fecha referencia</span><input id="siiRefFecha" type="date"></label>
+        <label class="field-group sii-reference-field hidden"><span>Código referencia</span><select id="siiRefCodigo"><option value="1">1 · Anula documento</option><option value="2">2 · Corrige texto</option><option value="3">3 · Corrige montos</option></select></label>
+        <label class="field-group span-2 sii-reference-field hidden"><span>Razón referencia</span><input id="siiRefRazon" placeholder="Motivo de la nota"></label>
+      </div>
+      
+      <div class="editor-actions"><button class="btn btn-primary" id="siiEmitDte" type="button"><i class="bi bi-receipt"></i> Generar documento</button><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
+    </div>
+
+
+    <div class="editor hidden sii-modal sii-exchange-modal" id="siiExchangeModal" role="dialog" aria-modal="true" aria-labelledby="siiExchangeModalTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Intercambio electrónico</span><h3 id="siiExchangeModalTitle">DTE recibidos de proveedores</h3><small>Importa EnvioDTE XML, registra la recepción y genera respuestas firmadas con el certificado activo.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <div class="integration-note"><i class="bi bi-shield-check"></i><span>El XML recibido se guarda cifrado en backend. Las respuestas se generan firmadas para intercambio/certificación. La recepción automática por correo queda habilitada al configurar el secreto servidor <strong>SII_DTE_INBOUND_SECRET</strong>.</span></div><div class="sii-issue-status span-2 warn" id="siiInboundStatus"><i class="bi bi-envelope-check"></i><span>Verificando recepción automática…</span></div>
+      <div class="sii-exchange-import"><div class="field-group file-field"><span>EnvioDTE XML o correo MIME/EML recibido</span><input id="siiExchangeFile" class="file-input" type="file" accept=".xml,.eml,.mime,text/xml,application/xml,message/rfc822"><label class="file-picker-btn" for="siiExchangeFile"><i class="bi bi-file-earmark-arrow-up"></i><span class="file-picker-text">Seleccionar archivo</span></label><small class="file-name">Sin archivo seleccionado</small></div><div class="editor-actions"><button class="btn btn-primary" id="siiExchangeImport" type="button"><i class="bi bi-cloud-arrow-up"></i> Importar DTE</button><button class="btn btn-light" id="siiExchangeRefresh" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div></div>
+      <div class="table-wrap sii-table-wrap"><table class="sii-table"><thead><tr><th>Fecha</th><th>Emisor</th><th>DTE / Folio</th><th>Total</th><th>Firma</th><th>Recepción</th><th>Comercial</th><th>Acciones</th></tr></thead><tbody id="siiExchangeTable"></tbody></table></div>
+      <div class="editor-actions"><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
+    </div>
+
+    <div class="editor hidden sii-modal" id="siiRegistryEventModal" role="dialog" aria-modal="true" aria-labelledby="siiRegistryEventTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Registro oficial SII</span><h3 id="siiRegistryEventTitle">Aceptación / reclamo de DTE</h3><small id="siiRegistryEventSubtitle">Selecciona la acción legal que corresponde al documento recibido.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <input type="hidden" id="siiRegistryDteId">
+      <div class="form-grid"><label class="field-group span-2"><span>Acción ante el SII</span><select id="siiRegistryAction"><option value="ACD">ACD · Aceptar contenido del documento</option><option value="ERM">ERM · Recibo de mercaderías o servicios</option><option value="RCD">RCD · Reclamo al contenido del documento</option><option value="RFP">RFP · Reclamo por falta parcial</option><option value="RFT">RFT · Reclamo por falta total</option></select></label></div>
+      <div class="integration-note"><i class="bi bi-exclamation-triangle"></i><span>Esta acción se registra en el WebService oficial del SII. Un reclamo impide posteriormente aceptar el DTE; ACD no reemplaza el recibo ERM para efectos de mercaderías/servicios.</span></div>
+      <div class="editor-actions"><button class="btn btn-primary" id="siiRegistryApply" type="button"><i class="bi bi-building-check"></i> Registrar en SII</button><button class="btn btn-light" type="button" data-sii-close>Cancelar</button></div>
+    </div>
+
+    <div class="editor hidden sii-modal sii-certification-modal" id="siiCertificationModal" role="dialog" aria-modal="true" aria-labelledby="siiCertificationModalTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Certificación sistema propio</span><h3 id="siiCertificationModalTitle">Control de certificación SII</h3><small>Registra el avance real informado por el portal del SII. El sistema no marca etapas como aprobadas automáticamente.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <div class="sii-cert-summary"><div><span>DTE recibidos</span><strong id="siiCertReceivedCount">0</strong></div><div><span>Respuestas firmadas</span><strong id="siiCertResponseCount">0</strong></div></div>
+      <div class="integration-note"><i class="bi bi-info-circle"></i><span>Set de pruebas, simulación, muestras, declaración y autorización se completan oficialmente en el portal del SII. Aquí se conserva la trazabilidad del avance.</span></div>
+      <div class="table-wrap sii-table-wrap"><table class="sii-table"><thead><tr><th>Etapa</th><th>Estado</th><th>Detalle / evidencia</th><th>Acción</th></tr></thead><tbody id="siiCertificationTable"></tbody></table></div>
+      <div class="editor-actions"><button class="btn btn-primary" id="siiOpenCertificationPortal" type="button"><i class="bi bi-box-arrow-up-right"></i> Portal oficial SII</button><button class="btn btn-light" id="siiCertificationRefresh" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
+    </div>
+
+    <section class="admin-view" id="view-settings">
+      <div class="admin-card"><span class="eyebrow">Tienda</span><h2>Configuración</h2>
+        <input type="hidden" id="sLogoId">
+        <div class="form-grid">
+          <label class="field-group"><span>Nombre del negocio</span><input id="sBusiness" placeholder="Ale Atencio"></label>
+          <label class="field-group"><span>RUT del negocio</span><input id="sBusinessRut" placeholder="12.345.678-5" inputmode="text"></label>
+          <label class="field-group span-2"><span>URL pública de la Web</span><input id="sPublicWebUrl" type="url" placeholder="https://aleatencioreposteria.cl/"><small>Esta es la única URL que se comparte con clientes por WhatsApp. Nunca uses aquí Supabase, Apps Script ni otra URL de backend.</small></label>
+          <label class="field-group span-2"><span>URL pública de documentos</span><input id="sDocumentsPublicUrl" type="url" placeholder="https://aleatencioreposteria.cl/documentos.html"><small>Todos los PDF, cartolas, DTE y comprobantes protegidos se abrirán bajo este dominio. Nunca configures aquí una URL de Supabase ni del servidor.</small></label>
+          <label class="field-group span-2"><span>URL de Eventos</span><input id="sEventsUrl" type="url" inputmode="url" placeholder="https://franciscoferraris.cl/"><small>El botón <strong>Eventos</strong> del header público abrirá esta dirección. Puedes cambiarla cuando quieras.</small></label>
+          <label class="field-group"><span>WhatsApp</span><input id="sWhatsapp" placeholder="+56..."></label>
+          <label class="field-group"><span>Correo</span><input id="sEmail" type="email" placeholder="correo@ejemplo.cl"></label>
+          <label class="field-group"><span>Dirección / retiro</span><input id="sAddress" placeholder="Dirección"></label>
+          <label class="field-group"><span>Instagram</span><input id="sInstagram" placeholder="https://instagram.com/..."></label>
+          <label class="field-group"><span>Facebook</span><input id="sFacebook" placeholder="https://facebook.com/..."></label>
+          <label class="field-group"><span>TikTok</span><input id="sTiktok" placeholder="https://tiktok.com/@..."></label>
+          <label class="field-group"><span>Valor despacho · CLP</span><input id="sDelivery" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej: 5.000"></label>
+          <label class="field-group"><span>IVA cotizaciones (%)</span><input id="sIva" type="number" min="0" max="100" step="0.01" placeholder="19"></label>
+          <label class="field-group"><span>Validez cotización (días)</span><input id="sQuoteValidity" type="number" min="1" max="365" placeholder="15"></label>
+          <label class="field-group"><span>Formato de documentos</span><select id="sDocumentFormat"><option value="A4">A4</option><option value="TICKET_80">Ticket térmico · 80 mm de ancho</option><option value="TICKET_100">Ticket térmico · 100 mm de ancho</option></select><small>80/100 mm usan ancho fijo y largo automático según el contenido.</small></label>
+          <label class="stock-visibility-setting span-2" for="sShowStockClients"><span class="stock-visibility-copy"><strong>Mostrar stock a clientes</strong><small id="sShowStockClientsHint">FALSE: el stock queda oculto en la Web; el cliente ve producto, tamaño y precio.</small></span><span class="stock-policy-switch stock-visibility-switch"><input id="sShowStockClients" type="checkbox" aria-describedby="sShowStockClientsHint"><span class="stock-policy-slider" aria-hidden="true"></span></span><span class="stock-visibility-value is-false" id="sShowStockClientsValue">FALSE</span></label>
+          <div class="span-2 form-help">Guarda aquí tus enlaces reales. La web mostrará únicamente WhatsApp y las redes sociales configuradas.</div>
+          <div class="field-group file-field span-2" data-file-picker="image"><span>Logo del negocio · también se usa en los DTE</span><input id="sLogo" class="file-input" type="file" accept="image/*"><label class="file-picker-btn" for="sLogo"><i class="bi bi-image"></i><span class="file-picker-text">Seleccionar logo</span></label><small class="file-name">Sin archivo seleccionado</small></div>
+        </div>
+        <button class="btn btn-primary" id="saveSettings">Guardar configuración</button>
+      </div>
+    </section>
+    <div class="editor hidden operational-modal movement-detail-editor" id="movementDetailEditor" role="dialog" aria-modal="true" aria-labelledby="movementDetailTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow" id="movementDetailEyebrow">Movimiento</span><h3 id="movementDetailTitle">Detalle del movimiento</h3><small id="movementDetailSubtitle">Información completa del registro seleccionado.</small></div><button type="button" class="editor-close-x" id="closeMovementDetail" aria-label="Cerrar">×</button></div>
+      <div class="movement-detail-grid" id="movementDetailGrid"></div>
+      <div class="movement-detail-note hidden" id="movementDetailNote"></div>
+      <div class="movement-detail-actions hidden" id="movementDetailActions"><button class="btn btn-primary" id="movementDetailPdf" type="button"><i class="bi bi-file-earmark-pdf"></i> Ver PDF del correlativo</button><button class="btn btn-danger hidden" id="movementDetailCancel" type="button"><i class="bi bi-x-octagon"></i> Anular correlativo</button></div>
+      <div class="editor-actions"><button class="btn btn-light" id="closeMovementDetailBottom" type="button">Cerrar</button></div>
+    </div>
+    <div class="editor hidden operational-modal inventory-cancel-editor" id="inventoryCancelEditor" role="dialog" aria-modal="true" aria-labelledby="inventoryCancelTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Auditoría de inventario</span><h3 id="inventoryCancelTitle">Anular correlativo</h3><small>La operación no se elimina. El sistema genera la reversa de stock y conserva toda la trazabilidad.</small></div><button type="button" class="editor-close-x" id="closeInventoryCancel" aria-label="Cerrar">×</button></div>
+      <div class="inventory-cancel-summary"><span>Correlativo</span><strong id="inventoryCancelFolio">—</strong><small id="inventoryCancelType">Movimiento de inventario</small></div>
+      <label class="field-group"><span>Motivo de anulación <b>*</b></span><textarea id="inventoryCancelReason" rows="5" maxlength="1000" placeholder="Ej: Se registró una cantidad incorrecta durante el conteo físico." required></textarea><small>Este motivo quedará registrado permanentemente en la auditoría.</small></label>
+      <div class="inventory-cancel-warning"><i class="bi bi-shield-exclamation"></i><div><strong>Esta acción genera una reversa.</strong><br>El correlativo original seguirá visible como ANULADO. Si la reversa requiere retirar stock que ya no está disponible, el sistema bloqueará la anulación.</div></div>
+      <div class="editor-actions"><button class="btn btn-danger" id="confirmInventoryCancel" type="button"><i class="bi bi-x-octagon"></i> Confirmar anulación</button><button class="btn btn-light" id="cancelInventoryCancel" type="button">Volver</button></div>
+    </div>
+    <footer class="admin-design-credit" aria-label="Créditos de desarrollo"><span>Design by</span> <a href="https://serviciosinformaticosas.cl/" target="_blank" rel="noopener noreferrer">SERVICIOS INFORMÁTICOS AS</a><span class="admin-credit-sep">·</span><span>Desarrollo Web, Sistemas y Android</span></footer>
+  </main>
+</div>
+<div class="notification-toast-stack" id="notificationToastStack" aria-live="polite"></div>
+<div class="toast" id="adminToast"></div>
+<script src="config.js"></script><script src="api.js"></script><script src="sii-api.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="cpanel.js"></script>
+</body></html>

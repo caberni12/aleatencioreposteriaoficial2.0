@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Ale Atencio · Verificación DTE</title>
+  <link rel="icon" href="favicon.png">
+  <link rel="stylesheet" href="dte.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <img src="logo-ale-atencio.png" alt="Ale Atencio" class="brand-logo" id="brandLogo">
+      <div><strong id="brandName">Ale Atencio</strong><span>Verificación y reimpresión de DTE</span></div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <span class="eyebrow">Documento Tributario Electrónico</span>
+      <h1>Consulta segura del documento</h1>
+      <p>Esta página permite revisar los datos registrados por el emisor y volver a abrir la representación PDF. La validación tributaria oficial se realiza en el Servicio de Impuestos Internos.</p>
+    </section>
+
+    <section class="card loading-card" id="dteCard" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <strong>Verificando documento…</strong>
+      <span>Consultando el registro tributario.</span>
+    </section>
+  </main>
+
+  <footer>Documento consultado mediante enlace seguro de ALE ATENCIÓN.</footer>
+  <script src="config.js"></script>
+  <script src="sii-api.js"></script>
+  <script src="dte.js"></script>
+</body>
+</html>

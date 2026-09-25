@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Ale Atencio · Trazabilidad</title>
+  <style>
+    :root{--bg:#f7f1ed;--card:#fff;--ink:#402f29;--muted:#7d6d66;--line:#eaded8;--accent:#b07a55;--ok:#2f7d5d;--warn:#a9682c}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#fff 0,#f7f1ed 100%);color:var(--ink)}
+    .top{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 18px}.top-inner{max-width:900px;margin:auto;display:flex;align-items:center;gap:14px}.top img{width:104px;max-height:50px;object-fit:contain}.top strong{font-size:15px}.top span{display:block;font-size:12px;color:var(--muted)}
+    main{max-width:900px;margin:0 auto;padding:26px 16px 50px}.hero{margin-bottom:16px}.hero small{color:var(--accent);text-transform:uppercase;letter-spacing:.12em;font-weight:800}.hero h1{margin:7px 0 4px;font-size:30px}.hero p{margin:0;color:var(--muted)}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 12px 35px rgba(81,58,48,.08)}.loading{text-align:center;padding:34px}.spinner{width:40px;height:40px;border:3px solid #eaded8;border-top-color:var(--accent);border-radius:50%;margin:0 auto 14px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .chain{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.step{border:1px solid var(--line);border-radius:16px;padding:14px;min-height:112px}.step.done{border-color:#b9d8c9;background:#f4fbf7}.step.current{box-shadow:0 0 0 2px rgba(176,122,85,.16)}.step small{display:block;color:var(--muted);margin-bottom:5px}.step strong{display:block;font-size:16px}.badge{display:inline-flex;margin-top:8px;padding:5px 9px;border-radius:999px;background:#f3ebe7;font-size:11px;font-weight:800}
+    .history{margin-top:22px}.history h2{font-size:18px}.event{position:relative;margin-left:8px;padding:0 0 18px 22px;border-left:1px solid #dccbc2}.event:last-child{border-left-color:transparent}.event:before{content:"";position:absolute;left:-5px;top:3px;width:9px;height:9px;border-radius:50%;background:var(--accent)}.event strong{font-size:14px}.event p{margin:4px 0;color:var(--muted);font-size:13px}.event time{font-size:11px;color:#9b8d86}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:800;color:var(--ink);background:#fff}.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}.error{color:#9c3535;text-align:center;padding:28px}.notice{margin-top:16px;padding:12px 14px;border-radius:12px;background:#fff8ef;border:1px solid #f1dac0;color:#7d572e;font-size:13px}
+    @media(max-width:680px){.chain{grid-template-columns:1fr}.hero h1{font-size:24px}.card{padding:15px}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="top-inner"><img src="logo-ale-atencio.png" alt="Ale Atencio"><div><strong>Trazabilidad de documento</strong><span>Seguimiento seguro y actualizado</span></div></div></header>
+  <main>
+    <section class="hero"><small>Ale Atencio</small><h1>Seguimiento y trazabilidad</h1><p>Consulta la relación entre solicitud, cotización y pedido.</p></section>
+    <section class="card" id="traceCard"><div class="loading"><div class="spinner"></div><strong>Cargando trazabilidad…</strong></div></section>
+  </main>
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script>
+    const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+    const fmt=d=>{try{return new Date(d).toLocaleString("es-CL")}catch(_){return String(d||"")}};
+    const p=new URLSearchParams(location.search),tipo=String(p.get("tipo")||"").toUpperCase(),id=String(p.get("id")||""),t=String(p.get("t")||""),host=document.getElementById("traceCard");
+    function step(label,row,numberField,statusField="estado"){if(!row)return `<div class="step"><small>${label}</small><strong>Pendiente</strong><span class="badge">Aún no generado</span></div>`;return `<div class="step done"><small>${label}</small><strong>${esc(row[numberField]||row.id||"")}</strong><span class="badge">${esc(row[statusField]||"Registrado")}</span>${row.fecha?`<div style="margin-top:8px;font-size:11px;color:#7d6d66">${esc(fmt(row.fecha))}</div>`:""}</div>`}
+    async function load(){if(!tipo||!id||!t){host.innerHTML='<div class="error">El enlace de trazabilidad está incompleto.</div>';return}try{const out=await AleAPI.postPublic("publictrace",{tipo,id,t}),r=out.request||null,q=out.quote||null,o=out.order||null,h=Array.isArray(out.history)?out.history:[];host.innerHTML=`<div class="chain">${step("Solicitud",r,"numero_solicitud")}${step("Cotización",q,"numero_cotizacion")}${step("Pedido",o,"numero_pedido")}</div>${o?`<div class="history"><h2>Línea de tiempo del pedido</h2>${h.length?h.map(ev=>`<div class="event"><strong>${esc(ev.estado_pedido||ev.evento||"Actualización")}</strong><p>${esc(ev.descripcion||"")}${ev.estado_pago?` · Pago: ${esc(ev.estado_pago)}`:""}</p><time>${esc(fmt(ev.creado_en))}</time></div>`).join(""):'<div class="notice">El pedido existe, pero todavía no registra eventos adicionales en su línea de tiempo.</div>'}</div>`:'<div class="notice">Todavía no existe un pedido asociado. Este mismo QR seguirá siendo válido y mostrará el pedido cuando se genere.</div>'}<div class="actions">${out.tracking_url?`<a class="btn primary" href="${esc(out.tracking_url)}">Abrir seguimiento del pedido</a>`:""}<a class="btn" href="./">Volver a la tienda</a></div>`}catch(err){console.warn(err);host.innerHTML='<div class="error"><strong>No fue posible consultar la trazabilidad.</strong><br><small>El enlace puede ser inválido o haber sido alterado.</small></div>'}}
+    load();
+  </script>
+</body>
+</html>

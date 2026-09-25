@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Ale Atención · Documento</title>
+<link rel="icon" href="favicon.png">
+<style>
+:root{--wine:#7b3f50;--gold:#b28c48;--ink:#302824;--paper:#fbf8f3;--line:#eadfd5}
+*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--paper);color:var(--ink)}
+.shell{height:100%;display:grid;grid-template-rows:auto 1fr}.head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 4px 18px rgba(53,36,31,.06)}
+.brand{display:flex;align-items:center;gap:10px}.brand img{width:48px;height:48px;object-fit:contain}.brand strong{display:block;font-size:16px}.brand small{display:block;color:#756861;margin-top:2px}.actions{display:flex;gap:8px}.actions button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;font-weight:700;color:var(--wine);cursor:pointer}.viewer{min-height:0;position:relative}.viewer iframe{width:100%;height:100%;border:0;background:#777}.viewer img{display:block;max-width:calc(100% - 32px);max-height:calc(100% - 32px);margin:16px auto;object-fit:contain}.state{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;background:var(--paper)}.state>div{max-width:560px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 14px 40px rgba(53,36,31,.08)}.state h1{margin:0 0 8px;font-size:20px}.state p{margin:0;color:#756861;line-height:1.5}.hidden{display:none!important}
+@media(max-width:560px){.head{padding:9px 10px}.brand img{width:40px;height:40px}.brand strong{font-size:14px}.brand small{font-size:11px}.actions button{padding:8px 9px;font-size:12px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="head">
+    <div class="brand"><img src="logo-ale-atencio.png" alt="Ale Atención"><div><strong>Ale Atención</strong><small>Documento protegido</small></div></div>
+    <div class="actions"><button id="downloadBtn" type="button" disabled>Descargar</button></div>
+  </header>
+  <main class="viewer" id="viewer">
+    <div class="state" id="state"><div><h1>Cargando documento…</h1><p>Validando el enlace seguro.</p></div></div>
+  </main>
+</div>
+<script src="config.js"></script>
+<script>
+(async()=>{
+  const p=new URLSearchParams(location.search),tipo=(p.get('tipo')||'').trim(),id=(p.get('id')||'').trim(),t=(p.get('t')||'').trim();
+  const state=document.getElementById('state'),viewer=document.getElementById('viewer'),download=document.getElementById('downloadBtn');
+  const fail=(msg)=>{state.innerHTML=`<div><h1>No fue posible abrir el documento</h1><p>${String(msg||'Enlace no válido.')}</p></div>`;state.classList.remove('hidden')};
+  if(!tipo||!id||!t)return fail('El enlace está incompleto.');
+  const api=String(window.ALE_ATENCIO_CONFIG?.API_URL||'').replace(/\/$/,'');if(!api)return fail('Servicio no configurado.');
+  try{
+    const u=new URL(api);u.searchParams.set('document_proxy','1');u.searchParams.set('tipo',tipo);u.searchParams.set('id',id);u.searchParams.set('t',t);
+    const r=await fetch(u.toString(),{method:'GET',cache:'no-store',credentials:'omit'});if(!r.ok)throw new Error((await r.text().catch(()=>''))||`HTTP ${r.status}`);
+    const blob=await r.blob(),obj=URL.createObjectURL(blob),cd=r.headers.get('content-disposition')||'',m=cd.match(/filename="?([^";]+)"?/i),filename=m?.[1]||`documento-${id}`;
+    state.classList.add('hidden');
+    if((blob.type||'').startsWith('image/')){const img=document.createElement('img');img.src=obj;img.alt=filename;viewer.appendChild(img)}else{const frame=document.createElement('iframe');frame.src=obj;frame.title=filename;viewer.appendChild(frame)}
+    download.disabled=false;download.onclick=()=>{const a=document.createElement('a');a.href=obj;a.download=filename;document.body.appendChild(a);a.click();a.remove()};
+    document.title=`Ale Atención · ${filename}`;
+    addEventListener('beforeunload',()=>URL.revokeObjectURL(obj),{once:true});
+  }catch(err){fail(err?.message||err)}
+})();
+</script>
+</body>
+</html>

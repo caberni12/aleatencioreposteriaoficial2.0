@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#8d5060">
+  <title>Ale Atencio | Compras Mayoristas</title>
+  <link rel="icon" type="image/png" href="logo-ale-atencio.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="mayoristas.css">
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<section class="auth-shell" id="authShell">
+  <div class="auth-card auth-card-wide">
+    <a class="brand" href="index.html"><img src="logo-ale-atencio.png" alt="Ale Atencio"><div><span>Canal privado</span><strong>Compras Mayoristas</strong></div></a>
+    <div class="auth-tabs" role="tablist">
+      <button class="active" type="button" data-auth-tab="login">Ingresar</button>
+      <button type="button" data-auth-tab="register">Registrar usuario</button>
+    </div>
+    <form id="whLoginForm" class="auth-pane active" data-pane="login">
+      <h1>Acceso mayorista</h1>
+      <p>Ingresa con tu usuario habilitado por administración.</p>
+      <label>Usuario<input id="whUser" autocomplete="username" required></label>
+      <label>Contraseña<input id="whPassword" type="password" autocomplete="current-password" required></label>
+      <button type="submit" class="async-btn"><span>Ingresar</span></button>
+      <a href="index.html">Volver a la tienda</a>
+      <div class="status" id="loginStatus"></div>
+    </form>
+    <form id="whRegisterForm" class="auth-pane" data-pane="register">
+      <h1>Solicitud de acceso Mayorista</h1>
+      <p>Completa tus datos. El administrador revisará la solicitud, asignará tu lista de precios y activará el acceso.</p>
+      <div class="register-grid">
+        <label>RUT empresa<input id="regRut" placeholder="12.345.678-5" required></label>
+        <label>Razón social<input id="regBusiness" required></label>
+        <label>Giro<input id="regBusinessActivity"></label>
+        <label>Nombre de contacto<input id="regContact" required></label>
+        <label>Teléfono<input id="regPhone" required></label>
+        <label>Correo<input id="regEmail" type="email" required></label>
+        <label class="span-2">Dirección<input id="regAddress"></label>
+        <label>Comuna<input id="regCommune"></label>
+        <label>Usuario deseado<input id="regUser" autocomplete="username" required></label>
+        <label>Contraseña<input id="regPassword" type="password" minlength="8" autocomplete="new-password" required></label>
+        <label>Repetir contraseña<input id="regPassword2" type="password" minlength="8" autocomplete="new-password" required></label>
+        <label class="span-2">Observaciones<textarea id="regNotes" rows="3" placeholder="Información adicional para administración"></textarea></label>
+      </div>
+      <div class="access-note"><i class="bi bi-hourglass-split"></i><span>El registro queda PENDIENTE. No podrás ingresar hasta que administración lo apruebe y asigne una lista activa.</span></div>
+      <button type="submit" class="async-btn"><span>Enviar solicitud</span></button>
+      <div class="status" id="registerStatus"></div>
+    </form>
+  </div>
+</section>
+
+<section class="portal hidden" id="portal">
+  <header class="portal-head">
+    <a class="brand" href="index.html"><img src="logo-ale-atencio.png" alt="Ale Atencio"><div><span>Portal mayorista</span><strong id="whWelcome">Mayorista</strong></div></a>
+    <div class="head-actions">
+      <span class="list-badge" id="whListBadge">Lista autorizada</span>
+      <span class="wholesale-tier-badge tier-general" id="whTierBadge" title="Mayorista General"><svg class="wholesale-crown-icon" viewBox="0 0 64 48" aria-hidden="true"><path class="crown-main" d="M9 36 14 17l13 11 5-16 5 16 13-11 5 19H9Z"/><path class="crown-base" d="M12 36h40v7H12z"/><circle class="crown-tip" cx="14" cy="16" r="2.5"/><circle class="crown-tip" cx="32" cy="11" r="2.5"/><circle class="crown-tip" cx="50" cy="16" r="2.5"/></svg><span>Mayorista General</span></span>
+      <button id="whCreditHeader" class="credit-head-badge hidden" type="button" title="Ver línea de crédito"><i class="bi bi-wallet2"></i><span><small>Saldo</small><strong id="whCreditHeaderAmount">$0</strong></span></button>
+      <div class="wh-notification-wrap">
+        <button id="whBell" class="icon-action" title="Notificaciones" aria-label="Notificaciones"><i class="bi bi-bell"></i><span class="notification-count hidden" id="whBellCount">0</span></button>
+        <aside class="notification-popover hidden" id="whBellPanel" aria-label="Centro de notificaciones Mayorista">
+          <div class="notification-popover-head">
+            <div><span class="notification-eyebrow">Actividad</span><h3>Centro de notificaciones</h3></div>
+            <button class="notification-close" id="whCloseNotifications" type="button" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+          </div>
+          <div class="notification-tools">
+            <button class="notification-tool" id="whMarkAll" type="button"><i class="bi bi-check2-all"></i><span>Marcar todas</span></button>
+          </div>
+          <div id="whBellList" class="notification-popover-list"></div>
+        </aside>
+      </div>
+      <button id="whRefresh" class="icon-action async-btn" title="Actualizar"><i class="bi bi-arrow-clockwise"></i></button>
+      <button id="whCartBtn" class="icon-action"><i class="bi bi-bag"></i><span id="whCartCount">0</span></button>
+      <button id="whLogout" class="icon-action" title="Salir" aria-label="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button>
+      <img id="whHeaderAvatar" class="wh-header-avatar" src="favicon.png" alt="Perfil">
+    </div>
+  </header>
+
+  <div class="portal-layout">
+    <aside class="portal-nav">
+      <button class="active" data-view="catalog"><i class="bi bi-grid"></i>Catálogo</button>
+      <button data-view="orders"><i class="bi bi-receipt"></i>Mis pedidos</button>
+      <button data-view="credit" class="hidden" id="whCreditNav"><i class="bi bi-wallet2"></i>Créditos</button>
+      <button data-view="billing"><i class="bi bi-receipt-cutoff"></i>Facturación</button>
+      <button data-view="documents"><i class="bi bi-file-earmark-text"></i>Documentos</button>
+      <button data-view="profile"><i class="bi bi-person-circle"></i>Mi cuenta</button>
+    </aside>
+    <main class="portal-main">
+      <section class="portal-view active" id="wh-view-catalog">
+        <div class="hero"><div><span>Lista privada de precios</span><h1>Catálogo mayorista</h1><p>Los valores mostrados corresponden únicamente a la lista asignada a tu empresa.</p></div></div>
+        <div class="filter-bar catalog-filter-bar">
+          <label><span>Buscar</span><input id="whSearch" placeholder="Producto, descripción..."></label>
+          <label><span>Categoría</span><select id="whCategory"><option value="">Todas</option></select></label>
+          <label><span>Desde</span><input id="whCatalogFrom" type="date"></label>
+          <label><span>Hasta</span><input id="whCatalogTo" type="date"></label>
+          <button id="whCatalogToday" class="filter-btn" type="button">Hoy</button>
+          <button id="whCatalogClear" class="filter-btn" type="button">Limpiar</button>
+        </div>
+        <div class="kpis"><article><span>Pedidos</span><strong id="kOrders">0</strong></article><article><span>Total comprado</span><strong id="kTotal">$0</strong></article><article><span>Pagados</span><strong id="kPaid">0</strong></article><article><span>Pendientes</span><strong id="kPending">0</strong></article></div>
+        <div class="products" id="whProducts"></div>
+      </section>
+
+      <section class="portal-view" id="wh-view-orders">
+        <div class="section-head"><div><span>Historial</span><h2>Mis pedidos</h2><p>Consulta, descarga PDF y revisa la trazabilidad de cada pedido.</p></div></div>
+        <div class="filter-bar order-filter-bar">
+          <label><span>Buscar</span><input id="whOrderSearch" placeholder="N.º pedido, estado..."></label>
+          <label><span>Estado</span><select id="whOrderStatus"><option value="">Todos</option></select></label>
+          <label><span>Pago</span><select id="whOrderPaymentStatus"><option value="">Todos</option></select></label>
+          <label><span>Desde</span><input id="whOrderFrom" type="date"></label>
+          <label><span>Hasta</span><input id="whOrderTo" type="date"></label>
+          <button id="whOrdersToday" class="filter-btn" type="button">Hoy</button>
+          <button id="whOrdersClear" class="filter-btn" type="button">Limpiar</button>
+        </div>
+        <div class="table-wrap" id="whOrders"></div>
+      </section>
+
+      <section class="portal-view" id="wh-view-credit">
+        <div class="section-head"><div><span>Financiamiento</span><h2>Mi línea de crédito</h2><p>Consulta tu límite, saldo disponible, deuda utilizada, plazo por compra, recargo y estado de mora.</p></div></div>
+        <div class="credit-overview" id="whCreditOverview">
+          <article><span>Límite de crédito</span><strong id="whCreditLimit">$0</strong></article>
+          <article><span>Saldo disponible</span><strong id="whCreditAvailable">$0</strong></article>
+          <article><span>Crédito utilizado</span><strong id="whCreditUsed">$0</strong></article>
+          <article><span>Fecha de asignación</span><strong id="whCreditAssigned">—</strong></article>
+          <article><span>Próximo vencimiento</span><strong id="whCreditDue">—</strong></article>
+          <article><span>Plazo por compra</span><strong id="whCreditTerm">30 días</strong></article>
+          <article><span>Recargo por uso</span><strong id="whCreditSurcharge">0%</strong></article>
+        </div>
+        <div class="credit-status-card" id="whCreditStatusCard"><i class="bi bi-info-circle"></i><div><strong id="whCreditStatusTitle">Sin línea asignada</strong><p id="whCreditStatusText">Administración debe asignar una línea de crédito para habilitar compras con este medio de pago.</p></div></div>
+        <div class="credit-rating-portal" id="whCreditRatingCard"><div><span>Historial crediticio</span><strong id="whCreditRatingStars">☆☆☆☆☆</strong></div><div><span>Evaluación</span><strong id="whCreditRatingLevel">Sin historial</strong></div><div><span>Puntualidad</span><strong id="whCreditRatingPunctuality">—</strong></div><div><span>Límite recomendado</span><strong id="whCreditRatingRecommended">—</strong></div><p id="whCreditRatingNote">El historial se construye con tus pagos de crédito.</p></div>
+        <div class="section-head"><div><span>Trazabilidad</span><h3>Movimientos de crédito</h3></div></div>
+        <div class="table-wrap" id="whCreditMovements"></div>
+      </section>
+
+      <section class="portal-view" id="wh-view-billing">
+        <div class="section-head billing-head"><div><span>Tributario y cobranza</span><h2>Facturación</h2><p>Consulta tus documentos tributarios, descarga tu cartola mensual y paga tu línea de crédito.</p></div></div>
+        <div class="billing-toolbar">
+          <label><span>Mes</span><input id="whBillingMonth" type="month"></label>
+          <label><span>Tipo de documento</span><select id="whBillingType"><option value="">Todos</option><option value="33">Factura electrónica</option><option value="34">Factura exenta</option><option value="39">Boleta electrónica</option><option value="41">Boleta exenta</option><option value="56">Nota de débito</option><option value="61">Nota de crédito</option></select></label>
+          <button class="billing-statement-btn async-btn" id="whBillingStatement" type="button"><i class="bi bi-file-earmark-pdf"></i><span>Descargar cartola del mes</span></button>
+        </div>
+
+        <div class="billing-credit-pay hidden" id="whBillingCreditPay">
+          <div class="billing-credit-title"><div><span>Línea de crédito</span><h3>Pagar deuda</h3><p>Elige transferencia o Transbank. El recargo del 3% se aplica únicamente al pago de la línea mediante Transbank.</p></div><div class="billing-debt"><small>Deuda actual</small><strong id="whBillingCreditDebt">$0</strong></div></div>
+          <div class="billing-credit-form">
+            <label>Monto a abonar<input id="whCreditPayAmount" type="number" inputmode="numeric" min="1" step="1" placeholder="0"></label>
+            <label>Medio de pago<select id="whCreditPayMethod"><option value="TRANSFERENCIA">Transferencia</option><option value="TRANSBANK">Transbank</option></select></label>
+            <label class="span-2">Referencia / observación<input id="whCreditPayRef" maxlength="500" placeholder="Ej: pago factura, abono línea de crédito..."></label>
+            <label class="span-2 billing-proof-field" id="whCreditPayProofWrap">Comprobante de transferencia<input id="whCreditPayProof" type="file" accept="application/pdf,image/jpeg,image/png,image/webp"><small>PDF, JPG, PNG o WEBP. Quedará pendiente de aprobación administrativa.</small></label>
+          </div>
+          <div class="billing-payment-summary" id="whCreditPaySummary"></div>
+          <button class="billing-pay-btn async-btn" id="whCreditPaySubmit" type="button"><i class="bi bi-send-check"></i><span>Enviar comprobante</span></button>
+        </div>
+
+        <div class="billing-card">
+          <div class="billing-card-head"><div><span>Documentos tributarios</span><h3>Mis facturas, boletas y notas</h3><p>Solo se muestran documentos asociados a tu empresa/RUT.</p></div></div>
+          <div class="table-wrap billing-table" id="whBillingDocuments"></div>
+        </div>
+        <div class="billing-card">
+          <div class="billing-card-head"><div><span>Cobranza</span><h3>Pagos de línea de crédito</h3><p>Transferencias enviadas a aprobación y pagos confirmados por Transbank.</p></div></div>
+          <div class="table-wrap billing-table" id="whCreditPayments"></div>
+        </div>
+      </section>
+
+      <section class="portal-view" id="wh-view-documents">
+        <div class="section-head"><div><span>Empresa</span><h2>Documentos de mi empresa</h2><p>Carga documentación comercial o legal para futuras consultas de administración.</p></div></div>
+        <div class="upload-card"><select id="whDocumentType"><option value="RUT_EMPRESA">RUT / e-RUT empresa</option><option value="INICIACION_ACTIVIDADES">Inicio de actividades</option><option value="ESCRITURA">Escritura / constitución</option><option value="REPRESENTANTE_LEGAL">Representante legal</option><option value="CERTIFICADO_BANCARIO">Certificado bancario</option><option value="ORDEN_COMPRA">Orden de compra</option><option value="COMPROBANTE">Comprobante</option><option value="OTRO">Otro documento</option></select><input id="whDocumentName" placeholder="Nombre del documento"><input id="whDocumentFile" type="file" accept=".pdf,image/*"><button id="whUploadDocument" class="async-btn"><span>Subir archivo</span></button></div>
+        <div class="documents" id="whDocuments"></div>
+      </section>
+
+      <section class="portal-view" id="wh-view-profile">
+        <div class="section-head"><div><span>Cuenta</span><h2>Datos mayorista</h2></div></div>
+        <div class="profile-photo-card">
+          <img id="whProfilePhoto" src="favicon.png" alt="Foto de perfil">
+          <div><strong>Foto de perfil</strong><small>JPG, PNG o WEBP · máximo 5 MB</small><input id="whProfileFile" type="file" accept="image/jpeg,image/png,image/webp"><button id="whSaveProfilePhoto" class="async-btn" type="button"><span>Guardar foto</span></button></div>
+        </div>
+        <div class="profile-actions"><button id="whEditProfile" class="profile-edit-btn" type="button"><i class="bi bi-pencil-square"></i><span>Editar mis datos</span></button></div>
+        <div class="profile-grid" id="whProfile"></div>
+        <div class="section-head profile-notification-head"><div><span>Centro de notificaciones</span><h3>Notificaciones</h3></div><button id="whProfileMarkAll" type="button">Marcar todas como leídas</button></div>
+        <div class="notifications" id="whNotifications"></div>
+      </section>
+    </main>
+  </div>
+</section>
+
+<div class="wh-product-modal" id="whProductModal" aria-hidden="true">
+  <div class="wh-product-card" role="dialog" aria-modal="true" aria-labelledby="whProductTitle"><button class="wh-product-close" id="whProductClose" type="button" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button><div id="whProductContent"></div></div>
+</div>
+
+<div class="wh-order-modal" id="whOrderModal" aria-hidden="true">
+  <div class="wh-order-card" role="dialog" aria-modal="true" aria-labelledby="whOrderModalTitle">
+    <button class="wh-order-close" id="whOrderClose" type="button" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+    <div class="wh-order-modal-head"><span>Pedido Mayorista</span><h2 id="whOrderModalTitle">Detalle</h2></div>
+    <div id="whOrderDetail" class="wh-order-detail"><div class="loading-block">Cargando…</div></div>
+  </div>
+</div>
+
+<div class="wh-profile-edit-modal" id="whProfileEditModal" aria-hidden="true">
+  <div class="wh-profile-edit-card" role="dialog" aria-modal="true" aria-labelledby="whProfileEditTitle">
+    <button class="wh-profile-edit-close" id="whProfileEditClose" type="button" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+    <div class="wh-profile-edit-head"><span>Mi cuenta</span><h2 id="whProfileEditTitle">Editar mis datos</h2><p>Puedes actualizar tus datos de contacto y despacho. El RUT, la lista de precios, la categoría y el crédito se administran desde el cPanel.</p></div>
+    <div class="wh-profile-edit-form">
+      <label>RUT<input id="whEditRut" readonly></label>
+      <label>Razón social<input id="whEditBusiness" maxlength="250"></label>
+      <label>Nombre de contacto<input id="whEditName" maxlength="180"></label>
+      <label>Giro<input id="whEditGiro" maxlength="250"></label>
+      <label>Teléfono<input id="whEditPhone" maxlength="80"></label>
+      <label>Correo<input id="whEditEmail" type="email" maxlength="250"></label>
+      <label class="profile-edit-wide">Dirección<input id="whEditAddress" maxlength="500"></label>
+      <label>Comuna<input id="whEditCommune" maxlength="180"></label>
+      <label>Ciudad<input id="whEditCity" maxlength="180"></label>
+    </div>
+    <button id="whSaveProfileData" class="submit-order async-btn" type="button"><span>Guardar cambios</span></button>
+  </div>
+</div>
+
+<div class="overlay" id="whOverlay"></div>
+<aside class="cart-panel" id="whCart">
+  <div class="cart-scroll">
+    <div class="cart-head"><div><span>Pedido mayorista</span><h2>Carrito</h2></div><button id="whCartClose">×</button></div>
+    <div class="cart-options-top">
+      <details class="checkout-accordion" id="whCheckoutAccordion">
+        <summary>
+          <div><span>Opciones del pedido</span><strong>Medio de pago, entrega y datos de despacho</strong></div>
+          <i class="bi bi-chevron-down"></i>
+        </summary>
+        <div class="checkout-fields">
+          <label>Medio de pago<select id="whPayment"><option value="TRANSFERENCIA">Transferencia</option><option value="TRANSBANK">Transbank</option><option value="EFECTIVO">Efectivo</option><option value="CREDITO" id="whCreditPaymentOption" hidden>Crédito disponible</option></select></label>
+          <div class="credit-checkout-note hidden" id="whCreditCheckoutNote"><i class="bi bi-wallet2"></i><span id="whCreditCheckoutText"></span></div>
+          <label>Entrega<select id="whDelivery"><option value="COORDINAR">Coordinar</option><option value="RETIRO">Retiro</option><option value="DESPACHO">Despacho</option></select></label>
+          <label>Dirección<input id="whAddress"></label>
+          <label>Comuna<input id="whCommune"></label>
+          <label>Ciudad<input id="whCity" placeholder="Ciudad"></label>
+          <label>Observaciones<textarea id="whNotes" rows="3"></textarea></label>
+        </div>
+      </details>
+    </div>
+    <div class="cart-items" id="whCartItems"></div>
+    <div class="checkout">
+      <div class="total"><span>Total productos</span><strong id="whCartTotal">$0</strong></div>
+      <button class="submit-order async-btn" id="whSubmitOrder"><span>Crear pedido</span></button>
+      <div class="last-order hidden" id="whLastOrder"><strong id="whLastOrderNumber"></strong><div class="transfer-upload hidden" id="whTransferUpload"><input id="whProofFile" type="file" accept="image/*,.pdf"><button id="whUploadProof" class="async-btn"><span>Subir comprobante</span></button></div></div>
+    </div>
+  </div>
+</aside>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="mayoristas.js"></script>
+</body>
+</html>

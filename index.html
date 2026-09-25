@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#8d5060">
+  <title>Ale Atencio | Repostería</title>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <meta name="description" content="Ale Atencio Repostería. Tortas, galletas, postres y regalos para cumpleaños, celebraciones y momentos especiales.">
+  <link rel="canonical" href="https://aleatencioreposteria.cl/">
+  <meta property="og:url" content="https://aleatencioreposteria.cl/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="splash-screen" id="splashScreen" aria-live="polite">
+  <div class="parchment-wrap">
+    <div class="parchment-scroll">
+      <div class="parchment-ornament ornament-top">❦</div>
+      <img class="parchment-logo parchment-emblem-only" src="favicon.png" alt="Ale Atencio">
+      <div class="parchment-welcome">Bienvenidos</div>
+      <h1 class="parchment-title">Ale Atencio</h1>
+      <div class="parchment-subtitle">Repostería</div>
+      <p class="parchment-message">Dulces momentos creados especialmente para ti.</p>
+      <div class="parchment-loader" aria-label="Cargando">
+        <span></span>
+      </div>
+      <div class="parchment-ornament ornament-bottom">❦</div>
+    </div>
+  </div>
+</div>
+<div class="announcement-bar">
+  <span>Pedidos personalizados · Regalos · Celebraciones</span>
+  <a href="#solicitud">Haz tu solicitud</a>
+</div>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand brand-single-logo" href="#inicio" aria-label="Ale Atencio Repostería">
+      <img id="brandLogo" class="brand-wordmark-single" src="logo-ale-atencio.png" alt="Ale Atencio Repostería">
+    </a>
+    <button class="mobile-toggle" id="mobileToggle" aria-label="Abrir menú"><i class="bi bi-list"></i></button>
+    <nav class="main-nav" id="mainNav">
+      <a href="#inicio">Inicio</a>
+      <div class="nav-group">
+        <button class="nav-trigger">Productos <i class="bi bi-chevron-down"></i></button>
+        <div class="nav-menu" id="categoryMenu"></div>
+      </div>
+      <a href="#ofertas">Promociones</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#galeria">Galería</a>
+      <a id="eventsHeaderLink" href="https://franciscoferraris.cl/">Eventos</a>
+      <a href="#solicitud">Solicitud</a>
+      <a href="#seguimiento"><i class="bi bi-box-seam"></i> Consulta tu pedido</a>
+      <a href="#politicas">Políticas</a>
+    </nav>
+    <div class="header-actions">
+      <a class="cpanel-access wholesale-access" href="mayoristas.html" aria-label="Compras para mayoristas" title="Compras para mayoristas">
+        <i class="bi bi-shop-window"></i><span>Mayoristas</span>
+      </a>
+      <a class="cpanel-access" href="cpanel.html" aria-label="Acceder al cPanel" title="Acceder al cPanel">
+        <i class="bi bi-shield-lock"></i><span>cPanel</span>
+      </a>
+      <button class="round-button" id="searchBtn" aria-label="Buscar"><i class="bi bi-search"></i></button>
+      <button class="cart-button" id="cartBtn"><i class="bi bi-bag"></i><span id="cartCount">0</span></button>
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<aside class="cart-drawer" id="cartDrawer">
+  <div class="drawer-head">
+    <div><small>Tu selección</small><h3>Carrito</h3></div>
+    <button id="closeCart" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-summary">
+    <div><span>Subtotal</span><strong id="cartSubtotal">$0</strong></div>
+    <div><span>Despacho</span><strong id="cartDelivery">Por confirmar</strong></div>
+    <div class="grand-total"><span>Total</span><strong id="cartTotal">$0</strong></div>
+    <button class="btn btn-primary btn-block" id="checkoutBtn">Finalizar pedido</button>
+    <button class="btn btn-transbank btn-block hidden" id="transbankCartBtn" type="button"><i class="bi bi-credit-card-2-front"></i> <span id="transbankCartLabel">Pagar con Transbank</span></button>
+    <small class="payment-cart-note hidden" id="transbankCartNote">El pedido se registra primero; luego Transbank genera una transacción segura y única en pesos chilenos (CLP) por ese monto.</small>
+    <button class="btn btn-light btn-block" id="clearCart">Vaciar carrito</button>
+  </div>
+</aside>
+<div class="screen-overlay" id="overlay"></div>
+
+<div class="modal" id="searchModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close-modal><i class="bi bi-x-lg"></i></button>
+    <span class="eyebrow">Buscar</span>
+    <h2>¿Qué se te antoja?</h2>
+    <div class="search-row">
+      <input id="searchInput" placeholder="Tortas, galletas, postres...">
+      <button class="btn btn-primary" id="searchAction">Buscar</button>
+    </div>
+    <div id="searchResults" class="search-results"></div>
+  </div>
+</div>
+
+<div class="modal product-detail-modal" id="productDetailModal" aria-hidden="true">
+  <div class="modal-card product-detail-card">
+    <button class="modal-close" data-close-modal aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+    <div id="productDetailContent"></div>
+  </div>
+</div>
+
+<div class="modal" id="checkoutModal">
+  <div class="modal-card checkout-card">
+    <button class="modal-close" data-close-modal><i class="bi bi-x-lg"></i></button>
+    <span class="eyebrow">Pedido</span>
+    <h2>Datos para coordinar</h2>
+    <div class="form-grid">
+      <input id="coName" placeholder="Nombre completo" autocomplete="name" required>
+      <div class="checkout-rut-field">
+        <input id="coRut" placeholder="RUT (ej: 12.345.678-5)" inputmode="text" autocomplete="off" required>
+        <small id="coRutLookupState" class="checkout-rut-lookup-state">Ingresa tu RUT para recuperar tus datos si ya eres cliente.</small>
+      </div>
+      <input id="coPhone" placeholder="WhatsApp" inputmode="tel" autocomplete="tel" required>
+      <input id="coEmail" type="email" placeholder="Correo" autocomplete="email">
+      <select id="coMethod">
+        <option value="Retiro">Retiro coordinado</option>
+        <option value="Despacho">Despacho</option>
+      </select>
+      <input id="coAddress" placeholder="Dirección" autocomplete="street-address">
+      <input id="coCommune" placeholder="Comuna" autocomplete="address-level2">
+      <textarea id="coNotes" class="span-2" placeholder="Observaciones del pedido"></textarea>
+    </div>
+    <div class="checkout-payment-intent hidden" id="checkoutPaymentIntent"><i class="bi bi-credit-card-2-front"></i><span>Después de registrar el pedido continuarás a Transbank. El cobro se procesa en pesos chilenos (CLP).</span></div>
+    <button class="btn btn-primary btn-block" id="submitOrderBtn">Enviar pedido</button>
+    <section class="order-success-panel hidden" id="orderSuccessPanel" aria-live="polite">
+      <div class="order-success-icon"><i class="bi bi-check-circle-fill"></i></div>
+      <div>
+        <span class="eyebrow">Pedido registrado</span>
+        <h3>Respaldo de tu pedido</h3>
+        <p>Tu número de pedido es <strong id="orderSuccessNumber"></strong>.</p>
+        <a class="btn btn-light" id="orderSuccessPdf" href="#" target="_blank" rel="noopener" hidden><i class="bi bi-file-earmark-pdf"></i> Abrir / descargar respaldo PDF</a>
+        <button class="btn btn-light" id="orderSuccessPdfGenerate" type="button" hidden><i class="bi bi-file-earmark-pdf"></i> Generar PDF</button>
+        <a class="btn btn-light" id="orderSuccessTracking" href="#seguimiento" hidden><i class="bi bi-box-seam"></i> Seguir mi pedido</a>
+        <button class="btn btn-transbank" id="orderSuccessTransbank" type="button" hidden><i class="bi bi-credit-card-2-front"></i> Reintentar pago Transbank</button>
+        <p class="order-success-pending" id="orderSuccessPdfPending" hidden>El pedido quedó guardado. El PDF podrá regenerarse desde el cPanel si el servidor no logró crearlo en este momento.</p>
+      </div>
+      <button class="btn btn-primary" id="orderSuccessClose" type="button">Cerrar</button>
+    </section>
+  </div>
+</div>
+
+<a class="whatsapp-float" id="whatsappFloat" href="#" aria-label="Contactar por WhatsApp" title="WhatsApp">
+  <span class="whatsapp-pulse" aria-hidden="true"></span><i class="bi bi-whatsapp"></i>
+</a>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

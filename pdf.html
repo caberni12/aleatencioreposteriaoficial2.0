@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Ale Atencio · PDF de pedido</title>
+  <style>
+    :root{--bg:#fbf7f3;--paper:#fff;--ink:#3d2a24;--muted:#8e756a;--line:#eadbd2;--accent:#b57945}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}
+    body{display:flex;flex-direction:column;min-height:100vh}
+    .bar{display:flex;align-items:center;gap:18px;min-height:68px;padding:10px 22px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:3;box-shadow:0 8px 24px rgba(74,48,38,.05)}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}.brand img{width:118px;height:44px;object-fit:contain}.brand-copy{min-width:0}.brand-copy strong{display:block;font-size:14px}.brand-copy span{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .actions{margin-left:auto;display:flex;gap:8px}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}.btn:disabled{opacity:.45;cursor:not-allowed}
+    .stage{flex:1;display:flex;min-height:0;padding:16px}.viewer-shell{width:min(1180px,100%);margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 18px 45px rgba(67,43,34,.08);min-height:calc(100vh - 102px);position:relative}
+    #pdfFrame{width:100%;height:calc(100vh - 104px);border:0;background:#fff;display:none}.state{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:30px;text-align:center}.state-card{max-width:480px}.spinner{width:42px;height:42px;border-radius:50%;border:3px solid #eadbd2;border-top-color:var(--accent);animation:spin .8s linear infinite;margin:0 auto 16px}.state h1{font-size:20px;margin:0 0 8px}.state p{margin:0;color:var(--muted);line-height:1.5}.error{color:#9c3535}@keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:680px){.bar{padding:8px 12px;gap:8px}.brand img{width:86px}.brand-copy strong{font-size:12px}.brand-copy span{font-size:10px}.actions .btn{padding:8px 9px;font-size:12px}.stage{padding:8px}.viewer-shell{border-radius:12px;min-height:calc(100vh - 86px)}#pdfFrame{height:calc(100vh - 88px)}}
+  </style>
+</head>
+<body>
+  <header class="bar">
+    <div class="brand"><img src="logo-ale-atencio.png" alt="Ale Atencio"><div class="brand-copy"><strong>Documento de pedido</strong><span id="orderLabel">Cargando…</span></div></div>
+    <div class="actions"><button id="downloadPdf" class="btn primary" type="button" disabled>Descargar PDF</button></div>
+  </header>
+  <main class="stage">
+    <section class="viewer-shell">
+      <div id="state" class="state"><div class="state-card"><div class="spinner"></div><h1>Preparando tu PDF</h1><p>Estamos cargando el respaldo del pedido de forma segura.</p></div></div>
+      <iframe id="pdfFrame" title="PDF del pedido"></iframe>
+    </section>
+  </main>
+  <script src="config.js"></script>
+  <script>
+  (()=>{
+    const params=new URLSearchParams(location.search),pedido=String(params.get('pedido')||'').trim(),token=String(params.get('t')||'').trim();
+    const label=document.getElementById('orderLabel'),state=document.getElementById('state'),frame=document.getElementById('pdfFrame'),download=document.getElementById('downloadPdf');
+    label.textContent=pedido||'Pedido';let objectUrl='';
+    function showError(message){state.innerHTML=`<div class="state-card"><h1 class="error">No fue posible abrir el PDF</h1><p>${String(message||'El enlace no está disponible.')}</p></div>`;state.style.display='flex';frame.style.display='none';download.disabled=true}
+    async function load(){
+      if(!pedido||!token)return showError('El enlace está incompleto. Vuelve a abrirlo desde Consulta tu pedido.');
+      const api=String(window.ALE_ATENCIO_CONFIG?.API_URL||'').trim();if(!/^https:\/\//i.test(api))return showError('El servicio de documentos no está configurado.');
+      try{
+        const u=new URL(api);u.searchParams.set('pdf','1');u.searchParams.set('pedido',pedido);u.searchParams.set('t',token);
+        const res=await fetch(u.toString(),{method:'GET',mode:'cors',cache:'no-store',credentials:'omit',headers:{Accept:'application/pdf'}});
+        if(!res.ok){const txt=(await res.text().catch(()=>''))||`HTTP ${res.status}`;throw new Error(txt)}
+        const blob=await res.blob();if(!String(blob.type||'').toLowerCase().includes('pdf'))throw new Error('El servidor no devolvió un PDF válido.');
+        objectUrl=URL.createObjectURL(blob);frame.src=objectUrl;frame.style.display='block';state.style.display='none';download.disabled=false;
+        download.addEventListener('click',()=>{const a=document.createElement('a');a.href=objectUrl;a.download=`${pedido.replace(/[^A-Za-z0-9._-]+/g,'-')||'pedido'}.pdf`;document.body.appendChild(a);a.click();a.remove()},{once:false});
+      }catch(err){console.error(err);showError('El documento no está disponible o el enlace dejó de ser válido.')}
+    }
+    addEventListener('beforeunload',()=>{if(objectUrl)URL.revokeObjectURL(objectUrl)});load();
+  })();
+  </script>
+</body>
+</html>
