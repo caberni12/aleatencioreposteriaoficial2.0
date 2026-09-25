@@ -139,8 +139,66 @@
     </header>
 
     <section class="admin-view active" id="view-dashboard">
-      <div class="kpi-grid"><div class="kpi-card"><span>Productos</span><strong id="kpiProducts">0</strong></div><div class="kpi-card"><span>Pedidos pendientes</span><strong id="kpiOrders">0</strong></div><div class="kpi-card"><span>Solicitudes nuevas</span><strong id="kpiRequests">0</strong></div><div class="kpi-card"><span>Stock total</span><strong id="kpiStock">0</strong></div><div class="kpi-card"><span>Ventas pagadas hoy</span><strong id="dashboardSalesToday">$0</strong></div><div class="kpi-card"><span>Ventas pagadas mes</span><strong id="dashboardSalesMonth">$0</strong></div></div>
-      <div class="admin-card"><h2>Resumen</h2><div id="dashboardSummary" class="summary-list"></div></div>
+      <div class="dash-pro-shell">
+        <div class="dash-pro-hero">
+          <div>
+            <span class="eyebrow">Analítica comercial</span>
+            <h2>Panel de Control</h2>
+            <p>Ventas, visitas web y comportamiento geográfico en una sola vista.</p>
+          </div>
+          <div class="dash-pro-brand"><i class="bi bi-heart-fill"></i><span>Más que pasteles, creamos momentos</span></div>
+        </div>
+
+        <div class="dash-filterbar" aria-label="Filtros del dashboard">
+          <label><span><i class="bi bi-geo-alt"></i> Región</span><select id="dashRegionFilter"><option value="">Todas</option></select></label>
+          <label><span><i class="bi bi-pin-map"></i> Comuna</span><select id="dashCommuneFilter"><option value="">Todas</option></select></label>
+          <label><span><i class="bi bi-shop"></i> Canal</span><select id="dashChannelFilter"><option value="">Todos</option><option value="WEB">Web</option><option value="CPANEL">cPanel</option><option value="MAYORISTA">Mayorista</option><option value="PRESENCIAL">Presencial</option></select></label>
+          <label><span><i class="bi bi-tag"></i> Tipo de venta</span><select id="dashSaleTypeFilter"><option value="">Todas</option><option value="NORMAL">Normal</option><option value="MAYORISTA">Mayorista</option></select></label>
+          <div class="dash-range-tabs" id="dashRangeTabs" role="group" aria-label="Período">
+            <button type="button" data-range="today">Hoy</button><button type="button" data-range="7d">7 días</button><button type="button" data-range="30d">30 días</button><button type="button" data-range="month">Mes</button><button type="button" class="active" data-range="year">Año</button>
+          </div>
+          <button class="dash-refresh-btn" id="dashRefresh" type="button" title="Actualizar dashboard"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+
+        <div class="dash-kpi-grid">
+          <button class="dash-kpi" type="button" data-dash-action="sales"><span class="dash-kpi-icon"><i class="bi bi-cash-coin"></i></span><small>Ventas Totales</small><strong id="dashKpiSales">$0</strong><em id="dashKpiSalesMeta">Período seleccionado</em><span class="dash-kpi-spark" id="dashSparkSales"></span></button>
+          <button class="dash-kpi" type="button" data-dash-action="orders"><span class="dash-kpi-icon"><i class="bi bi-cart3"></i></span><small>Pedidos</small><strong id="dashKpiOrders">0</strong><em>Ventas pagadas</em><span class="dash-kpi-spark" id="dashSparkOrders"></span></button>
+          <button class="dash-kpi" type="button" data-dash-action="ticket"><span class="dash-kpi-icon"><i class="bi bi-ticket-perforated"></i></span><small>Ticket Promedio</small><strong id="dashKpiTicket">$0</strong><em>Promedio por pedido</em><span class="dash-kpi-spark" id="dashSparkTicket"></span></button>
+          <button class="dash-kpi" type="button" data-dash-action="visits"><span class="dash-kpi-icon"><i class="bi bi-cursor"></i></span><small>Visitas Web</small><strong id="dashKpiVisits">0</strong><em id="dashKpiVisitors">0 visitantes únicos</em><span class="dash-kpi-spark" id="dashSparkVisits"></span></button>
+          <button class="dash-kpi" type="button" data-dash-action="conversion"><span class="dash-kpi-icon"><i class="bi bi-bar-chart-line"></i></span><small>Conversión</small><strong id="dashKpiConversion">0%</strong><em>Pedidos / visitas</em><span class="dash-kpi-spark" id="dashSparkConversion"></span></button>
+          <button class="dash-kpi dash-kpi-top" type="button" data-dash-action="commune"><span class="dash-kpi-icon"><i class="bi bi-star-fill"></i></span><small>Comuna Top</small><strong id="dashKpiTopCommune">—</strong><em id="dashKpiTopCommuneMeta">Sin ventas</em><span class="dash-kpi-crown"><i class="bi bi-award-fill"></i></span></button>
+        </div>
+
+        <div class="dash-main-grid">
+          <div class="dash-column dash-column-left">
+            <article class="dash-panel"><div class="dash-panel-head"><div><span class="eyebrow">Ventas</span><h3>Ventas Mensuales</h3></div><span class="dash-mini-badge">CLP</span></div><div class="dash-bars" id="dashSalesChart"></div></article>
+            <article class="dash-panel"><div class="dash-panel-head"><div><span class="eyebrow">Tráfico</span><h3>Visitas Web</h3></div><span class="dash-mini-badge" id="dashVisitsPeriodLabel">Año</span></div><div class="dash-line-chart" id="dashVisitsChart"></div></article>
+            <article class="dash-panel"><div class="dash-panel-head"><div><span class="eyebrow">Catálogo</span><h3>Top Productos Más Vendidos</h3></div></div><div class="dash-ranking" id="dashTopProducts"><div class="dash-empty">Cargando…</div></div></article>
+          </div>
+
+          <article class="dash-panel dash-map-panel">
+            <div class="dash-panel-head"><div><span class="eyebrow">Geografía</span><h3>Mapa de Chile por Región</h3><p>Haz clic en una región para filtrar y ver el detalle de ventas.</p></div><button class="dash-link-btn" id="dashClearRegion" type="button">Ver todo Chile</button></div>
+            <div class="dash-map-layout">
+              <div class="dash-map-stage">
+                <svg id="dashChileMap" viewBox="0 0 320 820" role="img" aria-label="Mapa interactivo de Chile por regiones"></svg>
+                <div class="dash-map-tooltip hidden" id="dashMapTooltip"></div>
+              </div>
+              <div class="dash-map-side">
+                <div class="dash-map-legend"><strong>Ventas por Región</strong><span><i class="lv5"></i>Muy alta</span><span><i class="lv4"></i>Alta</span><span><i class="lv3"></i>Media</span><span><i class="lv2"></i>Baja</span><span><i class="lv1"></i>Sin / baja venta</span></div>
+                <div class="dash-chile-total"><span>Total Chile</span><strong id="dashChileTotal">$0</strong><small id="dashChileOrders">0 pedidos</small><i class="bi bi-graph-up-arrow"></i></div>
+              </div>
+            </div>
+          </article>
+
+          <div class="dash-column dash-column-right">
+            <article class="dash-panel dash-region-detail"><div class="dash-panel-head"><div><span class="eyebrow">Detalle</span><h3 id="dashRegionTitle">Todo Chile</h3></div><span class="dash-region-pin"><i class="bi bi-geo-alt-fill"></i></span></div><div class="dash-region-kpis"><div><span>Ventas Totales</span><strong id="dashRegionSales">$0</strong></div><div><span>Pedidos</span><strong id="dashRegionOrders">0</strong></div><div><span>Ticket Promedio</span><strong id="dashRegionTicket">$0</strong></div></div></article>
+            <article class="dash-panel"><div class="dash-panel-head"><div><span class="eyebrow">Ranking</span><h3 id="dashCommuneChartTitle">Ventas por Comuna</h3></div></div><div class="dash-ranking" id="dashCommuneChart"><div class="dash-empty">Sin datos</div></div></article>
+            <article class="dash-panel"><div class="dash-panel-head"><div><span class="eyebrow">Top 5</span><h3>Comunas con más compras</h3></div></div><div class="dash-commune-list" id="dashTopCommunes"><div class="dash-empty">Sin datos</div></div></article>
+          </div>
+        </div>
+
+        <div class="dash-status" id="dashStatus"><i class="bi bi-shield-check"></i><span>Los datos de ventas consideran pedidos pagados. Las visitas web comienzan a registrarse al instalar el SQL y desplegar la Edge Function incluida en este ZIP.</span></div>
+      </div>
     </section>
 
     <section class="admin-view" id="view-products">

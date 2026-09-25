@@ -235,6 +235,10 @@
     },
 
     // R9.18.12: salesreport tolera esquema histórico en backend y conserva reintentos de transporte.
+    async dashboardAnalytics(data = {}, token = "") {
+      return request("dashboardanalytics", data, token, {timeoutMs:25000});
+    },
+
     async salesReport(data = {}, token = "") {
       let lastErr = null;
       for (const timeoutMs of [20000, 45000]) {

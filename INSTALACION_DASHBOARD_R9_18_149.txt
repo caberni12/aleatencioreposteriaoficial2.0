@@ -1,0 +1,11 @@
+ALE ATENCIO · R9.18.149 · DASHBOARD EJECUTIVO
+
+1. SUBE LOS ARCHIVOS WEB de la raíz a GitHub Pages.
+2. En Supabase > SQL Editor ejecuta: INSTALACION_SUPABASE/20_ALE_ATENCIO_SQL_R9_18_149_ANALITICA_WEB_DASHBOARD.sql
+3. Reemplaza/despliega la Edge Function dynamic-processor con: INSTALACION_SUPABASE_EDGE_FUNCTIONS/dynamic-processor/index.ts
+4. No es necesario cambiar tu logo: el dashboard usa el mismo logo configurado actualmente.
+5. Las ventas por región/comuna se calculan únicamente desde pedidos PAGADOS.
+6. Las visitas web comienzan a contabilizarse desde el momento en que el SQL y la Edge Function están instalados.
+7. El mapa, filtros de Región/Comuna, Canal, Tipo de venta y período son clickeables.
+
+IMPORTANTE: no elimines las otras carpetas de instalación si aún necesitas instalar módulos anteriores de Supabase/SII.
