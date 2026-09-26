@@ -1,0 +1,8 @@
+ALE ATENCIÓN R9.18.153
+
+1. Despliegue INSTALACION_SUPABASE_EDGE_FUNCTIONS/dynamic-processor/index.ts.
+2. No es necesario volver a ejecutar SQL si ya instaló R9.18.152.
+3. Reemplace cpanel.js y mayoristas.js (o suba todo el ZIP).
+4. El switch de Configuración ahora se guarda inmediatamente en Supabase mediante TS.
+5. Mayorista consulta la política real del servidor antes de crear el pedido.
+6. Con TRUE no se muestra alerta de stock insuficiente y se permite stock negativo.

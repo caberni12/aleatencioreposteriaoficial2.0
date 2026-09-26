@@ -1,2 +1,2 @@
-R9.18.151
-Dashboard Chile refinado + switch global venta sin stock Web/Mayorista
+ALE ATENCIO R9.18.153
+Stock policy persistente por TS + sincronización Web/Mayorista

@@ -46,6 +46,7 @@ function populateOrderFilters(){for(const [id,key] of [['#whOrderStatus','estado
 
 function whShowStockToClients(){return ["SI","SÍ","TRUE","1","YES","ON"].includes(String(state?.config?.mostrar_stock_clientes||"").trim().toUpperCase())}
 function whAllowNoStockSales(){return ["SI","SÍ","TRUE","1","YES","ON"].includes(String(state?.config?.permitir_venta_sin_stock||"").trim().toUpperCase())}
+async function whRefreshStockPolicy(){try{const out=await AleAPI.post("mayoristastockpolicy",{},token);state.config={...(state.config||{}),permitir_venta_sin_stock:out?.enabled?"SI":"NO"};if(out?.enabled){stockIssues.clear();renderCart()}return !!out?.enabled}catch(err){console.warn("MAYORISTA_STOCK_POLICY",err);return whAllowNoStockSales()}}
 function whProductById(id){return (state.products||[]).find(x=>String(x.id)===String(id))||null}
 function whGlobalStock(p){const sizes=whProductSizes(p);if(sizes.length)return sizes.reduce((sum,z)=>{const n=Number(z?.stock);return sum+(Number.isFinite(n)?n:0)},0);const n=Number(p?.stock);return Number.isFinite(n)?n:0}
 function whProductSizes(p){return Array.isArray(p?.tamanos)?p.tamanos.filter(z=>Number(z?.precio||0)>0):[]}
@@ -196,7 +197,7 @@ function showStockIssues(err){
   toast('Stock insuficiente para uno de los productos o tamaños.');return false;
 }
 function renderCart(){if(whAllowNoStockSales())stockIssues.clear();const count=cart.reduce((a,x)=>a+x.cantidad,0),total=cart.reduce((a,x)=>a+x.precio*x.cantidad,0);$('#whCartCount').textContent=count;$('#whCartTotal').textContent=money(total);$('#whCartItems').innerHTML=cart.map(x=>{const issue=stockIssues.get(x.key);return `<div class="cart-line ${issue?'stock-problem':''}" data-key="${esc(x.key)}"><div><strong>${esc(x.nombre)}</strong><small>${esc(x.tamano_nombre)} · ${money(x.precio)}</small>${issue?`<div class="stock-problem-note"><i class="bi bi-exclamation-triangle-fill"></i><span>Stock insuficiente · Disponible: <b>${Number(issue.disponible||0)}</b> · Solicitado: <b>${Number(issue.solicitado||x.cantidad)}</b></span></div>`:''}</div><div><input type="number" min="1" max="999" value="${x.cantidad}"><button data-remove><i class="bi bi-trash"></i></button></div></div>`}).join('')||'<p>Tu carrito está vacío.</p>';renderCreditPaymentOption()}
-$('#whCartItems').onchange=e=>{const line=e.target.closest('.cart-line');if(!line||e.target.tagName!=='INPUT')return;const x=cart.find(v=>v.key===line.dataset.key);if(x)x.cantidad=Math.max(1,Number(e.target.value)||1);stockIssues.delete(line.dataset.key);renderCart()};$('#whCartItems').onclick=e=>{const line=e.target.closest('.cart-line');if(line&&e.target.closest('[data-remove]')){stockIssues.delete(line.dataset.key);cart=cart.filter(v=>v.key!==line.dataset.key);renderCart()}};function openCart(){$('#whCart').classList.add('open');$('#whOverlay').classList.add('open')}function closeCart(){$('#whCart').classList.remove('open');$('#whOverlay').classList.remove('open')}$('#whCartBtn').onclick=openCart;$('#whCartClose').onclick=closeCart;$('#whOverlay').onclick=closeCart;
+$('#whCartItems').onchange=e=>{const line=e.target.closest('.cart-line');if(!line||e.target.tagName!=='INPUT')return;const x=cart.find(v=>v.key===line.dataset.key);if(x)x.cantidad=Math.max(1,Number(e.target.value)||1);stockIssues.delete(line.dataset.key);renderCart()};$('#whCartItems').onclick=e=>{const line=e.target.closest('.cart-line');if(line&&e.target.closest('[data-remove]')){stockIssues.delete(line.dataset.key);cart=cart.filter(v=>v.key!==line.dataset.key);renderCart()}};function openCart(){$('#whCart').classList.add('open');$('#whOverlay').classList.add('open');whRefreshStockPolicy().catch(()=>{})}function closeCart(){$('#whCart').classList.remove('open');$('#whOverlay').classList.remove('open')}$('#whCartBtn').onclick=openCart;$('#whCartClose').onclick=closeCart;$('#whOverlay').onclick=closeCart;
 
 ['#whSearch','#whCategory','#whCatalogFrom','#whCatalogTo'].forEach(id=>$(id).addEventListener(id.includes('Search')?'input':'change',renderProducts));['#whOrderSearch','#whOrderStatus','#whOrderPaymentStatus','#whOrderFrom','#whOrderTo'].forEach(id=>$(id).addEventListener(id.includes('Search')?'input':'change',renderOrders));
 $('#whCatalogToday').onclick=()=>{const t=dateOnly(new Date());$('#whCatalogFrom').value=t;$('#whCatalogTo').value=t;renderProducts()};$('#whCatalogClear').onclick=()=>{$('#whSearch').value='';$('#whCategory').value='';$('#whCatalogFrom').value='';$('#whCatalogTo').value='';renderProducts()};$('#whOrdersToday').onclick=()=>{const t=dateOnly(new Date());$('#whOrderFrom').value=t;$('#whOrderTo').value=t;renderOrders()};$('#whOrdersClear').onclick=()=>{$('#whOrderSearch').value='';$('#whOrderStatus').value='';$('#whOrderPaymentStatus').value='';$('#whOrderFrom').value='';$('#whOrderTo').value='';renderOrders()};
@@ -252,6 +253,7 @@ $('#whSubmitOrder').onclick=e=>busy(e.currentTarget,async()=>{
   if(!cart.length){toast('Agrega productos al pedido');return}
   const selectedPayment=$('#whPayment').value,total=cart.reduce((a,x)=>a+Number(x.precio||0)*Number(x.cantidad||0),0);
   if(selectedPayment==='CREDITO'&&!whCreditBenefitEnabled()){toast('El beneficio de crédito está desactivado para tu cuenta Mayorista.');return}if(selectedPayment==='CREDITO'&&!whCreditCanUse(total)){const c=whCredit();if(whCreditOverdue(c))toast('Tu línea de crédito está vencida. Regulariza el pago antes de volver a usarla.');else toast(`Saldo de crédito insuficiente. Disponible: ${money(c?.saldo_disponible||0)}`);return}
+  await whRefreshStockPolicy();
   let out=null;
   try{
     out=await AleAPI.post('mayoristacreateorder',{detalle:cart,medio_pago:$('#whPayment').value,metodo_entrega:$('#whDelivery').value,direccion:$('#whAddress').value,comuna:$('#whCommune').value,ciudad:$('#whCity')?$('#whCity').value:'',observaciones:$('#whNotes').value,despacho:0},token);
@@ -262,14 +264,21 @@ $('#whSubmitOrder').onclick=e=>busy(e.currentTarget,async()=>{
     else if(code.includes('CREDITO_EN_MORA')||code.includes('CREDITO_VENCIDO'))toast('Tu cuenta de crédito está en mora. Regulariza el pago con administración antes de volver a usarla.');
     else if(code.includes('CREDITO_BENEFICIO_DESACTIVADO'))toast('El beneficio de crédito está desactivado para tu cuenta Mayorista.');
     else if(code.includes('CREDITO_NO_ASIGNADO')||code.includes('CREDITO_NO_DISPONIBLE'))toast('La línea de crédito no está disponible para esta cuenta.');
-    else if(code.includes('STOCK_INSUFICIENTE')){if(!whAllowNoStockSales())showStockIssues(err);else toast('Actualizando disponibilidad… intenta nuevamente.');}
+    else if(code.includes('STOCK_INSUFICIENTE')){
+      const enabled=await whRefreshStockPolicy();
+      if(enabled){
+        stockIssues.clear();renderCart();
+        try{out=await AleAPI.post('mayoristacreateorder',{detalle:cart,medio_pago:$('#whPayment').value,metodo_entrega:$('#whDelivery').value,direccion:$('#whAddress').value,comuna:$('#whCommune').value,ciudad:$('#whCity')?$('#whCity').value:'',observaciones:$('#whNotes').value,despacho:0},token);}catch(retryErr){console.warn('MAYORISTA_CREATE_ORDER_RETRY',retryErr);toast('No fue posible crear el pedido. Actualiza el portal e intenta nuevamente.');return;}
+      }else{showStockIssues(err);return;}
+    }
     else if(code.includes('PRECIO_MAYORISTA_NO_AUTORIZADO')||code.includes('LISTA_PRECIO_NO_DISPONIBLE'))toast('La lista de precios mayorista cambió. Actualiza el portal e intenta nuevamente.');
     else if(code.includes('PRODUCTO_TAMANO_REQUERIDO'))toast('Uno de los tamaños ya no está disponible. Actualiza el pedido.');
     else {
       const raw=AleAPI?.errorText ? AleAPI.errorText(err?.message||err?.payload?.error||err) : String(err?.message||'ERROR_SERVIDOR');
       toast(`No fue posible crear el pedido: ${raw}`);
+      return;
     }
-    return;
+    if(!out)return;
   }
 
   // Desde aquí el pedido ya existe. Un error posterior de Transbank nunca debe
