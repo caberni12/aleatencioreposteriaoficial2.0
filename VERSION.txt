@@ -1,2 +1,2 @@
-R9.18.155
-Editor Web: Políticas + Misión + Visión + Valores · Importación DTE desde Pedidos para certificación SII
+ALE ATENCIO R9.18.156
+Importación DTE a Pedidos con XML + PDF opcional.

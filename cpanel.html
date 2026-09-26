@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="./styles.css?v=R9.18.155"><link rel="stylesheet" href="./cpanel.css?v=R9.18.155">
+  <link rel="stylesheet" href="./styles.css?v=R9.18.156"><link rel="stylesheet" href="./cpanel.css?v=R9.18.156">
   <style id="ale-production-css-fallback-r918151">
 /* R9.18.152: fallback embebido para GitHub Pages/Cloudflare. Mantener también archivos CSS externos. */
 :root{
@@ -8441,12 +8441,13 @@ Torta chocolate | 1 | 25000"></textarea></label>
 
 
     <div class="editor hidden sii-modal order-dte-import-modal" id="orderDteImportModal" role="dialog" aria-modal="true" aria-labelledby="orderDteImportTitle">
-      <div class="editor-modal-head"><div><span class="eyebrow">Pedidos · Certificación SII</span><h3 id="orderDteImportTitle">Importar DTE al pedido</h3><small>Importa XML de Factura, Boleta, Nota de Crédito o Nota de Débito sin consumir un nuevo folio.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
-      <div class="integration-note"><i class="bi bi-info-circle"></i><span>Tipos admitidos: <strong>33/34 Factura</strong>, <strong>39/41 Boleta</strong>, <strong>56 Nota de Débito</strong> y <strong>61 Nota de Crédito</strong>. El tipo y folio se leen directamente desde el XML.</span></div>
+      <div class="editor-modal-head"><div><span class="eyebrow">Pedidos · Certificación SII</span><h3 id="orderDteImportTitle">Importar DTE al pedido</h3><small>Importa el XML tributario y, opcionalmente, adjunta también su PDF de representación visual sin consumir un nuevo folio.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <div class="integration-note"><i class="bi bi-info-circle"></i><span>Tipos admitidos: <strong>33/34 Factura</strong>, <strong>39/41 Boleta</strong>, <strong>56 Nota de Débito</strong> y <strong>61 Nota de Crédito</strong>. El tipo y folio se leen desde el XML; el PDF queda asociado al mismo DTE para consulta/reimpresión.</span></div>
       <div class="form-grid">
         <label class="field-group span-2"><span>Pedido destino</span><select id="orderDteImportOrder"><option value="">Selecciona un pedido</option></select><small>El DTE quedará asociado al pedido y aparecerá en su columna DTE y trazabilidad.</small></label>
-        <div class="field-group file-field span-2" data-file-picker="xml"><span>Archivo XML del DTE / EnvioDTE</span><input id="orderDteImportFile" class="file-input" type="file" accept=".xml,text/xml,application/xml"><label class="file-picker-btn" for="orderDteImportFile"><i class="bi bi-file-earmark-code"></i><span class="file-picker-text">Seleccionar XML</span></label><small class="file-name">Sin archivo seleccionado</small></div>
-        <div class="order-dte-import-preview span-2" id="orderDteImportPreview"><i class="bi bi-receipt"></i><span>Selecciona el pedido y el XML. El sistema validará emisor, tipo, folio y receptor antes de guardar.</span></div>
+        <div class="field-group file-field span-2" data-file-picker="xml"><span>XML del DTE / EnvioDTE <strong>(obligatorio)</strong></span><input id="orderDteImportFile" class="file-input" type="file" accept=".xml,text/xml,application/xml"><label class="file-picker-btn" for="orderDteImportFile"><i class="bi bi-file-earmark-code"></i><span class="file-picker-text">Seleccionar XML</span></label><small class="file-name" id="orderDteImportXmlName">Sin archivo XML seleccionado</small></div>
+        <div class="field-group file-field span-2" data-file-picker="pdf"><span>PDF del DTE <strong>(opcional)</strong></span><input id="orderDteImportPdf" class="file-input" type="file" accept=".pdf,application/pdf"><label class="file-picker-btn" for="orderDteImportPdf"><i class="bi bi-file-earmark-pdf"></i><span class="file-picker-text">Seleccionar PDF</span></label><small class="file-name" id="orderDteImportPdfName">Sin PDF seleccionado</small><small>El PDF se almacena en el repositorio privado del DTE y podrá abrirse desde Facturación/Pedidos.</small></div>
+        <div class="order-dte-import-preview span-2" id="orderDteImportPreview"><i class="bi bi-receipt"></i><span>Selecciona el pedido y el XML. También puedes adjuntar el PDF del DTE.</span></div>
       </div>
       <div class="editor-actions"><button class="btn btn-primary" id="orderDteImportConfirm" type="button"><i class="bi bi-cloud-arrow-up"></i> Importar DTE</button><button class="btn btn-light" type="button" data-sii-close>Cancelar</button></div>
     </div>
@@ -8521,5 +8522,5 @@ Torta chocolate | 1 | 25000"></textarea></label>
 </div>
 <div class="notification-toast-stack" id="notificationToastStack" aria-live="polite"></div>
 <div class="toast" id="adminToast"></div>
-<script src="./config.js?v=R9.18.155"></script><script src="./api.js?v=R9.18.155"></script><script src="./sii-api.js?v=R9.18.155"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./cpanel.js?v=R9.18.155"></script>
+<script src="./config.js?v=R9.18.156"></script><script src="./api.js?v=R9.18.156"></script><script src="./sii-api.js?v=R9.18.156"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./cpanel.js?v=R9.18.156"></script>
 </body></html>

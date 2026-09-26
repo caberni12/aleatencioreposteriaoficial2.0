@@ -1,0 +1,13 @@
+ALE ATENCIO R9.18.156 · IMPORTACION DTE XML + PDF
+
+NOVEDAD
+- En Pedidos > Importar DTE, el XML sigue siendo obligatorio para leer/validar los datos tributarios.
+- Se agrega un segundo selector para adjuntar el PDF del mismo DTE.
+- El PDF se guarda usando el repositorio privado ya existente de Facturación SII.
+- No consume un folio nuevo.
+- No requiere SQL adicional respecto de R9.18.155.
+
+DESPLIEGUE
+1. Subir/reemplazar cpanel.html y cpanel.js (o todo el ZIP).
+2. Mantener desplegada la Edge Function facturacion-sii incluida en esta versión.
+3. Recargar con Ctrl+F5 y purgar caché si usa Cloudflare.
