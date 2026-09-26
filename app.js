@@ -91,7 +91,7 @@ function cartLineKey(id,sizeId=""){return `${String(id)}::${String(sizeId||"")}`
 
 function showStockToClients(){return ["SI","SÍ","TRUE","1","YES","ON"].includes(String(state?.config?.mostrar_stock_clientes||"").trim().toUpperCase())}
 function globalSalesWithoutStock(){return ["SI","SÍ","TRUE","1","YES","ON"].includes(String(state?.config?.permitir_venta_sin_stock||"").trim().toUpperCase())}
-function productAllowsNegativeStock(p){if(globalSalesWithoutStock())return true;const v=p?.permite_stock_negativo;if(v===undefined||v===null||String(v).trim()==="")return true;return v===true||["SI","SÍ","TRUE","1","YES","ON"].includes(String(v).trim().toUpperCase())}
+function productAllowsNegativeStock(p){return globalSalesWithoutStock()}
 function productGlobalStock(p){const sizes=productSizes(p);if(sizes.length)return sizes.reduce((sum,z)=>{const n=Number(z?.stock);return sum+(Number.isFinite(n)?n:0)},0);const n=Number(p?.stock);return Number.isFinite(n)?n:0}
 
 function heroView(){

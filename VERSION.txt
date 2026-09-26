@@ -1,2 +1,2 @@
-ALE ATENCIO R9.18.153
-Stock policy persistente por TS + sincronización Web/Mayorista
+R9.18.154
+Switch global único de stock · elimina selector oculto por producto · Web + Mayorista

@@ -1141,7 +1141,7 @@ function productEditorSnapshot(imageOverride=""){
     descripcion:$("#pDescription")?.value.trim()||"Agrega una descripción para mostrarla en la tienda.",
     precio:parseClpAmount($("#pPrice")?.value),
     categoria_nombre:$("#pCategory")?.value||"Categoría",
-    permite_stock_negativo:!!$("#pAllowNegativeStock")?.checked,
+    permite_stock_negativo:true,
     tamanos:collectProductSizes(),
     activo:$("#pActive")?.value||"SI",
     ocasion:$("#pOccasion")?.value.trim()||"",
@@ -1188,7 +1188,6 @@ function openProductEditor(id=""){
     renderProductSizeEditor(Array.isArray(p.tamanos)&&p.tamanos.length?p.tamanos:standardProductSizes());
     renderProductIngredientEditor(Array.isArray(p.ingredientes)?p.ingredientes:[]);
     $("#pActive").value=String(p.activo??"SI").toUpperCase()==="NO"?"NO":"SI";
-    if($("#pAllowNegativeStock"))$("#pAllowNegativeStock").value="NO";
     updateProductStatusHint();updateStockPolicyHint();
     $("#pOccasion").value=p.ocasion||"";
     $("#pDescription").value=p.descripcion||"";
@@ -1224,10 +1223,10 @@ $("#productsTable").addEventListener("change",e=>{
   const all=e.target.closest('input[data-bulk-select-all="products"]');if(all){const ids=data.products.filter(p=>{const q=normalizeText($("#productSearch").value),f=$("#productFilter").value,status=$("#productStatusFilter")?.value||"",active=String(p.activo??"SI").toUpperCase()==="NO"?"NO":"SI";return normalizeText([p.nombre,p.descripcion,p.categoria_nombre,p.ocasion].filter(Boolean).join(" ")).includes(q)&&(!f||p.categoria_nombre===f)&&(!status||active===status)}).map(p=>String(p.id));handleBulkSelectAllChange(e,ids);renderProducts()}
 });
 $("#deleteSelectedProducts")?.addEventListener("click",e=>deleteSelected("products",e.currentTarget));
-["pName","pPrice","pCategory","pStock","pActive","pOccasion","pDescription","pFeatured","pAllowNegativeStock"].forEach(id=>{
+["pName","pPrice","pCategory","pStock","pActive","pOccasion","pDescription","pFeatured"].forEach(id=>{
   const el=$("#"+id); if(!el)return;
-  const eventName=(id==="pFeatured"||id==="pActive"||id==="pCategory"||id==="pAllowNegativeStock")?"change":"input";
-  el.addEventListener(eventName,()=>{if(id==="pActive")updateProductStatusHint();if(id==="pAllowNegativeStock")updateStockPolicyHint();renderProductWebPreview()});
+  const eventName=(id==="pFeatured"||id==="pActive"||id==="pCategory")?"change":"input";
+  el.addEventListener(eventName,()=>{if(id==="pActive")updateProductStatusHint();renderProductWebPreview()});
 });
 $("#pImage")?.addEventListener("change",()=>{
   revokeProductPreviewObjectUrl();
@@ -1251,14 +1250,13 @@ $("#newProduct").addEventListener("click",()=>openProductEditor());
 function updateProductStatusHint(){const select=$("#pActive"),hint=$("#pActiveHint");if(!select||!hint)return;const active=select.value!=="NO";hint.textContent=active?"Activo: el producto se muestra y puede comprarse en la Web.":"Inactivo: el producto se oculta y no puede comprarse en la Web.";hint.classList.toggle("is-inactive",!active)}
 function updateStockPolicyHint(){}
 $("#pActive")?.addEventListener("change",updateProductStatusHint);
-$("#pAllowNegativeStock")?.addEventListener("change",updateStockPolicyHint);
-function clearProduct(){revokeProductPreviewObjectUrl();["pId","pImageId","pImageUrl","pOrder","pName","pPrice","pOccasion","pDescription"].forEach(id=>$("#"+id).value="");$("#pFeatured").checked=false;if($("#pActive"))$("#pActive").value="SI";if($("#pAllowNegativeStock"))$("#pAllowNegativeStock").value="NO";renderProductSizeEditor(standardProductSizes());renderProductIngredientEditor([]);updateProductStatusHint();updateStockPolicyHint();resetFilePicker("#pImage");renderProductImageSource("");renderProductWebPreview()}
+function clearProduct(){revokeProductPreviewObjectUrl();["pId","pImageId","pImageUrl","pOrder","pName","pPrice","pOccasion","pDescription"].forEach(id=>$("#"+id).value="");$("#pFeatured").checked=false;if($("#pActive"))$("#pActive").value="SI";renderProductSizeEditor(standardProductSizes());renderProductIngredientEditor([]);updateProductStatusHint();updateStockPolicyHint();resetFilePicker("#pImage");renderProductImageSource("");renderProductWebPreview()}
 $("#closeProductEditorX")?.addEventListener("click",closeProductEditor);
 $("#saveProduct").addEventListener("click",e=>busy(e.currentTarget,async()=>{try{
   let imageId=$("#pImageId").value,imageUrl=$("#pImageUrl").value;const file=$("#pImage").files[0];
   if(file){const u=await upload(file,"PRODUCTOS");imageId=u.fileId;imageUrl=u.imageUrl||imageUrl}
   syncProductBaseFromSizes();const tamanos=collectProductSizes(),ingredientes=collectProductIngredients();
-  const payload={id:$("#pId").value,nombre:$("#pName").value.trim(),descripcion:$("#pDescription").value.trim(),precio:parseClpAmount($("#pPrice").value),categoria_nombre:$("#pCategory").value,tamanos,ingredientes,drive_file_id:imageId,image_url:imageUrl,destacado:$("#pFeatured").checked?"SI":"NO",activo:$("#pActive")?.value||"SI",permite_stock_negativo:false,ocasion:$("#pOccasion").value.trim(),orden:toNumber($("#pOrder").value)};
+  const payload={id:$("#pId").value,nombre:$("#pName").value.trim(),descripcion:$("#pDescription").value.trim(),precio:parseClpAmount($("#pPrice").value),categoria_nombre:$("#pCategory").value,tamanos,ingredientes,drive_file_id:imageId,image_url:imageUrl,destacado:$("#pFeatured").checked?"SI":"NO",activo:$("#pActive")?.value||"SI",permite_stock_negativo:true,ocasion:$("#pOccasion").value.trim(),orden:toNumber($("#pOrder").value)};
   if(!payload.nombre){toast("El nombre es obligatorio");return}
   if(!tamanos.length){toast("Configura al menos un tamaño");return}
   const saved=await AleAPI.saveProductVerified(payload,token),verified=await AleAPI.adminModuleReliable("products",token,2);
@@ -1703,7 +1701,7 @@ if($("#sAllowNoStockSales"))$("#sAllowNoStockSales").addEventListener("change",a
   }catch(err){console.warn("SET_STOCK_POLICY",err);input.checked=!on;syncAllowNoStockSalesSetting();toast("✕ No fue posible guardar el switch de stock");}
   finally{input.disabled=false;}
 });
-$("#saveSettings").addEventListener("click",e=>busy(e.currentTarget,async()=>{try{let logoId=$("#sLogoId").value,logoUrl=data.config?.logo_url||"";const f=$("#sLogo").files[0];if(f){const up=await upload(f,"LOGO");logoId=up.fileId;logoUrl=up.imageUrl||logoUrl}const empresaRut=$("#sBusinessRut")?.value.trim()?requireRutChile($("#sBusinessRut").value):"";const publicWebUrl=clientPublicUrl($("#sPublicWebUrl")?.value.trim()||window.ALE_ATENCIO_CONFIG?.PUBLIC_BASE_URL||"");const documentsPublicUrl=$("#sDocumentsPublicUrl")?.value.trim()||new URL("documentos.html",publicWebUrl||window.ALE_ATENCIO_CONFIG?.PUBLIC_BASE_URL||location.origin+"/").toString();await AleAPI.post("saveConfig",{empresa:$("#sBusiness").value.trim(),empresa_rut:empresaRut,web_public_url:publicWebUrl,documentos_public_url:documentsPublicUrl,eventos_url:$("#sEventsUrl")?.value.trim()||"https://franciscoferraris.cl/",whatsapp:$("#sWhatsapp").value.trim(),email:$("#sEmail").value.trim(),direccion:$("#sAddress").value.trim(),instagram:$("#sInstagram").value.trim(),facebook:$("#sFacebook").value.trim(),tiktok:$("#sTiktok").value.trim(),valor_despacho:parseClpAmount($("#sDelivery").value),iva_porcentaje:$("#sIva").value,cotizacion_validez_dias:$("#sQuoteValidity").value,document_format:$("#sDocumentFormat")?.value||"A4",mostrar_stock_clientes:$("#sShowStockClients")?.checked?"SI":"NO",permitir_venta_sin_stock:$("#sAllowNoStockSales")?.checked?"SI":"NO",logo_drive_file_id:logoId,logo_url:logoUrl},token);toast("Configuración guardada");await reload()}catch(err){console.warn(err);toast("No fue posible guardar")}}));
+$("#saveSettings").addEventListener("click",e=>busy(e.currentTarget,async()=>{try{let logoId=$("#sLogoId").value,logoUrl=data.config?.logo_url||"";const f=$("#sLogo").files[0];if(f){const up=await upload(f,"LOGO");logoId=up.fileId;logoUrl=up.imageUrl||logoUrl}const empresaRut=$("#sBusinessRut")?.value.trim()?requireRutChile($("#sBusinessRut").value):"";const publicWebUrl=clientPublicUrl($("#sPublicWebUrl")?.value.trim()||window.ALE_ATENCIO_CONFIG?.PUBLIC_BASE_URL||"");const documentsPublicUrl=$("#sDocumentsPublicUrl")?.value.trim()||new URL("documentos.html",publicWebUrl||window.ALE_ATENCIO_CONFIG?.PUBLIC_BASE_URL||location.origin+"/").toString();await AleAPI.post("saveConfig",{empresa:$("#sBusiness").value.trim(),empresa_rut:empresaRut,web_public_url:publicWebUrl,documentos_public_url:documentsPublicUrl,eventos_url:$("#sEventsUrl")?.value.trim()||"https://franciscoferraris.cl/",whatsapp:$("#sWhatsapp").value.trim(),email:$("#sEmail").value.trim(),direccion:$("#sAddress").value.trim(),instagram:$("#sInstagram").value.trim(),facebook:$("#sFacebook").value.trim(),tiktok:$("#sTiktok").value.trim(),valor_despacho:parseClpAmount($("#sDelivery").value),iva_porcentaje:$("#sIva").value,cotizacion_validez_dias:$("#sQuoteValidity").value,document_format:$("#sDocumentFormat")?.value||"A4",mostrar_stock_clientes:$("#sShowStockClients")?.checked?"SI":"NO",logo_drive_file_id:logoId,logo_url:logoUrl},token);toast("Configuración guardada");await reload()}catch(err){console.warn(err);toast("No fue posible guardar")}}));
 
 async function upload(file,kind){if(file.size>6*1024*1024)throw new Error("IMAGEN_MUY_GRANDE");const dataUrl=await AleAPI.fileToDataUrl(file);return AleAPI.post("uploadImage",{kind,fileName:file.name,dataUrl},token)}
 window.removeEntity=async(kind,id,btn)=>{const label=kind==="product"?"producto":"registro";const extra=kind==="product"?"\n\nEl producto se eliminará definitivamente. Si su imagen fue subida a Supabase Storage, también se limpiará. Las imágenes locales de GitHub no se modifican.":"";if(!confirm(`¿Eliminar definitivamente este ${label}?${extra}`))return;await busy(btn,async()=>{try{const out=await AleAPI.post("deleteEntity",{kind,id},token);if(!out?.deleted)throw new Error("REGISTRO_NO_ELIMINADO");selectedSet(kind==="product"?"products":kind+"s").delete(String(id));toast("Registro eliminado");await reload()}catch(e){console.warn(e);toast("No fue posible eliminar")}})};

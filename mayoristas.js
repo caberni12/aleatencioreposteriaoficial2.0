@@ -46,7 +46,7 @@ function populateOrderFilters(){for(const [id,key] of [['#whOrderStatus','estado
 
 function whShowStockToClients(){return ["SI","SÍ","TRUE","1","YES","ON"].includes(String(state?.config?.mostrar_stock_clientes||"").trim().toUpperCase())}
 function whAllowNoStockSales(){return ["SI","SÍ","TRUE","1","YES","ON"].includes(String(state?.config?.permitir_venta_sin_stock||"").trim().toUpperCase())}
-async function whRefreshStockPolicy(){try{const out=await AleAPI.post("mayoristastockpolicy",{},token);state.config={...(state.config||{}),permitir_venta_sin_stock:out?.enabled?"SI":"NO"};if(out?.enabled){stockIssues.clear();renderCart()}return !!out?.enabled}catch(err){console.warn("MAYORISTA_STOCK_POLICY",err);return whAllowNoStockSales()}}
+async function whRefreshStockPolicy(){try{const out=await AleAPI.post("mayoristastockpolicy",{},token);const enabled=!!out?.enabled;state.config={...(state.config||{}),permitir_venta_sin_stock:enabled?"SI":"NO"};if(enabled){stockIssues.clear();renderCart()}return enabled}catch(err){console.warn("MAYORISTA_STOCK_POLICY",err);const enabled=whAllowNoStockSales();if(enabled){stockIssues.clear();renderCart()}return enabled}}
 function whProductById(id){return (state.products||[]).find(x=>String(x.id)===String(id))||null}
 function whGlobalStock(p){const sizes=whProductSizes(p);if(sizes.length)return sizes.reduce((sum,z)=>{const n=Number(z?.stock);return sum+(Number.isFinite(n)?n:0)},0);const n=Number(p?.stock);return Number.isFinite(n)?n:0}
 function whProductSizes(p){return Array.isArray(p?.tamanos)?p.tamanos.filter(z=>Number(z?.precio||0)>0):[]}
