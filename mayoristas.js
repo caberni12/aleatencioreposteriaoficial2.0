@@ -184,7 +184,7 @@ function stockIssuesFromError(err){
   return [];
 }
 function showStockIssues(err){
-  if(whAllowNoStockSales()){stockIssues.clear();renderCart();return false}
+  if(whAllowNoStockSales()){stockIssues.clear();renderCart();return true;}
   const rows=stockIssuesFromError(err);stockIssues.clear();
   for(const r of rows){const key=`${String(r.producto_id||'')}|${String(r.tamano_id||'')}`;if(key!=='|')stockIssues.set(key,r)}
   renderCart();
@@ -262,7 +262,7 @@ $('#whSubmitOrder').onclick=e=>busy(e.currentTarget,async()=>{
     else if(code.includes('CREDITO_EN_MORA')||code.includes('CREDITO_VENCIDO'))toast('Tu cuenta de crédito está en mora. Regulariza el pago con administración antes de volver a usarla.');
     else if(code.includes('CREDITO_BENEFICIO_DESACTIVADO'))toast('El beneficio de crédito está desactivado para tu cuenta Mayorista.');
     else if(code.includes('CREDITO_NO_ASIGNADO')||code.includes('CREDITO_NO_DISPONIBLE'))toast('La línea de crédito no está disponible para esta cuenta.');
-    else if(code.includes('STOCK_INSUFICIENTE'))showStockIssues(err);
+    else if(code.includes('STOCK_INSUFICIENTE')){if(!whAllowNoStockSales())showStockIssues(err);else toast('Actualizando disponibilidad… intenta nuevamente.');}
     else if(code.includes('PRECIO_MAYORISTA_NO_AUTORIZADO')||code.includes('LISTA_PRECIO_NO_DISPONIBLE'))toast('La lista de precios mayorista cambió. Actualiza el portal e intenta nuevamente.');
     else if(code.includes('PRODUCTO_TAMANO_REQUERIDO'))toast('Uno de los tamaños ya no está disponible. Actualiza el pedido.');
     else {
