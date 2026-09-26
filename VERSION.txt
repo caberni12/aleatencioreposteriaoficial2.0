@@ -1,2 +1,2 @@
-R9.18.154
-Switch global único de stock · elimina selector oculto por producto · Web + Mayorista
+R9.18.155
+Editor Web: Políticas + Misión + Visión + Valores · Importación DTE desde Pedidos para certificación SII

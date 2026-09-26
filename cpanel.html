@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="./styles.css?v=R9.18.154"><link rel="stylesheet" href="./cpanel.css?v=R9.18.154">
+  <link rel="stylesheet" href="./styles.css?v=R9.18.155"><link rel="stylesheet" href="./cpanel.css?v=R9.18.155">
   <style id="ale-production-css-fallback-r918151">
 /* R9.18.152: fallback embebido para GitHub Pages/Cloudflare. Mantener también archivos CSS externos. */
 :root{
@@ -7400,6 +7400,7 @@ body > #requestClientEditor:not(.hidden) .editor-actions{
           <button data-view="products"><i class="bi bi-cake2"></i> Productos</button>
           <button data-view="categories"><i class="bi bi-tags"></i> Categorías</button>
           <button data-view="banners"><i class="bi bi-images"></i> Carrusel</button>
+          <button data-view="web-content"><i class="bi bi-file-richtext"></i> Políticas · Misión · Visión</button>
           <button data-view="gallery"><i class="bi bi-camera"></i> Galería</button>
         </div>
       </details>
@@ -7619,9 +7620,29 @@ body > #requestClientEditor:not(.hidden) .editor-actions{
       </div>
     </section>
 
+    <section class="admin-view" id="view-web-content">
+      <div class="admin-card web-content-admin">
+        <div class="card-head"><div><span class="eyebrow">Contenido de la Web</span><h2>Políticas · Misión · Visión · Valores</h2><p class="module-help">Edita directamente los textos públicos de la página web. Los cambios se guardan en Supabase y se muestran en la Web sin modificar código.</p></div><button class="btn btn-primary" id="saveWebContent" type="button"><i class="bi bi-floppy"></i> Guardar contenido</button></div>
+        <div class="web-content-grid">
+          <article class="web-content-block"><div class="web-content-block-head"><i class="bi bi-shield-check"></i><div><strong>Políticas</strong><small>Tarjetas visibles en la sección Políticas.</small></div></div><div class="form-grid">
+            <label class="field-group"><span>Título · Privacidad</span><input id="wcPolicyPrivacyTitle" maxlength="120"></label><label class="field-group"><span>Título · Pedidos personalizados</span><input id="wcPolicyCustomTitle" maxlength="120"></label>
+            <label class="field-group"><span>Texto · Privacidad</span><textarea id="wcPolicyPrivacyText" rows="5" maxlength="3000"></textarea></label><label class="field-group"><span>Texto · Pedidos personalizados</span><textarea id="wcPolicyCustomText" rows="5" maxlength="3000"></textarea></label>
+            <label class="field-group"><span>Título · Despacho y retiro</span><input id="wcPolicyDeliveryTitle" maxlength="120"></label><label class="field-group"><span>Título · Cambios</span><input id="wcPolicyChangesTitle" maxlength="120"></label>
+            <label class="field-group"><span>Texto · Despacho y retiro</span><textarea id="wcPolicyDeliveryText" rows="5" maxlength="3000"></textarea></label><label class="field-group"><span>Texto · Cambios</span><textarea id="wcPolicyChangesText" rows="5" maxlength="3000"></textarea></label>
+          </div></article>
+          <article class="web-content-block"><div class="web-content-block-head"><i class="bi bi-stars"></i><div><strong>Identidad del negocio</strong><small>Misión, Visión y Valores de Ale Atencio.</small></div></div><div class="form-grid">
+            <label class="field-group"><span>Título · Misión</span><input id="wcMissionTitle" maxlength="120"></label><label class="field-group"><span>Título · Visión</span><input id="wcVisionTitle" maxlength="120"></label>
+            <label class="field-group"><span>Texto · Misión</span><textarea id="wcMissionText" rows="6" maxlength="3000"></textarea></label><label class="field-group"><span>Texto · Visión</span><textarea id="wcVisionText" rows="6" maxlength="3000"></textarea></label>
+            <label class="field-group span-2"><span>Título · Valores</span><input id="wcValuesTitle" maxlength="120"></label><label class="field-group span-2"><span>Valores</span><textarea id="wcValuesText" rows="7" maxlength="3000" placeholder="Ej: Calidad, dedicación, cercanía, creatividad..."></textarea><small>Puedes escribirlos en una o varias líneas.</small></label>
+          </div></article>
+        </div>
+        <div class="editor-actions"><button class="btn btn-primary" id="saveWebContentBottom" type="button"><i class="bi bi-floppy"></i> Guardar contenido</button></div>
+      </div>
+    </section>
+
     <section class="admin-view" id="view-orders">
       <div class="admin-card">
-        <div class="card-head"><div><span class="eyebrow">Ventas</span><h2>Pedidos</h2></div><button class="btn btn-primary" id="newOrder"><i class="bi bi-bag-plus"></i> Crear pedido</button></div>
+        <div class="card-head"><div><span class="eyebrow">Ventas</span><h2>Pedidos</h2></div><div class="card-head-actions"><button class="btn btn-light" id="orderDteImportOpen" type="button"><i class="bi bi-file-earmark-arrow-up"></i> Importar DTE</button><button class="btn btn-primary" id="newOrder"><i class="bi bi-bag-plus"></i> Crear pedido</button></div></div>
         <div class="module-filter-bar" data-filter-kind="orders">
           <div class="module-search-box"><i class="bi bi-search"></i><input id="ordersSearch" type="search" autocomplete="off" placeholder="Buscar en pedidos..."></div>
           <label class="module-select-filter"><span>Tipo de venta</span><select id="ordersSaleType" aria-label="Tipo de venta"><option value="">Todos</option><option value="MINORISTA">Minorista</option><option value="MAYORISTA">Mayorista</option></select></label>
@@ -8419,6 +8440,17 @@ Torta chocolate | 1 | 25000"></textarea></label>
     </div>
 
 
+    <div class="editor hidden sii-modal order-dte-import-modal" id="orderDteImportModal" role="dialog" aria-modal="true" aria-labelledby="orderDteImportTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Pedidos · Certificación SII</span><h3 id="orderDteImportTitle">Importar DTE al pedido</h3><small>Importa XML de Factura, Boleta, Nota de Crédito o Nota de Débito sin consumir un nuevo folio.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <div class="integration-note"><i class="bi bi-info-circle"></i><span>Tipos admitidos: <strong>33/34 Factura</strong>, <strong>39/41 Boleta</strong>, <strong>56 Nota de Débito</strong> y <strong>61 Nota de Crédito</strong>. El tipo y folio se leen directamente desde el XML.</span></div>
+      <div class="form-grid">
+        <label class="field-group span-2"><span>Pedido destino</span><select id="orderDteImportOrder"><option value="">Selecciona un pedido</option></select><small>El DTE quedará asociado al pedido y aparecerá en su columna DTE y trazabilidad.</small></label>
+        <div class="field-group file-field span-2" data-file-picker="xml"><span>Archivo XML del DTE / EnvioDTE</span><input id="orderDteImportFile" class="file-input" type="file" accept=".xml,text/xml,application/xml"><label class="file-picker-btn" for="orderDteImportFile"><i class="bi bi-file-earmark-code"></i><span class="file-picker-text">Seleccionar XML</span></label><small class="file-name">Sin archivo seleccionado</small></div>
+        <div class="order-dte-import-preview span-2" id="orderDteImportPreview"><i class="bi bi-receipt"></i><span>Selecciona el pedido y el XML. El sistema validará emisor, tipo, folio y receptor antes de guardar.</span></div>
+      </div>
+      <div class="editor-actions"><button class="btn btn-primary" id="orderDteImportConfirm" type="button"><i class="bi bi-cloud-arrow-up"></i> Importar DTE</button><button class="btn btn-light" type="button" data-sii-close>Cancelar</button></div>
+    </div>
+
     <div class="editor hidden sii-modal sii-exchange-modal" id="siiExchangeModal" role="dialog" aria-modal="true" aria-labelledby="siiExchangeModalTitle">
       <div class="editor-modal-head"><div><span class="eyebrow">Intercambio electrónico</span><h3 id="siiExchangeModalTitle">DTE recibidos de proveedores</h3><small>Importa EnvioDTE XML, registra la recepción y genera respuestas firmadas con el certificado activo.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
       <div class="integration-note"><i class="bi bi-shield-check"></i><span>El XML recibido se guarda cifrado en backend. Las respuestas se generan firmadas para intercambio/certificación. La recepción automática por correo queda habilitada al configurar el secreto servidor <strong>SII_DTE_INBOUND_SECRET</strong>.</span></div><div class="sii-issue-status span-2 warn" id="siiInboundStatus"><i class="bi bi-envelope-check"></i><span>Verificando recepción automática…</span></div>
@@ -8489,5 +8521,5 @@ Torta chocolate | 1 | 25000"></textarea></label>
 </div>
 <div class="notification-toast-stack" id="notificationToastStack" aria-live="polite"></div>
 <div class="toast" id="adminToast"></div>
-<script src="./config.js?v=R9.18.154"></script><script src="./api.js?v=R9.18.154"></script><script src="./sii-api.js?v=R9.18.154"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./cpanel.js?v=R9.18.154"></script>
+<script src="./config.js?v=R9.18.155"></script><script src="./api.js?v=R9.18.155"></script><script src="./sii-api.js?v=R9.18.155"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./cpanel.js?v=R9.18.155"></script>
 </body></html>

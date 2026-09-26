@@ -1,0 +1,20 @@
+ALE ATENCIO R9.18.155
+
+NOVEDADES
+1) Web y Catálogo > Políticas · Misión · Visión
+   - Permite editar Privacidad, Pedidos personalizados, Despacho y retiro y Cambios.
+   - Permite editar Misión, Visión y Valores.
+   - Se guarda en la tabla config de Supabase y aparece en la Web pública.
+
+2) Pedidos > Importar DTE
+   - Importa XML DTE 33, 34, 39, 41, 56 y 61.
+   - Asocia el documento a un pedido existente.
+   - No reserva ni consume un folio nuevo.
+   - Conserva detalle y referencias del XML.
+
+INSTALACIÓN
+A. Ejecutar: INSTALACION_SUPABASE/24_ALE_ATENCIO_SQL_R9_18_155_IMPORT_DTE_PEDIDOS.sql
+B. Desplegar: INSTALACION_SUPABASE_EDGE_FUNCTIONS/dynamic-processor/index.ts
+C. Desplegar: INSTALACION_SUPABASE_EDGE_FUNCTIONS/facturacion-sii/index.ts
+D. Subir/reemplazar los archivos Web/cPanel del ZIP.
+E. Recargar con Ctrl+F5 y, si corresponde, purgar caché de Cloudflare.

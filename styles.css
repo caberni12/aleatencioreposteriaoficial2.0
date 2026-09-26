@@ -3074,3 +3074,6 @@ body.product-modal-open{overflow:hidden!important}
     transform:translateY(0) !important;
   }
 }
+
+/* R9.18.155 · Misión, visión y valores */
+.about-principles{margin-top:-24px}.about-principles .policy-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.about-principles .policy-card{min-height:190px}.about-principles .values-card{grid-column:auto}.policy-card p{white-space:normal}@media(max-width:900px){.about-principles .policy-grid{grid-template-columns:1fr}}
