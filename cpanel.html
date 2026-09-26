@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="./styles.css?v=R9.18.150"><link rel="stylesheet" href="./cpanel.css?v=R9.18.150">
-  <style id="ale-production-css-fallback-r918150">
-/* R9.18.150: fallback embebido para GitHub Pages/Cloudflare. Mantener también archivos CSS externos. */
+  <link rel="stylesheet" href="./styles.css?v=R9.18.151"><link rel="stylesheet" href="./cpanel.css?v=R9.18.151">
+  <style id="ale-production-css-fallback-r918151">
+/* R9.18.151: fallback embebido para GitHub Pages/Cloudflare. Mantener también archivos CSS externos. */
 :root{
   --cream:#fffaf7; --paper:#fff; --ink:#402f29; --muted:#7f6b64; --line:#eaded8;
   --berry:#8d5060; --berry2:#b86f80; --blush:#f6e9ec; --gold:#c9a34f; --gold-soft:#f3e6bf;
@@ -7329,7 +7329,23 @@ body > #requestClientEditor:not(.hidden) .editor-actions{
 @media(max-width:980px){.dash-pro-brand{display:none}.dash-kpi-grid{grid-template-columns:repeat(2,1fr)}.dash-main-grid{grid-template-columns:1fr}.dash-column-right{grid-column:auto;grid-template-columns:1fr}.dash-map-panel{min-height:auto}.dash-map-layout{min-height:520px}.dash-filterbar{grid-template-columns:1fr 1fr}.dash-range-tabs{grid-column:1/-1;overflow:auto}.dash-refresh-btn{grid-column:auto}.dash-map-stage{min-height:500px}}
 @media(max-width:620px){.dash-filterbar{grid-template-columns:1fr}.dash-range-tabs,.dash-refresh-btn{grid-column:auto}.dash-range-tabs button{flex:1;padding:0 7px}.dash-kpi-grid{grid-template-columns:1fr 1fr}.dash-kpi{min-height:108px;padding:12px}.dash-kpi strong,.dash-kpi small,.dash-kpi em{margin-left:36px}.dash-kpi strong{font-size:16px}.dash-map-layout{grid-template-columns:1fr}.dash-map-side{display:grid;grid-template-columns:1fr 1fr}.dash-map-stage{min-height:520px}.dash-pro-hero h2{font-size:23px}}
 
-  </style>
+  
+/* R9.18.151 · Mapa Chile más fiel al mockup + switch global de venta sin stock */
+.dash-map-layout{grid-template-columns:minmax(330px,1fr) 150px;gap:12px}
+.dash-map-stage{min-height:590px;background:radial-gradient(circle at 30% 18%,rgba(255,255,255,.9),transparent 26%),linear-gradient(180deg,#eaf7fc 0%,#f5fafc 55%,#edf7fb 100%);border:1px solid #dcebf1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
+.dash-map-stage svg{inset:8px 4px 8px 8px;width:calc(100% - 12px);height:calc(100% - 16px)}
+.dash-region-shape{stroke:rgba(255,255,255,.98);stroke-width:2.4;vector-effect:non-scaling-stroke;filter:drop-shadow(0 1px 1px rgba(89,63,20,.08));transform-box:fill-box;transform-origin:center;transition:filter .18s ease,transform .18s ease,stroke .18s ease}
+.dash-region-shape:hover,.dash-region-shape.active{stroke:#7f5312;stroke-width:3.1;filter:brightness(.94) drop-shadow(0 5px 8px rgba(84,55,17,.23));transform:scale(1.035)}
+.dash-region-label{font-size:10.5px;fill:#647184;font-weight:500}
+.dash-region-label.active{fill:#7f5312;font-weight:800}
+.dash-map-coastline{fill:none;stroke:rgba(191,150,75,.38);stroke-width:1.2;vector-effect:non-scaling-stroke;pointer-events:none}
+.dash-map-island{stroke:#fff;stroke-width:1.5;vector-effect:non-scaling-stroke;cursor:pointer}
+.dash-map-side{gap:14px}.dash-map-legend,.dash-chile-total{border-color:#dfe8ec;box-shadow:0 10px 28px rgba(28,45,60,.05)}
+.no-stock-global-setting{border-color:#ead8b3;background:linear-gradient(135deg,#fffaf0,#fff)}
+.no-stock-global-setting .stock-visibility-copy strong:before{content:'∞';display:inline-grid;place-items:center;width:25px;height:25px;border-radius:50%;background:#f4e4bf;color:#9b6718;margin-right:8px;font-size:16px}
+@media(max-width:1150px){.dash-map-layout{grid-template-columns:1fr}.dash-map-side{display:grid;grid-template-columns:1fr 1fr}.dash-chile-total{margin-top:0}}
+@media(max-width:720px){.dash-map-stage{min-height:520px}.dash-map-layout{grid-template-columns:1fr}.dash-map-side{grid-template-columns:1fr 1fr}.dash-region-label{font-size:9px}}
+</style>
 
 
   <style id="sidebar-critical-r918130">
@@ -7500,7 +7516,7 @@ body > #requestClientEditor:not(.hidden) .editor-actions{
             <div class="dash-panel-head"><div><span class="eyebrow">Geografía</span><h3>Mapa de Chile por Región</h3><p>Haz clic en una región para filtrar y ver el detalle de ventas.</p></div><button class="dash-link-btn" id="dashClearRegion" type="button">Ver todo Chile</button></div>
             <div class="dash-map-layout">
               <div class="dash-map-stage">
-                <svg id="dashChileMap" viewBox="0 0 320 820" role="img" aria-label="Mapa interactivo de Chile por regiones"></svg>
+                <svg id="dashChileMap" viewBox="0 0 360 820" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa interactivo de Chile por regiones"></svg>
                 <div class="dash-map-tooltip hidden" id="dashMapTooltip"></div>
               </div>
               <div class="dash-map-side">
@@ -8448,6 +8464,7 @@ Torta chocolate | 1 | 25000"></textarea></label>
           <label class="field-group"><span>Validez cotización (días)</span><input id="sQuoteValidity" type="number" min="1" max="365" placeholder="15"></label>
           <label class="field-group"><span>Formato de documentos</span><select id="sDocumentFormat"><option value="A4">A4</option><option value="TICKET_80">Ticket térmico · 80 mm de ancho</option><option value="TICKET_100">Ticket térmico · 100 mm de ancho</option></select><small>80/100 mm usan ancho fijo y largo automático según el contenido.</small></label>
           <label class="stock-visibility-setting span-2" for="sShowStockClients"><span class="stock-visibility-copy"><strong>Mostrar stock a clientes</strong><small id="sShowStockClientsHint">FALSE: el stock queda oculto en la Web; el cliente ve producto, tamaño y precio.</small></span><span class="stock-policy-switch stock-visibility-switch"><input id="sShowStockClients" type="checkbox" aria-describedby="sShowStockClientsHint"><span class="stock-policy-slider" aria-hidden="true"></span></span><span class="stock-visibility-value is-false" id="sShowStockClientsValue">FALSE</span></label>
+          <label class="stock-visibility-setting span-2 no-stock-global-setting" for="sAllowNoStockSales"><span class="stock-visibility-copy"><strong>Permitir comprar sin stock · Web + Mayorista</strong><small id="sAllowNoStockSalesHint">FALSE: se respetará el stock disponible y se bloqueará una compra cuando no existan unidades suficientes.</small></span><span class="stock-policy-switch stock-visibility-switch"><input id="sAllowNoStockSales" type="checkbox" aria-describedby="sAllowNoStockSalesHint"><span class="stock-policy-slider" aria-hidden="true"></span></span><span class="stock-visibility-value is-false" id="sAllowNoStockSalesValue">FALSE</span></label>
           <div class="span-2 form-help">Guarda aquí tus enlaces reales. La web mostrará únicamente WhatsApp y las redes sociales configuradas.</div>
           <div class="field-group file-field span-2" data-file-picker="image"><span>Logo del negocio · también se usa en los DTE</span><input id="sLogo" class="file-input" type="file" accept="image/*"><label class="file-picker-btn" for="sLogo"><i class="bi bi-image"></i><span class="file-picker-text">Seleccionar logo</span></label><small class="file-name">Sin archivo seleccionado</small></div>
         </div>
@@ -8473,5 +8490,5 @@ Torta chocolate | 1 | 25000"></textarea></label>
 </div>
 <div class="notification-toast-stack" id="notificationToastStack" aria-live="polite"></div>
 <div class="toast" id="adminToast"></div>
-<script src="./config.js?v=R9.18.150"></script><script src="./api.js?v=R9.18.150"></script><script src="./sii-api.js?v=R9.18.150"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./cpanel.js?v=R9.18.150"></script>
+<script src="./config.js?v=R9.18.151"></script><script src="./api.js?v=R9.18.151"></script><script src="./sii-api.js?v=R9.18.151"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./cpanel.js?v=R9.18.151"></script>
 </body></html>

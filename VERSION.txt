@@ -1,1 +1,2 @@
-ALE ATENCIO R9.18.150 - FIX ESTILOS PRODUCCION GITHUB PAGES/CLOUDFLARE
+R9.18.151
+Dashboard Chile refinado + switch global venta sin stock Web/Mayorista

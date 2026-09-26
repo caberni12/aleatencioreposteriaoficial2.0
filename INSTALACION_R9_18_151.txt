@@ -1,0 +1,10 @@
+ALE ATENCIÓN R9.18.151
+
+1. Subir los archivos Web/cPanel de este ZIP a GitHub Pages reemplazando los anteriores.
+2. Ejecutar en Supabase SQL Editor: INSTALACION_SUPABASE/21_ALE_ATENCIO_SQL_R9_18_151_VENTA_SIN_STOCK_GLOBAL.sql
+3. Desplegar INSTALACION_SUPABASE_EDGE_FUNCTIONS/dynamic-processor/index.ts
+4. En cPanel > Configuración usar el switch “Permitir comprar sin stock · Web + Mayorista”.
+   - TRUE: ambos catálogos permiten comprar aunque no exista stock y no muestran avisos de stock insuficiente. El inventario puede quedar negativo y mantiene trazabilidad.
+   - FALSE: se respetan las existencias.
+5. El mapa de Chile del Dashboard fue rediseñado con una silueta más orgánica, regiones clickeables, hover, leyenda y filtros.
+6. Se conserva el logo existente de ALE ATENCIÓN.

@@ -90,7 +90,8 @@ function cartLinePrice(i,p){const z=cartLineSize(p,i);return Number(z?.precio??i
 function cartLineKey(id,sizeId=""){return `${String(id)}::${String(sizeId||"")}`}
 
 function showStockToClients(){return ["SI","SÍ","TRUE","1","YES","ON"].includes(String(state?.config?.mostrar_stock_clientes||"").trim().toUpperCase())}
-function productAllowsNegativeStock(p){const v=p?.permite_stock_negativo;if(v===undefined||v===null||String(v).trim()==="")return true;return v===true||["SI","SÍ","TRUE","1","YES","ON"].includes(String(v).trim().toUpperCase())}
+function globalSalesWithoutStock(){return ["SI","SÍ","TRUE","1","YES","ON"].includes(String(state?.config?.permitir_venta_sin_stock||"").trim().toUpperCase())}
+function productAllowsNegativeStock(p){if(globalSalesWithoutStock())return true;const v=p?.permite_stock_negativo;if(v===undefined||v===null||String(v).trim()==="")return true;return v===true||["SI","SÍ","TRUE","1","YES","ON"].includes(String(v).trim().toUpperCase())}
 function productGlobalStock(p){const sizes=productSizes(p);if(sizes.length)return sizes.reduce((sum,z)=>{const n=Number(z?.stock);return sum+(Number.isFinite(n)?n:0)},0);const n=Number(p?.stock);return Number.isFinite(n)?n:0}
 
 function heroView(){
@@ -775,6 +776,7 @@ function friendlyOrderCreateError(err){
   const raw=AleAPI?.errorText ? AleAPI.errorText(err?.message||err?.payload?.error||err) : String(err?.message||err||"ERROR_SERVIDOR");
   const code=String(raw||"ERROR_SERVIDOR").toUpperCase();
   if(code.includes("STOCK_INSUFICIENTE")){
+    if(globalSalesWithoutStock()) return "No fue posible completar el pedido en este intento. Reintenta nuevamente.";
     const detail=String(err?.detail||err?.payload?.error_detail||"").trim();
     if(detail){try{const rows=JSON.parse(detail);if(Array.isArray(rows)&&rows.length){const r=rows[0],extra=rows.length>1?` Además hay ${rows.length-1} producto(s) con el mismo problema.`:"";return `Stock insuficiente: ${r.producto_nombre||"Producto"}${r.tamano_nombre?` · ${r.tamano_nombre}`:""}. Disponible: ${Number(r.disponible||0)} · Solicitado: ${Number(r.solicitado||0)}.${extra}`}}catch(_){}}
     return "Stock insuficiente para uno de los productos o tamaños seleccionados.";

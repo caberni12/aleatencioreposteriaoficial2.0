@@ -45,6 +45,7 @@ function populateCatalogFilters(){const sel=$('#whCategory'),cur=sel.value,cats=
 function populateOrderFilters(){for(const [id,key] of [['#whOrderStatus','estado'],['#whOrderPaymentStatus','estado_pago']]){const sel=$(id),cur=sel.value,vals=[...new Set((state.orders||[]).map(o=>String(o[key]||'').trim()).filter(Boolean))].sort();sel.innerHTML='<option value="">Todos</option>'+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(vals.includes(cur))sel.value=cur}}
 
 function whShowStockToClients(){return ["SI","SÍ","TRUE","1","YES","ON"].includes(String(state?.config?.mostrar_stock_clientes||"").trim().toUpperCase())}
+function whAllowNoStockSales(){return ["SI","SÍ","TRUE","1","YES","ON"].includes(String(state?.config?.permitir_venta_sin_stock||"").trim().toUpperCase())}
 function whProductById(id){return (state.products||[]).find(x=>String(x.id)===String(id))||null}
 function whGlobalStock(p){const sizes=whProductSizes(p);if(sizes.length)return sizes.reduce((sum,z)=>{const n=Number(z?.stock);return sum+(Number.isFinite(n)?n:0)},0);const n=Number(p?.stock);return Number.isFinite(n)?n:0}
 function whProductSizes(p){return Array.isArray(p?.tamanos)?p.tamanos.filter(z=>Number(z?.precio||0)>0):[]}
@@ -183,6 +184,7 @@ function stockIssuesFromError(err){
   return [];
 }
 function showStockIssues(err){
+  if(whAllowNoStockSales()){stockIssues.clear();renderCart();return false}
   const rows=stockIssuesFromError(err);stockIssues.clear();
   for(const r of rows){const key=`${String(r.producto_id||'')}|${String(r.tamano_id||'')}`;if(key!=='|')stockIssues.set(key,r)}
   renderCart();
@@ -193,7 +195,7 @@ function showStockIssues(err){
   }
   toast('Stock insuficiente para uno de los productos o tamaños.');return false;
 }
-function renderCart(){const count=cart.reduce((a,x)=>a+x.cantidad,0),total=cart.reduce((a,x)=>a+x.precio*x.cantidad,0);$('#whCartCount').textContent=count;$('#whCartTotal').textContent=money(total);$('#whCartItems').innerHTML=cart.map(x=>{const issue=stockIssues.get(x.key);return `<div class="cart-line ${issue?'stock-problem':''}" data-key="${esc(x.key)}"><div><strong>${esc(x.nombre)}</strong><small>${esc(x.tamano_nombre)} · ${money(x.precio)}</small>${issue?`<div class="stock-problem-note"><i class="bi bi-exclamation-triangle-fill"></i><span>Stock insuficiente · Disponible: <b>${Number(issue.disponible||0)}</b> · Solicitado: <b>${Number(issue.solicitado||x.cantidad)}</b></span></div>`:''}</div><div><input type="number" min="1" max="999" value="${x.cantidad}"><button data-remove><i class="bi bi-trash"></i></button></div></div>`}).join('')||'<p>Tu carrito está vacío.</p>';renderCreditPaymentOption()}
+function renderCart(){if(whAllowNoStockSales())stockIssues.clear();const count=cart.reduce((a,x)=>a+x.cantidad,0),total=cart.reduce((a,x)=>a+x.precio*x.cantidad,0);$('#whCartCount').textContent=count;$('#whCartTotal').textContent=money(total);$('#whCartItems').innerHTML=cart.map(x=>{const issue=stockIssues.get(x.key);return `<div class="cart-line ${issue?'stock-problem':''}" data-key="${esc(x.key)}"><div><strong>${esc(x.nombre)}</strong><small>${esc(x.tamano_nombre)} · ${money(x.precio)}</small>${issue?`<div class="stock-problem-note"><i class="bi bi-exclamation-triangle-fill"></i><span>Stock insuficiente · Disponible: <b>${Number(issue.disponible||0)}</b> · Solicitado: <b>${Number(issue.solicitado||x.cantidad)}</b></span></div>`:''}</div><div><input type="number" min="1" max="999" value="${x.cantidad}"><button data-remove><i class="bi bi-trash"></i></button></div></div>`}).join('')||'<p>Tu carrito está vacío.</p>';renderCreditPaymentOption()}
 $('#whCartItems').onchange=e=>{const line=e.target.closest('.cart-line');if(!line||e.target.tagName!=='INPUT')return;const x=cart.find(v=>v.key===line.dataset.key);if(x)x.cantidad=Math.max(1,Number(e.target.value)||1);stockIssues.delete(line.dataset.key);renderCart()};$('#whCartItems').onclick=e=>{const line=e.target.closest('.cart-line');if(line&&e.target.closest('[data-remove]')){stockIssues.delete(line.dataset.key);cart=cart.filter(v=>v.key!==line.dataset.key);renderCart()}};function openCart(){$('#whCart').classList.add('open');$('#whOverlay').classList.add('open')}function closeCart(){$('#whCart').classList.remove('open');$('#whOverlay').classList.remove('open')}$('#whCartBtn').onclick=openCart;$('#whCartClose').onclick=closeCart;$('#whOverlay').onclick=closeCart;
 
 ['#whSearch','#whCategory','#whCatalogFrom','#whCatalogTo'].forEach(id=>$(id).addEventListener(id.includes('Search')?'input':'change',renderProducts));['#whOrderSearch','#whOrderStatus','#whOrderPaymentStatus','#whOrderFrom','#whOrderTo'].forEach(id=>$(id).addEventListener(id.includes('Search')?'input':'change',renderOrders));
