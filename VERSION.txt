@@ -1,2 +1,2 @@
-ALE ATENCIO R9.18.156
-Importación DTE a Pedidos con XML + PDF opcional.
+ALE ATENCIO R9.18.157
+Importación DTE XML + PDF visible

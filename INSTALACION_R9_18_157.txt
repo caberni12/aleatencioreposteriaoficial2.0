@@ -1,0 +1,14 @@
+ALE ATENCIO R9.18.157 · IMPORTACION DTE XML + PDF VISIBLE
+
+CAMBIO PRINCIPAL
+- En Pedidos el botón ahora dice “Importar DTE XML / PDF”.
+- Dentro del modal se muestra de forma destacada un selector independiente “Seleccionar PDF del DTE”.
+- XML sigue siendo obligatorio para registrar/validar el DTE tributario.
+- PDF es opcional y se guarda asociado al mismo DTE/pedido.
+- Se fuerza versión R9.18.157 en los recursos del cPanel para evitar que GitHub/Cloudflare sirvan el HTML/JS anterior desde caché.
+
+SUBIR A GITHUB/HOSTING
+- cpanel.html
+- cpanel.js
+
+No requiere SQL nuevo ni cambios de TS respecto de R9.18.156.
