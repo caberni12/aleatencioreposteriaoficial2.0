@@ -1,0 +1,29 @@
+ALE ATENCIO R9.18.160 · INSUMOS + COSTEO DE RECETAS
+
+CAMBIOS
+- Modal de Insumos convertido en modal real, centrado, con scroll y diseño responsivo.
+- Base de insumos editable: nombre, unidad, stock, stock mínimo, costo unitario vigente y estado.
+- Vista previa inmediata del nombre, unidad y costo mientras se edita el insumo.
+- Productos ahora muestran un botón “Configurar ingredientes”.
+- Nuevo modal independiente de Ingredientes / Costeo dentro del módulo Productos.
+- Cada ingrediente muestra: insumo, cantidad utilizada, unidad, costo unitario vigente y costo utilizado.
+- Cálculo automático del costo total de elaboración del producto.
+- Si cambia el costo de un insumo, el costo actual de las recetas se recalcula con el nuevo valor.
+- Los costos históricos de compras continúan guardados en compra_items y no se sobrescriben.
+- El listado “Costo estimado por producto” ahora recalcula usando los costos vigentes de los insumos.
+- Ingreso de mercadería también se muestra como modal real para evitar estilos rotos o contenido fuera de pantalla.
+- SQL R9.18.160 agrega vistas seguras de costo actual por ingrediente/producto y función de consulta.
+
+INSTALACION
+1. Reemplazar los archivos Web/cPanel por los incluidos en este ZIP.
+2. Ejecutar en Supabase SQL Editor:
+   INSTALACION_SUPABASE/25_ALE_ATENCIO_SQL_R9_18_160_COSTOS_INSUMOS_RECETAS.sql
+3. Desplegar la Edge Function incluida:
+   INSTALACION_SUPABASE_EDGE_FUNCTIONS/dynamic-processor/index.ts
+4. No modificar los secretos existentes.
+5. Publicar y purgar caché de Cloudflare una vez; luego usar Ctrl+F5.
+
+USO
+- cPanel > Insumos / Costos > Nuevo insumo: registrar huevo, harina, mantequilla, queso, chocolate, etc. con su costo real por unidad de control.
+- cPanel > Productos > Editar producto > Configurar ingredientes: seleccionar insumo y cantidad utilizada.
+- El sistema calcula automáticamente el costo utilizado por línea y el costo total del producto.
