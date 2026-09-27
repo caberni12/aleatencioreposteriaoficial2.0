@@ -1,1 +1,2 @@
-ALE ATENCIO R9.18.158
+R9.18.159
+Optimización de imágenes + valores visibles en gráfico de tráfico

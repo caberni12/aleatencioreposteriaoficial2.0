@@ -20,6 +20,12 @@ const mediaUrl = value => {
   const sep=u.includes("?")?"&":"?";
   return `${u}${sep}v=${MEDIA_VERSION}`;
 };
+function warmImageCache(){
+  const urls=[];
+  for(const b of (state?.banners||[]).slice(0,2))if(b?.image_url)urls.push(mediaUrl(b.image_url));
+  for(const p of (state?.products||[]).filter(x=>x?.image_url).slice(0,6))urls.push(mediaUrl(p.image_url));
+  [...new Set(urls)].forEach((src,i)=>{const im=new Image();im.decoding='async';im.fetchPriority=i===0?'high':'low';im.src=src});
+}
 const publicBaseUrl=()=>{
   const candidates=[state?.config?.web_public_url,state?.config?.transbank_checkout_url,window.ALE_ATENCIO_CONFIG?.PUBLIC_BASE_URL,`${location.origin}${location.pathname}`];
   for(const raw of candidates){try{const u=new URL(String(raw||""),location.href),host=u.hostname.toLowerCase();if(u.protocol!=="https:"||host==="supabase.co"||host.endsWith(".supabase.co"))continue;u.search="";u.hash="";return u.toString()}catch(_){}}
@@ -119,7 +125,7 @@ function heroView(){
 
 function categoryCard(c,i){
   return `<a class="category-card" href="#productos/${slug(c.nombre)}">
-    ${c.image_url?`<img src="${esc(mediaUrl(c.image_url))}" alt="${esc(c.nombre)}">`:`<div style="position:absolute;inset:0;display:grid;place-items:center;font-size:92px">${categoryFallback(i)}</div>`}
+    ${c.image_url?`<img src="${esc(mediaUrl(c.image_url))}" alt="${esc(c.nombre)}" loading="lazy" decoding="async">`:`<div style="position:absolute;inset:0;display:grid;place-items:center;font-size:92px">${categoryFallback(i)}</div>`}
     <div class="category-copy"><h3>${esc(c.nombre)}</h3><span>${esc(c.descripcion||"")}</span></div>
   </a>`;
 }
@@ -131,7 +137,7 @@ function productCard(p){
   const sizeMeta=sizes.length?`${sizes.length} ${sizes.length===1?"tamaño":"tamaños"}`:"Presentación única";
   return `<article class="product-card product-card-compact" data-product-id="${esc(p.id)}" role="button" tabindex="0" aria-label="Ver ${esc(p.nombre)}" onclick="openProductDetail('${esc(p.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProductDetail('${esc(p.id)}')}">
     <div class="product-image">
-      ${p.image_url?`<img src="${esc(mediaUrl(p.image_url))}" alt="${esc(p.nombre)}" loading="lazy">`:`<span>${productFallback(p)}</span>`}
+      ${p.image_url?`<img src="${esc(mediaUrl(p.image_url))}" alt="${esc(p.nombre)}" loading="lazy" decoding="async">`:`<span>${productFallback(p)}</span>`}
       ${String(p.destacado).toUpperCase()==="SI"?'<span class="product-badge">Destacado</span>':""}
     </div>
     <div class="product-body">
@@ -157,7 +163,7 @@ function renderProductDetail(){
   const sizeOptions=sizes.length?`<div class="product-detail-section"><div class="product-detail-section-head"><div><div class="product-detail-label">Tamaño ${esc((p.nombre||"").toLowerCase())}</div><div class="product-detail-hint">Selecciona al menos 1</div></div><span class="product-detail-required">Obligatorio</span></div><div class="product-detail-sizes">${sizes.map(z=>`<button type="button" class="product-detail-size ${String(z.id)===String(selected?.id)?"active":""}" onclick="selectProductDetailSize('${esc(z.id)}')"><span class="product-detail-size-copy"><span class="product-detail-size-name">${esc(z.nombre)}</span><small>${productDetailMoney(z.precio)}</small></span><span class="product-detail-size-check" aria-hidden="true"></span></button>`).join("")}</div></div>`:"";
   host.innerHTML=`
     <div class="product-detail-layout">
-      <div class="product-detail-media">${p.image_url?`<img src="${esc(mediaUrl(p.image_url))}" alt="${esc(p.nombre)}">`:`<span>${productFallback(p)}</span>`}</div>
+      <div class="product-detail-media">${p.image_url?`<img src="${esc(mediaUrl(p.image_url))}" alt="${esc(p.nombre)}" loading="lazy" decoding="async">`:`<span>${productFallback(p)}</span>`}</div>
       <div class="product-detail-side">
         <div class="product-detail-side-scroll">
           <small>${esc(p.categoria_nombre||p.categoria||"")}</small>
@@ -244,7 +250,7 @@ function delicaciesSection(){
       <div class="delicacies-grid">
         ${cards.map((c,i)=>`<article class="delicacy-card">
           <a class="delicacy-media" href="#productos/${c.filter}" aria-label="Ver ${esc(c.title)}">
-            ${c.product?.image_url?`<img src="${esc(mediaUrl(c.product.image_url))}" alt="${esc(c.title)}" loading="lazy">`:`<div class="delicacy-fallback">${categoryFallback(i)}</div>`}
+            ${c.product?.image_url?`<img src="${esc(mediaUrl(c.product.image_url))}" alt="${esc(c.title)}" loading="lazy" decoding="async">`:`<div class="delicacy-fallback">${categoryFallback(i)}</div>`}
           </a>
           <div class="delicacy-body">
             <h3>${esc(c.title)}</h3>
@@ -258,9 +264,9 @@ function delicaciesSection(){
 
 function galleryView(){
   const items=(state.gallery||[]).filter(x=>String(x.activo??"SI").toUpperCase()!=="NO"&&String(x.visible_publico??"SI").toUpperCase()!=="NO");
-  return `<section class="view-hero"><div class="view-hero-inner"><span class="eyebrow">Galería</span><h1>Trabajos y celebraciones</h1><p>Una selección de preparaciones y eventos realizados por Ale Atencio.</p></div></section><section class="section"><div class="public-gallery-grid">${items.length?items.map(x=>`<article class="public-gallery-card"><img src="${esc(mediaUrl(x.image_url||""))}" alt="${esc(x.titulo||"Trabajo Ale Atencio")}" loading="lazy"><div><small>${esc(x.categoria||"Ale Atencio")}</small><h3>${esc(x.titulo||"")}</h3>${x.descripcion?`<p>${esc(x.descripcion)}</p>`:""}</div></article>`).join(""):'<div class="empty-card">Pronto publicaremos nuevos trabajos.</div>'}</div></section>${footer()}`;
+  return `<section class="view-hero"><div class="view-hero-inner"><span class="eyebrow">Galería</span><h1>Trabajos y celebraciones</h1><p>Una selección de preparaciones y eventos realizados por Ale Atencio.</p></div></section><section class="section"><div class="public-gallery-grid">${items.length?items.map(x=>`<article class="public-gallery-card"><img src="${esc(mediaUrl(x.image_url||""))}" alt="${esc(x.titulo||"Trabajo Ale Atencio")}" loading="lazy" decoding="async"><div><small>${esc(x.categoria||"Ale Atencio")}</small><h3>${esc(x.titulo||"")}</h3>${x.descripcion?`<p>${esc(x.descripcion)}</p>`:""}</div></article>`).join(""):'<div class="empty-card">Pronto publicaremos nuevos trabajos.</div>'}</div></section>${footer()}`;
 }
-function galleryHomeSection(){const items=(state.gallery||[]).filter(x=>String(x.activo??"SI").toUpperCase()!=="NO"&&String(x.visible_publico??"SI").toUpperCase()!=="NO"&&x.image_url).slice(0,6);if(!items.length)return"";return `<section class="section"><div class="section-head compact-head"><div><span class="eyebrow">Galería</span><h2>Trabajos realizados</h2></div><a class="editorial-link" href="#galeria">Ver galería</a></div><div class="public-gallery-grid public-gallery-preview">${items.map(x=>`<a class="public-gallery-card" href="#galeria"><img src="${esc(mediaUrl(x.image_url))}" alt="${esc(x.titulo||"Ale Atencio")}" loading="lazy"><div><small>${esc(x.categoria||"Ale Atencio")}</small><h3>${esc(x.titulo||"")}</h3></div></a>`).join("")}</div></section>`}
+function galleryHomeSection(){const items=(state.gallery||[]).filter(x=>String(x.activo??"SI").toUpperCase()!=="NO"&&String(x.visible_publico??"SI").toUpperCase()!=="NO"&&x.image_url).slice(0,6);if(!items.length)return"";return `<section class="section"><div class="section-head compact-head"><div><span class="eyebrow">Galería</span><h2>Trabajos realizados</h2></div><a class="editorial-link" href="#galeria">Ver galería</a></div><div class="public-gallery-grid public-gallery-preview">${items.map(x=>`<a class="public-gallery-card" href="#galeria"><img src="${esc(mediaUrl(x.image_url))}" alt="${esc(x.titulo||"Ale Atencio")}" loading="lazy" decoding="async"><div><small>${esc(x.categoria||"Ale Atencio")}</small><h3>${esc(x.titulo||"")}</h3></div></a>`).join("")}</div></section>`}
 
 function homeView(){
   const cats = state.categories.slice().sort((a,b)=>Number(a.orden||0)-Number(b.orden||0));
@@ -272,7 +278,7 @@ function homeView(){
   const giftVisual = state.products.find(p=>slug(p.categoria_nombre||p.categoria)==="regalos") || state.products[0];
 
   const imgOrFallback = (p,cls="") => p && p.image_url
-    ? `<img class="${cls}" src="${esc(mediaUrl(p.image_url))}" alt="${esc(p.nombre||"Ale Atencio")}">`
+    ? `<img class="${cls}" src="${esc(mediaUrl(p.image_url))}" alt="${esc(p.nombre||"Ale Atencio")}" loading="lazy" decoding="async">`
     : `<div class="visual-fallback ${cls}">${p?productFallback(p):"🧁"}</div>`;
 
   return `${heroView()}
@@ -295,7 +301,7 @@ function homeView(){
       ${cats.slice(0,5).map((c,i)=>`
         <a class="category-visual-card category-size-${i+1}" href="#productos/${slug(c.nombre)}">
           ${c.image_url
-            ? `<img src="${esc(mediaUrl(c.image_url))}" alt="${esc(c.nombre)}">`
+            ? `<img src="${esc(mediaUrl(c.image_url))}" alt="${esc(c.nombre)}" loading="lazy" decoding="async">`
             : `<div class="category-visual-fallback">${categoryFallback(i)}</div>`}
           <div class="category-visual-overlay">
             <span>${esc(c.descripcion||"")}</span>
@@ -369,7 +375,7 @@ function homeView(){
     <div class="instagram-photo-grid">
       ${allVisual.map((p,i)=>`
         <a class="instagram-photo" href="${state.config.instagram?esc(state.config.instagram):"#productos/todos"}" ${state.config.instagram?'target="_blank" rel="noopener"':""}>
-          ${p.image_url?`<img src="${esc(mediaUrl(p.image_url))}" alt="${esc(p.nombre)}">`:`<div class="instagram-fallback">${productFallback(p)}</div>`}
+          ${p.image_url?`<img src="${esc(mediaUrl(p.image_url))}" alt="${esc(p.nombre)}" loading="lazy" decoding="async">`:`<div class="instagram-fallback">${productFallback(p)}</div>`}
           <span><i class="bi bi-instagram"></i></span>
         </a>`).join("")}
     </div>
@@ -621,7 +627,7 @@ function wireTracking(){const form=$("#trackingForm"),input=$("#trackingQuery"),
 function footer(){
   const c=state.config;
   return `<footer class="site-footer"><div class="footer-inner"><div class="footer-grid">
-    <div class="footer-brand-block"><img class="footer-logo" src="${esc(c.logo_url||"logo-ale-atencio.png")}" alt="Ale Atencio"><p>Tortas, galletas, postres y regalos preparados para tus momentos especiales.</p>${socialIcons()}</div>
+    <div class="footer-brand-block"><img class="footer-logo" src="${esc(c.logo_url||"logo-ale-atencio.png")}" alt="Ale Atencio" loading="lazy" decoding="async"><p>Tortas, galletas, postres y regalos preparados para tus momentos especiales.</p>${socialIcons()}</div>
     <div class="footer-shop-block"><div class="footer-title">Tienda</div><div class="footer-links"><a href="#inicio">Inicio</a><a href="#productos/tortas">Tortas</a><a href="#productos/galletas">Galletas</a><a href="#productos/postres">Postres</a><a href="#productos/regalos">Regalos</a></div></div>
     <div class="footer-help-block"><div class="footer-title">Ayuda</div><div class="footer-links"><a href="#seguimiento">Consulta tu pedido</a><a href="#solicitud">Solicitud</a><a href="#politicas">Políticas</a><a href="#politicas">Despachos</a><a href="#politicas">Cambios</a></div></div>
     <div class="footer-contact-block"><div class="footer-title">Contacto</div><div class="footer-links">${normalizePhone(c.whatsapp)?`<a href="#" onclick="openWhatsApp();return false">${esc(c.whatsapp)}</a>`:""}${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:""}${c.direccion?`<span>${esc(c.direccion)}</span>`:""}</div></div>
@@ -1150,3 +1156,5 @@ window.uploadTransferProofFromTracking=uploadTransferProofFromTracking;
   async function track(){if(!window.AleAPI?.configured?.())return;try{await window.AleAPI.postPublic("trackvisit",{event_type:"PAGE_VIEW",path:location.pathname+location.search,visitor_id:storageId("ale_web_visitor"),session_id:sessionStorage.getItem("ale_web_session")||(()=>{const v=crypto?.randomUUID?.()||String(Date.now());try{sessionStorage.setItem("ale_web_session",v)}catch(_){ }return v})(),referrer:document.referrer||"",device:deviceType(),title:document.title||""})}catch(_){/* La analítica nunca debe bloquear la tienda */}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(track,250),{once:true});else setTimeout(track,250);
 })();
+
+window.addEventListener('load',()=>{try{warmImageCache()}catch(_){}});

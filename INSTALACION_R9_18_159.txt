@@ -1,0 +1,18 @@
+ALE ATENCIO R9.18.159
+
+CAMBIOS
+- Optimización automática de nuevas imágenes antes de subirlas (WebP y reducción de dimensiones).
+- Cache-Control de 1 año para nuevas imágenes públicas subidas a Supabase Storage.
+- loading=lazy + decoding=async en catálogos Web y Mayorista.
+- precarga de primeras imágenes relevantes del catálogo.
+- Gráfico de tráfico/visitas ahora muestra cantidad de visitas sobre puntos representativos además de la fecha.
+- Tooltip conserva fecha + cantidad exacta.
+
+INSTALACION
+1. Reemplazar archivos Web/cPanel por los de este ZIP.
+2. Desplegar INSTALACION_SUPABASE_EDGE_FUNCTIONS/dynamic-processor/index.ts para cache largo en nuevas imágenes.
+3. No requiere SQL nuevo.
+4. Purga caché de Cloudflare y Ctrl+F5 una vez tras publicar.
+
+NOTA
+Las imágenes ya cargadas anteriormente no se recomprimen automáticamente. Las nuevas cargas sí quedan optimizadas. El cache y lazy loading mejoran también la navegación con imágenes existentes.
