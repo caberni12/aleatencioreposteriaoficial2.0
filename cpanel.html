@@ -5478,29 +5478,12 @@ body.client-editor-open{overflow:hidden}body.client-editor-open::before{content:
 
 /* R9.18.52 · Parametrización de tamaños por producto */
 .product-size-editor{border:1px solid #eaded8;border-radius:16px;background:#fffaf8;padding:14px!important}
-.product-size-editor-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.product-size-editor-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
 .product-size-editor-head>div{display:grid;gap:3px}
 .product-size-editor-head>div>span{font-weight:900;color:#4b352d}
 .product-size-editor-head small{color:#8c756b;line-height:1.35}
 .btn-compact{padding:8px 11px!important;font-size:11px!important;white-space:nowrap}
-.product-size-rows{display:grid;gap:9px}
-.product-size-row{display:grid;grid-template-columns:28px minmax(110px,1.2fr) minmax(105px,1fr) 90px 105px 34px;align-items:end;gap:8px;padding:9px;border:1px solid #eee2dc;border-radius:13px;background:#fff}
-.product-size-order{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#f3e9e4;color:#72564b;font-size:11px;font-weight:900;margin-bottom:8px}
-.product-size-row label{display:grid;gap:4px}
-.product-size-row label small{font-size:9px;text-transform:uppercase;letter-spacing:.06em;font-weight:900;color:#9b8176}
-.product-size-row input,.product-size-row select{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff}
-.product-size-remove{width:32px;height:36px;border:0;border-radius:10px;background:#fff0f1;color:#a13f53;font-size:20px;font-weight:900;cursor:pointer}
-.product-size-summary{display:flex;flex-wrap:wrap;gap:5px;max-width:330px}
-.product-size-summary span{display:inline-flex;gap:5px;align-items:center;padding:5px 8px;border-radius:999px;background:#f8f0ec;border:1px solid #eaded8;font-size:10px;white-space:nowrap}
-.product-size-summary b{color:#6e4c40}
-.muted{color:#9b8880;font-size:11px}
-.product-preview-sizes{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
-.product-preview-sizes span{padding:5px 8px;border-radius:999px;border:1px solid #e8dad4;background:#fff;font-size:9px;font-weight:900;color:#715349}
-.product-preview-sizes span.active{background:#533a32;color:#fff;border-color:#533a32}
-.product-preview-size-caption{margin-top:6px;color:#8d756b;font-size:10px}
-.product-preview-size-caption strong{color:#533a32}
-@media(max-width:1050px){.product-size-row{grid-template-columns:28px 1fr 1fr 90px}.product-size-active{grid-column:2/4}.product-size-remove{grid-column:4;grid-row:2}}
-@media(max-width:650px){.product-size-editor-head{align-items:flex-start;flex-direction:column}.product-size-row{grid-template-columns:26px 1fr}.product-size-row label,.product-size-active{grid-column:2}.product-size-remove{grid-column:2;grid-row:auto;justify-self:end}.product-size-order{grid-row:1/6;align-self:start}}
+.product-size-rows{display:grid;gap:10px;overflow:hidden}.product-size-row{display:grid;grid-template-columns:28px repeat(8,minmax(0,1fr)) 34px;align-items:end;gap:8px;padding:11px;border:1px solid #eee2dc;border-radius:16px;background:#fff;overflow:hidden}.product-size-row>*{min-width:0}.product-size-order{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#f3e9e4;color:#72564b;font-size:11px;font-weight:900;margin-bottom:8px}.product-size-row label{display:grid;gap:4px;min-width:0}.product-size-row label small{font-size:9px;text-transform:uppercase;letter-spacing:.06em;font-weight:900;color:#9b8176;line-height:1.15}.product-size-row input,.product-size-row select{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff}.product-size-remove{width:32px;height:36px;border:0;border-radius:10px;background:#fff0f1;color:#a13f53;font-size:20px;font-weight:900;cursor:pointer}.product-size-summary{display:flex;flex-wrap:wrap;gap:5px;max-width:330px}.product-size-summary span{display:inline-flex;gap:5px;align-items:center;padding:5px 8px;border-radius:999px;background:#f8f0ec;border:1px solid #eaded8;font-size:10px;white-space:nowrap}.product-size-summary b{color:#6e4c40}@media(max-width:1380px){.product-size-row{grid-template-columns:28px repeat(4,minmax(150px,1fr)) 34px}.product-size-remove{grid-column:6;justify-self:end}.product-size-row label:nth-of-type(1){grid-column:2}.product-size-row label:nth-of-type(2){grid-column:3}.product-size-row label:nth-of-type(3){grid-column:4}.product-size-row label:nth-of-type(4){grid-column:5}.product-size-row label:nth-of-type(5){grid-column:2}.product-size-row label:nth-of-type(6){grid-column:3}.product-size-row label:nth-of-type(7){grid-column:4}.product-size-row label:nth-of-type(8){grid-column:5}}@media(max-width:980px){.product-size-row{grid-template-columns:28px repeat(2,minmax(170px,1fr)) 34px}.product-size-remove{grid-column:4;grid-row:auto;justify-self:end}.product-size-row label:nth-of-type(1){grid-column:2}.product-size-row label:nth-of-type(2){grid-column:3}.product-size-row label:nth-of-type(3){grid-column:2}.product-size-row label:nth-of-type(4){grid-column:3}.product-size-row label:nth-of-type(5){grid-column:2}.product-size-row label:nth-of-type(6){grid-column:3}.product-size-row label:nth-of-type(7){grid-column:2}.product-size-row label:nth-of-type(8){grid-column:3}}@media(max-width:650px){.product-size-editor-head{align-items:flex-start;flex-direction:column}.product-size-row{grid-template-columns:26px 1fr;gap:10px}.product-size-row label,.product-size-active{grid-column:2!important}.product-size-remove{grid-column:2;grid-row:auto;justify-self:end}.product-size-order{grid-row:1/10;align-self:start}}
 
 /* R9.18.53 · Mayoristas y listas de precios */
 .wholesale-admin-shell .module-help{max-width:760px}.wholesale-kpis{margin-top:18px}.price-list-editor{max-width:1180px}.price-list-help{margin:14px 0;padding:12px 14px;border-radius:12px;background:#fff9eb;border:1px solid #ead9aa;color:#6a5530}.price-list-items{max-height:52vh;overflow:auto}.price-list-items input{min-width:130px;border:1px solid #ddd1bd;border-radius:10px;padding:9px 10px;background:#fff}.wholesale-document-form{margin:14px 0}.btn-compact{padding:7px 10px;font-size:12px}.wholesale-user-field.hidden{display:none!important}
