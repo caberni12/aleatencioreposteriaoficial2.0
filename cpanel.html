@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="./styles.css?v=R9.18.161"><link rel="stylesheet" href="./cpanel.css?v=R9.18.161">
+  <link rel="stylesheet" href="./styles.css?v=R9.18.162"><link rel="stylesheet" href="./cpanel.css?v=R9.18.162">
   <style id="ale-production-css-fallback-r918151">
 /* R9.18.152: fallback embebido para GitHub Pages/Cloudflare. Mantener también archivos CSS externos. */
 :root{
@@ -8186,13 +8186,46 @@ Torta chocolate | 1 | 25000"></textarea></label>
         <div class="editor-actions"><button class="btn btn-primary" id="applySupplyImport" type="button" disabled><i class="bi bi-database-up"></i> Actualizar / agregar insumos</button><button class="btn btn-light" id="cancelSupplyImport" type="button">Cancelar</button></div>
       </div>
       <div class="editor hidden operational-modal cost-variation-editor" id="costVariationEditor" role="dialog" aria-modal="true" aria-labelledby="costVariationTitle">
-        <div class="editor-modal-head"><div><span class="eyebrow">Estadísticas de costos</span><h3 id="costVariationTitle">Variaciones de costos</h3><small>Seguimiento por día, semana, mes o año con comparación contra el año anterior.</small></div><button type="button" class="editor-close-x" id="closeCostVariations" aria-label="Cerrar">×</button></div>
-        <div class="cost-variation-filters"><label class="field-group"><span>Insumo</span><select id="costVariationSupply"></select></label><label class="field-group"><span>Agrupar por</span><select id="costVariationPeriod"><option value="day">Día</option><option value="week">Semana</option><option value="month" selected>Mes</option><option value="year">Año</option></select></label></div>
-        <div class="kpi-grid cost-variation-kpis"><div class="kpi-card"><span>Costo actual</span><strong id="costVarCurrent">$0</strong></div><div class="kpi-card"><span>Variación período</span><strong id="costVarPrevious">0%</strong></div><div class="kpi-card"><span>Variación año anterior</span><strong id="costVarYear">0%</strong></div></div>
-        <div class="cost-variation-chart" id="costVariationChart"></div>
-        <div class="table-wrap" id="costVariationTable"></div>
-        <div class="supply-cost-note"><i class="bi bi-info-circle"></i><span>El historial comienza a registrarse desde la instalación de esta actualización. Cada cambio manual, XLSX o ingreso de mercadería queda guardado.</span></div>
-        <div class="editor-actions"><button class="btn btn-light" id="closeCostVariationsBottom" type="button">Cerrar</button></div>
+        <div class="editor-modal-head cost-variation-head">
+          <div class="cost-variation-heading">
+            <div class="cost-variation-heading-icon"><i class="bi bi-graph-up-arrow"></i></div>
+            <div><span class="eyebrow">Analítica de costos</span><h3 id="costVariationTitle">Variaciones de costos</h3><small>Historial, tendencia y comparación contra períodos anteriores.</small></div>
+          </div>
+          <button type="button" class="editor-close-x" id="closeCostVariations" aria-label="Cerrar">×</button>
+        </div>
+
+        <section class="cost-variation-filter-panel" aria-label="Filtros de análisis">
+          <div class="cost-filter-copy"><span class="cost-section-kicker">ANÁLISIS</span><strong>Selecciona qué insumo quieres revisar</strong><small>El gráfico y los indicadores se recalculan automáticamente.</small></div>
+          <div class="cost-variation-filters">
+            <label class="cost-filter-field"><span><i class="bi bi-basket2"></i> Insumo</span><div class="cost-filter-control"><select id="costVariationSupply"></select><i class="bi bi-chevron-down"></i></div></label>
+            <label class="cost-filter-field"><span><i class="bi bi-calendar3"></i> Agrupar por</span><div class="cost-filter-control"><select id="costVariationPeriod"><option value="day">Día</option><option value="week">Semana</option><option value="month" selected>Mes</option><option value="year">Año</option></select><i class="bi bi-chevron-down"></i></div></label>
+          </div>
+        </section>
+
+        <div class="cost-variation-kpis">
+          <article class="cost-kpi-card current"><span class="cost-kpi-icon"><i class="bi bi-cash-coin"></i></span><div><small>Costo actual</small><strong id="costVarCurrent">$0</strong><em id="costVarCurrentMeta">Valor vigente</em></div></article>
+          <article class="cost-kpi-card" id="costVarPreviousCard"><span class="cost-kpi-icon"><i class="bi bi-arrow-left-right"></i></span><div><small>Variación período</small><strong id="costVarPrevious">—</strong><em id="costVarPreviousMeta">Sin comparación</em></div></article>
+          <article class="cost-kpi-card" id="costVarYearCard"><span class="cost-kpi-icon"><i class="bi bi-calendar2-check"></i></span><div><small>Vs. año anterior</small><strong id="costVarYear">—</strong><em id="costVarYearMeta">Mismo período</em></div></article>
+          <article class="cost-kpi-card range"><span class="cost-kpi-icon"><i class="bi bi-arrows-collapse"></i></span><div><small>Rango observado</small><strong id="costVarRange">—</strong><em id="costVarSamples">0 períodos registrados</em></div></article>
+        </div>
+
+        <div class="cost-variation-insight" id="costVariationInsight">
+          <span class="cost-insight-icon"><i class="bi bi-activity"></i></span>
+          <div><small>Tendencia del insumo</small><strong id="costVarTrend">Selecciona un insumo para comenzar</strong></div>
+        </div>
+
+        <section class="cost-analytics-card cost-chart-card">
+          <div class="cost-analytics-head"><div><span class="cost-section-kicker">EVOLUCIÓN</span><h4 id="costVariationChartTitle">Costo histórico</h4><p>Últimos períodos con información registrada.</p></div><span class="cost-chart-legend"><i></i> Costo de cierre</span></div>
+          <div class="cost-variation-chart" id="costVariationChart"><div class="cost-empty-state"><i class="bi bi-graph-up"></i><strong>Selecciona un insumo</strong><span>Aquí verás su evolución de costos.</span></div></div>
+        </section>
+
+        <section class="cost-analytics-card cost-table-card">
+          <div class="cost-analytics-head"><div><span class="cost-section-kicker">COMPARATIVO</span><h4>Detalle por período</h4><p>Compara costo de cierre, período anterior y mismo período del año previo.</p></div></div>
+          <div class="table-wrap cost-variation-table-wrap" id="costVariationTable"></div>
+        </section>
+
+        <div class="supply-cost-note cost-history-note"><i class="bi bi-shield-check"></i><span>Los cambios manuales, importaciones XLSX e ingresos de mercadería quedan registrados para mantener trazabilidad histórica.</span></div>
+        <div class="editor-actions cost-variation-actions"><button class="btn btn-light" id="closeCostVariationsBottom" type="button"><i class="bi bi-x-lg"></i> Cerrar</button></div>
       </div>
       <div class="editor hidden operational-modal inventory-receipt-editor" id="inventoryReceiptEditor" role="dialog" aria-modal="true"><div class="editor-modal-head"><div><span class="eyebrow">Ingreso de mercadería</span><h3>Registrar compra</h3><small>Al guardar se incrementa el stock y se recalcula el costo promedio.</small></div><button type="button" class="editor-close-x" id="closeInventoryReceipt">×</button></div><div class="form-grid"><label>Proveedor<select id="receiptSupplier"><option value="">Sin proveedor</option></select></label><label>Fecha<input id="receiptDate" type="datetime-local"></label><label>Tipo documento<select id="receiptType"><option value="COMPRA">Compra</option><option value="FACTURA">Factura</option><option value="BOLETA">Boleta</option><option value="GUIA">Guía</option></select></label><label>N.º documento<input id="receiptDocument" placeholder="Folio / referencia"></label><label class="span-2">Observaciones<textarea id="receiptNotes"></textarea></label></div><div class="receipt-items-head"><strong>Detalle</strong><button class="btn btn-light btn-compact" id="addReceiptItem" type="button">+ Línea</button></div><div id="receiptItemsEditor" class="receipt-item-rows"></div><div class="receipt-total">Total compra: <strong id="receiptTotal">$0</strong></div><div class="editor-actions"><button class="btn btn-primary" id="saveInventoryReceipt" type="button">Registrar mercadería</button><button class="btn btn-light" id="cancelInventoryReceipt" type="button">Cancelar</button></div></div>
     </section>
@@ -8595,5 +8628,5 @@ Torta chocolate | 1 | 25000"></textarea></label>
 </div>
 <div class="notification-toast-stack" id="notificationToastStack" aria-live="polite"></div>
 <div class="toast" id="adminToast"></div>
-<script src="./config.js?v=R9.18.161"></script><script src="./api.js?v=R9.18.161"></script><script src="./sii-api.js?v=R9.18.161"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./cpanel.js?v=R9.18.161"></script>
+<script src="./config.js?v=R9.18.162"></script><script src="./api.js?v=R9.18.162"></script><script src="./sii-api.js?v=R9.18.162"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./cpanel.js?v=R9.18.162"></script>
 </body></html>

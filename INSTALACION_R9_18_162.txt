@@ -1,0 +1,22 @@
+ALE ATENCIÓN R9.18.162
+
+CAMBIOS PRINCIPALES
+- Rediseño completo del modal Variaciones de costos.
+- Filtros de Insumo y Agrupación con presentación de producción.
+- KPI: costo actual, variación del período, comparación anual y rango observado.
+- Tendencia automática del insumo.
+- Gráfico SVG responsive con evolución histórica.
+- Tabla comparativa con indicadores visuales de alza, baja y estabilidad.
+- Diseño responsive para escritorio y móvil.
+- Corrección permanente de Security Advisor para:
+  public.vw_producto_ingrediente_costos
+  public.vw_producto_costos_actuales
+
+ACTUALIZACIÓN DESDE R9.18.161
+1. Reemplazar archivos del sitio/cPanel por los de este paquete.
+2. Ejecutar:
+   INSTALACION_SUPABASE/27_ALE_ATENCIO_SQL_R9_18_162_SECURITY_VISTAS_COSTOS.sql
+3. Limpiar caché o recargar con Ctrl+F5.
+
+No es necesario volver a ejecutar la migración 26 si R9.18.161 ya estaba instalada.
+Para una instalación nueva, la migración 26 de este paquete ya crea ambas vistas con security_invoker=true.
