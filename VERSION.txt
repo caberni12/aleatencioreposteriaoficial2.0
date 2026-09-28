@@ -1,2 +1,1 @@
-R9.18.160
-Insumos + costos reales + modal de ingredientes + costeo automático por producto
+R9.18.161 - INSUMOS GR KG UNID + XLSX + VARIACIONES + RECETAS

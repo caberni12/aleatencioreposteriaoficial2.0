@@ -1,0 +1,25 @@
+ALE ATENCIO · R9.18.161 · INSUMOS / COSTOS
+
+1. Ejecutar en Supabase SQL Editor:
+   INSTALACION_SUPABASE/26_ALE_ATENCIO_SQL_R9_18_161_INSUMOS_UNIDADES_XLSX_VARIACIONES.sql
+
+2. Reemplazar los archivos del sitio/cPanel por los incluidos en este ZIP.
+
+3. Desplegar nuevamente la Edge Function:
+   INSTALACION_SUPABASE_EDGE_FUNCTIONS/dynamic-processor/index.ts
+
+NOVEDADES
+- Unidades de insumos normalizadas: GR, KG y UNID.
+- Conversión automática GR <-> KG en recetas.
+- UNID solo se combina con UNID.
+- Importador XLSX de insumos: actualiza por ID o nombre; agrega cuando no existe.
+- Plantilla: PLANTILLA_IMPORTACION_INSUMOS_ALE_ATENCIO.xlsx
+- Historial permanente de variaciones de costo.
+- Estadísticas por día, semana, mes y año, con comparación contra el año anterior.
+- Ingredientes por producto mejorados: cantidad + unidad de uso + costo unitario + costo utilizado.
+- Al cambiar el costo de un insumo, el costo actual de todos los productos que lo utilizan se recalcula automáticamente.
+
+FORMATO XLSX DE INSUMOS
+ID | NOMBRE | UNIDAD | COSTO_UNITARIO | STOCK | STOCK_MINIMO | ACTIVO
+UNIDAD admite: GR, KG, UNID
+ACTIVO admite: SI, NO
