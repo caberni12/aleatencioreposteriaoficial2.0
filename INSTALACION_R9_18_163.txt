@@ -1,0 +1,48 @@
+ALE ATENCIÓN · R9.18.163
+========================================
+
+OBJETIVO DE ESTA ENTREGA
+- Parametrización de tamaños por producto con rangos de personas.
+- Receta base por número de personas y escalado automático.
+- Receta independiente opcional por tamaño.
+- Ingredientes PROPORCIONAL / FIJO / REDONDEAR.
+- Costeo actualizado automáticamente usando los costos vigentes de insumos.
+- Ingresos de insumos con folio correlativo ING-00000001, ING-00000002, etc.
+- PDF A4 de ingreso, con diseño documental ordenado, QR y reimpresión.
+- El PDF de ingreso es un DOCUMENTO INTERNO NO TRIBUTARIO; no sustituye DTE/SII.
+- Vistas de costos mantienen security_invoker=true.
+
+ORDEN DE INSTALACIÓN
+1) Supabase > SQL Editor:
+   Ejecutar completo:
+   INSTALACION_SUPABASE/28_ALE_ATENCIO_SQL_R9_18_163_TAMANOS_PERSONAS_FOLIO_INGRESOS.sql
+
+2) Supabase > Edge Functions:
+   Volver a desplegar dynamic-processor usando:
+   INSTALACION_SUPABASE_EDGE_FUNCTIONS/dynamic-processor/index.ts
+
+3) Sitio / GitHub Pages:
+   Reemplazar los archivos web/cPanel de esta entrega conservando la estructura.
+
+4) Navegador:
+   Hacer Ctrl+F5 para limpiar caché.
+
+USO · PRODUCTOS / RECETAS
+- En cada producto indicar "Receta base para X personas".
+- En cada tamaño definir Personas desde/hasta y Porciones receta.
+- Modo ESCALADA: usa la receta base y aplica factor según porciones.
+- Modo INDEPENDIENTE: permite capturar cantidades exactas para ese tamaño.
+- PROPORCIONAL: cantidad × factor.
+- FIJO: no cambia con el tamaño (ej. caja/base/topper).
+- REDONDEAR: escala y, si es UNID, redondea hacia arriba (ej. huevos).
+
+USO · INGRESOS DE INSUMOS
+- Cada ingreso confirmado obtiene automáticamente un número correlativo.
+- El número tiene formato ING-00000001.
+- Se genera y almacena un PDF A4 del ingreso.
+- Desde el historial puede abrirse o regenerarse el PDF.
+- El ingreso actualiza stock/costo promedio y, por consecuencia, el costo vigente de las recetas/productos.
+
+NOTA LEGAL
+El PDF de ingreso utiliza una composición visual administrativa limpia inspirada en los documentos del sistema,
+pero está rotulado "DOCUMENTO INTERNO - NO TRIBUTARIO". No representa una factura, guía, boleta ni otro DTE del SII.
