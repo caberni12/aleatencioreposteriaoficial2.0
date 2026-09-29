@@ -1,0 +1,17 @@
+ALE ATENCIO R9.18.177 · VALIDACION LOCAL / ESTATICA
+
+OK · facturacion-api.js: sintaxis JavaScript válida.
+OK · cpanel.js: sintaxis JavaScript válida.
+OK · sii-api.js: sintaxis JavaScript válida.
+OK · facturacion-proveedores/index.ts: transpila sin errores TypeScript.
+OK · facturacion-sii/index.ts: transpila sin errores TypeScript.
+OK · facturacion-cl-gateway/index.ts: transpila sin errores TypeScript.
+OK · cpanel.html: 0 IDs duplicados.
+OK · Nuevo switch billingShowAllDocuments presente.
+OK · Preferencia mostrar_todos_documentos persistida en facturacion_proveedor_config.
+OK · Historial global combina Facturación Propia y Facturacion.cl sin cambiar proveedor activo.
+OK · PDF Facturacion.cl se puede consultar por su provider_code aunque el proveedor activo sea otro.
+OK · Búsqueda de pedido acepta solo número (ej. 12) y genera candidatos PED-12 / PED-012 / PED-0012 / PED-00012 / etc.
+OK · La misma normalización se implementó en facturacion-sii y facturacion-cl-gateway.
+
+NOTA: validación remota contra Supabase/Facturacion.cl no ejecutada desde el entorno local.

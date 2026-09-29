@@ -1,5 +1,5 @@
 window.ALE_ATENCIO_CONFIG = {
-  // ALE ATENCIO R9.18.176 · MANTENEDOR DEL SISTEMA / PUESTA EN PRODUCCION.
+  // ALE ATENCIO R9.18.177 · HISTORIAL GLOBAL MULTIPROVEEDOR + BUSQUEDA DE PEDIDO POR CORRELATIVO.
   // La interfaz de Facturación es única. El proveedor activo solo cambia la API/driver utilizada.
   API_URL: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/dynamic-processor",
 

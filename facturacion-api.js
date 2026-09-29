@@ -3,7 +3,7 @@
   const $=s=>document.querySelector(s);
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
   const adminToken=()=>localStorage.getItem('aleAdminToken')||sessionStorage.getItem('aleAdminToken')||'';
-  let state={loaded:false,ambiente:'CERTIFICACION',proveedor_activo:null,proveedores:[]};
+  let state={loaded:false,ambiente:'CERTIFICACION',proveedor_activo:null,mostrar_todos_documentos:false,proveedores:[]};
 
   function makeError(message,status=0,payload=null){const e=new Error(String(message||payload?.error||'FACTURACION_API_ERROR'));e.status=status;e.payload=payload;return e}
   function validUrl(v){return /^https:\/\/[a-z0-9-]+\.supabase\.co\/functions\/v1\/[A-Za-z0-9_-]+\/?$/i.test(String(v||'').trim())}
@@ -27,7 +27,7 @@
   async function load(force=false,token=adminToken()){
     if(state.loaded&&!force)return state;
     const out=await manager('status',{},token,20000);
-    state={loaded:true,ambiente:out.ambiente||'CERTIFICACION',proveedor_activo:out.proveedor_activo||null,proveedores:Array.isArray(out.proveedores)?out.proveedores:[]};
+    state={loaded:true,ambiente:out.ambiente||'CERTIFICACION',proveedor_activo:out.proveedor_activo||null,mostrar_todos_documentos:Boolean(out.mostrar_todos_documentos),proveedores:Array.isArray(out.proveedores)?out.proveedores:[]};
     render();
     return state;
   }
@@ -39,6 +39,9 @@
   }
   async function saveEnvironment(ambiente,token=adminToken()){
     const env=String(ambiente||'').toUpperCase()==='PRODUCCION'?'PRODUCCION':'CERTIFICACION';const out=await manager('environment_save',{ambiente:env},token,20000);await load(true,token);const sii=$('#siiEnvironment');if(sii)sii.value=env;window.dispatchEvent(new CustomEvent('ale:billing-environment-changed',{detail:{ambiente:env}}));return out;
+  }
+  async function saveDocumentsView(mostrar,token=adminToken()){
+    const value=Boolean(mostrar);const out=await manager('documents_view_save',{mostrar_todos_documentos:value},token,20000);await load(true,token);window.dispatchEvent(new CustomEvent('ale:billing-documents-view-changed',{detail:{mostrar_todos_documentos:value}}));return out;
   }
   async function saveProvider(data,token=adminToken()){const out=await manager('provider_save',data,token,20000);await load(true,token);return out}
   async function testConnection(code,token=adminToken()){
@@ -69,20 +72,42 @@
     }
     throw makeError('PROVEEDOR_FACTURACION_NO_ACTIVO');
   }
+  async function pdfForProvider(code,tipo,folio,token=adminToken()){
+    const c=String(code||'').toUpperCase();
+    if(c!=='FACTURACION_CL')throw makeError('PDF_EXTERNO_NO_APLICA');
+    return rawCall(providerUrl(c),'pdf',{tipo_dte:Number(tipo),folio:Number(folio),cedible:false},token,60000);
+  }
   async function pdf(tipo,folio,token=adminToken()){
-    if(!state.loaded)await load(false,token);const code=activeCodeCached();
-    if(code!=='FACTURACION_CL')throw makeError('PDF_EXTERNO_NO_APLICA');
-    return rawCall(providerUrl(code),'pdf',{tipo_dte:Number(tipo),folio:Number(folio),cedible:false},token,60000);
+    if(!state.loaded)await load(false,token);return pdfForProvider(activeCodeCached(),tipo,folio,token);
+  }
+  async function documentsForProvider(code,token=adminToken()){
+    const c=String(code||'').toUpperCase();
+    if(c==='SII_PROPIO'){
+      if(!window.SiiAPI?.configured())throw makeError('FACTURACION_PROPIA_API_NO_CONFIGURADA');
+      const out=window.SiiAPI.documents?await window.SiiAPI.documents(token,200):await window.SiiAPI.status(token);
+      const rows=out.documentos||out.documents||[];
+      return rows.map(x=>({...x,provider_code:'SII_PROPIO',provider_name:label('SII_PROPIO'),external_provider:false}));
+    }
+    if(c==='FACTURACION_CL'){
+      const out=await rawCall(providerUrl(c),'documents',{limit:200},token,30000);
+      return (out.documents||[]).map(x=>({...x,provider_code:'FACTURACION_CL',provider_name:label('FACTURACION_CL'),external_provider:true,razon_social_receptor:x.receptor_razon||'',rut_receptor:x.receptor_rut||''}));
+    }
+    return[];
   }
   async function documents(token=adminToken()){
-    if(!state.loaded)await load(false,token);const code=activeCodeCached();
-    if(code==='FACTURACION_CL')return rawCall(providerUrl(code),'documents',{limit:150},token,30000);
-    if(code==='SII_PROPIO')return window.SiiAPI.status(token);
-    return{ok:true,documents:[]};
+    if(!state.loaded)await load(false,token);
+    const codes=state.mostrar_todos_documentos?['SII_PROPIO','FACTURACION_CL']:[activeCodeCached()].filter(Boolean);
+    const settled=await Promise.allSettled(codes.map(code=>documentsForProvider(code,token)));
+    const docs=[],errors=[];
+    settled.forEach((result,index)=>{if(result.status==='fulfilled')docs.push(...result.value);else errors.push({provider:codes[index],error:String(result.reason?.message||result.reason||'ERROR')})});
+    if(!docs.length&&errors.length===codes.length)throw makeError(errors.map(x=>`${x.provider}:${x.error}`).join(' | '));
+    docs.sort((a,b)=>new Date(b.fecha_emision||b.creado_en||0).getTime()-new Date(a.fecha_emision||a.creado_en||0).getTime());
+    return{ok:true,documents:docs,mostrar_todos_documentos:state.mostrar_todos_documentos,errors};
   }
   function render(){
     const env=$('#billingEnvironment');if(env)env.value=state.ambiente||'CERTIFICACION';const hiddenSii=$('#siiEnvironment');if(hiddenSii)hiddenSii.value=state.ambiente||'CERTIFICACION';
     const active=$('#billingActiveProviderName');if(active)active.textContent=label(state.proveedor_activo);const activeModal=$('#billingActiveProviderNameModal');if(activeModal)activeModal.textContent=label(state.proveedor_activo);
+    const allDocs=$('#billingShowAllDocuments');if(allDocs)allDocs.checked=Boolean(state.mostrar_todos_documentos);const scope=$('#billingDocumentsScope');if(scope)scope.textContent=state.mostrar_todos_documentos?'Todos los proveedores':'Solo proveedor activo';
     const tbody=$('#billingProviderTable');if(tbody){tbody.innerHTML=state.proveedores.map(p=>{const api=providerUrl(p.codigo),checked=p.activo?'checked':'',disabled=!p.habilitado?'disabled':'',status=p.habilitado?'Habilitado':'Inactivo';return `<tr><td><div class="billing-provider-name"><strong>${esc(p.nombre)}</strong><small>${esc(p.codigo)}</small></div></td><td><span class="billing-provider-type">${esc(p.tipo)}</span></td><td><span class="billing-api-status ${api?'ok':'warn'}">${api?'Configurada':'Pendiente'}</span></td><td><span class="billing-provider-state ${p.habilitado?'':'off'}">${status}</span></td><td><label class="billing-provider-switch" title="Activo"><input type="checkbox" data-billing-provider-active="${esc(p.codigo)}" ${checked} ${disabled}><span></span></label></td><td><div class="billing-provider-actions"><button class="btn btn-light btn-compact" type="button" data-billing-provider-edit="${esc(p.codigo)}"><i class="bi bi-pencil-square"></i> Editar</button><button class="btn btn-light btn-compact" type="button" data-billing-provider-test="${esc(p.codigo)}"><i class="bi bi-plug"></i> Probar conexión</button></div></td></tr>`}).join('')||'<tr><td colspan="6">Sin proveedores configurados.</td></tr>'}
     const badge=$('#billingEnvironmentBadge');if(badge){badge.textContent=state.ambiente==='PRODUCCION'?'PRODUCCIÓN':'CERTIFICACIÓN';badge.classList.toggle('production',state.ambiente==='PRODUCCION');badge.classList.toggle('certification',state.ambiente!=='PRODUCCION')}
     if(typeof window.updateSiiIssueModeUi==='function')try{window.updateSiiIssueModeUi()}catch(_){}
@@ -103,6 +128,12 @@
   }
   function notify(msg){if(typeof window.toast==='function')return window.toast(msg);const el=$('#adminToast');if(el){el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200)}}
   document.addEventListener('change',async e=>{
+    const historySwitch=e.target.closest?.('#billingShowAllDocuments');
+    if(historySwitch){
+      historySwitch.disabled=true;
+      try{await saveDocumentsView(historySwitch.checked);notify(historySwitch.checked?'✓ Historial global activado':'✓ Historial limitado al proveedor activo')}catch(err){historySwitch.checked=!historySwitch.checked;notify(`✕ ${err.message||err}`)}finally{historySwitch.disabled=false}
+      return;
+    }
     const input=e.target.closest?.('[data-billing-provider-active]');if(!input)return;
     if(!input.checked){input.checked=true;return}
     const code=input.dataset.billingProviderActive;input.disabled=true;
@@ -119,6 +150,6 @@
     if(e.target.closest?.('#billingEnvironmentSave')){const b=e.target.closest('#billingEnvironmentSave');b.disabled=true;try{await saveEnvironment($('#billingEnvironment')?.value);notify('✓ Ambiente de facturación guardado')}catch(err){notify(`✕ ${err.message||err}`)}finally{b.disabled=false}return}
     const nav=e.target.closest?.('[data-view="billing-sii"]');if(nav)setTimeout(()=>load(true).catch(err=>notify(`✕ ${err.message||err}`)),10);
   });
-  window.FacturacionAPI={load,manager,activate,saveEnvironment,saveProvider,testConnection,orderPreview,issue,pdf,documents,activeCodeCached,activeProvider,label,providerUrl,openProvidersModal,closeProvidersModal,openProviderEditor,closeProviderEditor,get state(){return state}};
+  window.FacturacionAPI={load,manager,activate,saveEnvironment,saveDocumentsView,saveProvider,testConnection,orderPreview,issue,pdf,pdfForProvider,documents,documentsForProvider,activeCodeCached,activeProvider,label,providerUrl,openProvidersModal,closeProvidersModal,openProviderEditor,closeProviderEditor,get state(){return state}};
   document.addEventListener('DOMContentLoaded',()=>load(false).catch(()=>{}));
 })();

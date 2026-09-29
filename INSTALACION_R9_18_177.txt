@@ -1,0 +1,20 @@
+ALE ATENCIO R9.18.177 · HISTORIAL GLOBAL MULTIPROVEEDOR
+
+CAMBIOS
+- Emisión SII acepta buscar un pedido escribiendo solo su correlativo numérico: 12 -> PED-00012/PED-000012 según exista.
+- La misma regla aplica a Facturacion.cl.
+- El proveedor activo continúa definiendo exclusivamente quién EMITE.
+- Nuevo switch “Mostrar todos los documentos” en Mantenedor de Proveedores.
+- Con el switch activo, el historial combina Facturación Propia + Facturacion.cl aunque uno esté inactivo.
+- El PDF de un documento Facturacion.cl sigue disponible aunque Facturacion.cl no sea el proveedor activo.
+
+ACTUALIZACION DESDE R9.18.176
+1. Ejecutar: INSTALACION_SUPABASE/35_ALE_ATENCIO_SQL_R9_18_177_HISTORIAL_GLOBAL_FACTURACION.sql
+2. Redesplegar con JWT desactivado:
+   - facturacion-proveedores
+   - facturacion-sii
+   - facturacion-cl-gateway
+3. Reemplazar en web: cpanel.html, cpanel.js, facturacion-api.js (y config.js si se despliega el paquete completo).
+4. Ctrl+F5.
+
+NO ES NECESARIO redesplegar dynamic-processor ni mantenedor-sistema para este cambio.
