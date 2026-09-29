@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="./styles.css?v=R9.18.178"><link rel="stylesheet" href="./cpanel.css?v=R9.18.178">
+  <link rel="stylesheet" href="./styles.css?v=R9.18.178"><link rel="stylesheet" href="./cpanel.css?v=R9.18.182">
   <style id="ale-production-css-fallback-r918151">
 /* R9.18.152: fallback embebido para GitHub Pages/Cloudflare. Mantener también archivos CSS externos. */
 :root{
@@ -7392,6 +7392,62 @@ body > #requestClientEditor:not(.hidden) .editor-actions{
 @media(max-width:980px){.billing-command-head{align-items:flex-start}.billing-command-state{justify-content:flex-start}.billing-status-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.billing-status-strip>div:nth-child(2){border-right:0}.billing-status-strip>div:nth-child(-n+2){border-bottom:1px solid #f0e6e1}.billing-maintainer-toolbar{grid-template-columns:1fr 1fr}.billing-maintainer-toolbar>.btn{grid-column:1/-1}}
 @media(max-width:650px){.billing-command-panel{top:6px;border-radius:14px}.billing-command-head{display:grid;padding:12px}.billing-command-title p{display:none}.billing-command-title h2{font-size:18px}.billing-command-state{gap:6px}.billing-active-pill{min-width:0;max-width:180px}.billing-command-bar{padding:7px 8px}.billing-command-btn{min-height:36px;padding:7px 9px}.billing-status-strip{grid-template-columns:1fr 1fr}.billing-status-strip>div{padding:8px 10px}.billing-maintainer-toolbar{grid-template-columns:1fr}.billing-maintainer-toolbar>.btn{grid-column:auto;width:100%}.billing-providers-modal{width:calc(100vw - 14px)!important;max-height:95dvh!important}.billing-provider-actions{min-width:220px}}
 </style>
+<style id="ale-maintenance-layout-r918182">
+/* R9.18.182: un único scroll vertical y contenido ajustado al modal. */
+#systemMaintenanceModal:not(.hidden){display:flex!important;flex-direction:column!important;width:min(1120px,calc(100vw - 32px))!important;height:min(90dvh,860px)!important;max-height:calc(100dvh - 24px)!important;padding:0!important;overflow:hidden!important;min-width:0!important}
+#systemMaintenanceModal .system-maintenance-head{position:static!important;top:auto!important;flex:0 0 auto;display:flex!important;align-items:flex-start;gap:16px;margin:0!important;padding:18px 22px!important;min-width:0}
+#systemMaintenanceModal .system-maintenance-head>div{min-width:0;flex:1}
+#systemMaintenanceModal .editor-close-x{position:static!important;flex:0 0 38px;width:38px;height:38px;margin:0!important}
+#systemMaintenanceModal .system-maintenance-toolbar{flex:0 0 auto;flex-wrap:wrap;overflow:visible;padding:10px 18px;gap:6px}
+#systemMaintenanceModal .system-maintenance-toolbar .btn{margin-left:auto}
+#systemMaintenanceModal .system-maintenance-tab{min-width:0;white-space:normal;text-align:left}
+#systemMaintenanceModal .system-maintenance-content{flex:1 1 auto;min-height:0;min-width:0;width:100%;max-height:none!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;scrollbar-gutter:stable;padding:18px 20px}
+#systemMaintenanceModal .system-maintenance-footer{flex:0 0 auto;position:static!important;bottom:auto!important;margin:0!important;padding:12px 20px!important}
+#systemMaintenanceModal .system-maintenance-pane>.editor-actions{position:static!important;margin:14px 0 0!important;padding:12px 0 0!important}
+#systemMaintenanceModal .system-maintenance-pane,#systemMaintenanceModal .system-maintenance-kpis>div,#systemMaintenanceModal .system-reset-step>div,#systemMaintenanceModal .system-reset-warning>div,#systemMaintenanceModal .system-control,#systemMaintenanceModal .system-input-shell,#systemMaintenanceModal .system-select-shell{min-width:0;max-width:100%}
+#systemMaintenanceModal .system-maintenance-kpis strong{font-size:clamp(16px,1.7vw,21px);line-height:1.35;overflow-wrap:anywhere;word-break:normal;white-space:normal;min-width:0}
+#systemMaintenanceModal small,#systemMaintenanceModal strong,#systemMaintenanceModal p,#systemMaintenanceModal .system-operation-status,#systemMaintenanceModal .system-reset-readiness span,#systemMaintenanceModal .system-maintenance-state-pill{overflow-wrap:anywhere;white-space:normal}
+#systemMaintenanceModal .system-maintenance-module-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#systemMaintenanceModal .system-module-card{padding:14px;gap:10px;min-width:0;align-items:flex-start}
+#systemMaintenanceModal .system-module-card>div{flex:1;min-width:0;gap:7px}
+#systemMaintenanceModal .system-module-card strong{font-size:13px;line-height:1.4}
+#systemMaintenanceModal .system-module-card small{font-size:11px;line-height:1.5}
+#systemMaintenanceModal .system-module-card.reset{border-color:#d8a8b3;background:#fffafb}
+#systemMaintenanceModal .system-module-state{font-size:9px;line-height:1.5;gap:4px;max-width:100%;width:fit-content}
+#systemMaintenanceModal .system-module-choice{display:grid;gap:5px;min-width:0}
+#systemMaintenanceModal .system-module-choice>span{font-size:10px;color:#806b62}
+#systemMaintenanceModal .system-module-choice select{display:block;width:100%;min-width:0;max-width:100%;min-height:40px;padding:8px 26px 8px 10px;border:1px solid #d8cec7;border-radius:9px;background:#fff;color:#523c34;font-size:12px;font-weight:700}
+#systemMaintenanceModal .system-module-choice select:focus-visible{outline:3px solid #d7b678;outline-offset:2px}
+#systemMaintenanceModal .system-module-card.reset select{border-color:#bb7788;color:#913951}
+#systemMaintenanceModal .system-module-count{font-weight:700}
+#systemMaintenanceModal .system-selection-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin:0 0 14px;background:#f6eee7;border:1px solid #e5d8cc;border-radius:12px;min-width:0}
+#systemMaintenanceModal .system-selection-bar p{margin:0;font-size:12px;line-height:1.55;flex:1;min-width:0}
+#systemMaintenanceModal .system-selection-bar .btn{flex:0 0 auto;font-size:11px}
+#systemMaintenanceModal .system-operation-status:not(.hidden){display:flex;min-width:0;margin-bottom:14px}
+#systemMaintenanceModal .system-maintenance-table-wrap{width:100%;max-width:100%;overflow:auto;max-height:45dvh}
+#systemMaintenanceModal .system-maintenance-table-wrap table{table-layout:fixed;min-width:650px;width:100%}
+#systemMaintenanceModal .system-maintenance-table-wrap td,#systemMaintenanceModal .system-maintenance-table-wrap th{overflow-wrap:anywhere;white-space:normal}
+#systemMaintenanceModal input,#systemMaintenanceModal select{max-width:100%;min-width:0}
+#systemMaintenanceModal button:disabled,#systemMaintenanceModal select:disabled{opacity:.6;cursor:not-allowed}
+@media(max-width:900px){#systemMaintenanceModal .system-maintenance-module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){
+ #systemMaintenanceModal:not(.hidden){width:calc(100vw - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100dvh - 16px)!important;border-radius:16px!important}
+ #systemMaintenanceModal .system-maintenance-head{padding:12px 14px!important;gap:8px}
+ #systemMaintenanceModal .system-maintenance-head h3{font-size:23px}
+ #systemMaintenanceModal .system-maintenance-head small{font-size:11px}
+ #systemMaintenanceModal .system-maintenance-head .eyebrow{font-size:9px;margin-bottom:5px}
+ #systemMaintenanceModal .system-maintenance-toolbar{padding:8px 10px;gap:4px}
+ #systemMaintenanceModal .system-maintenance-tab{padding:7px 8px;font-size:10px;min-height:34px}
+ #systemMaintenanceModal .system-maintenance-tab span{display:inline}
+ #systemMaintenanceModal .system-maintenance-toolbar .btn{margin-left:0;padding:8px;font-size:10px}
+ #systemMaintenanceModal .system-maintenance-content{padding:12px}
+ #systemMaintenanceModal .system-maintenance-module-grid,#systemMaintenanceModal .system-maintenance-kpis{grid-template-columns:minmax(0,1fr)}
+ #systemMaintenanceModal .system-selection-bar{align-items:stretch;flex-direction:column}
+ #systemMaintenanceModal .system-maintenance-footer{padding:9px 12px!important}
+ #systemMaintenanceModal .system-reset-form{padding:12px!important}
+}
+
+</style>
 </head>
 <body class="admin-body auth-locked">
 <div class="login-screen" id="loginScreen">
@@ -8657,7 +8713,7 @@ Torta chocolate | 1 | 25000"></textarea></label>
 
     <div class="editor hidden sii-modal system-maintenance-modal" id="systemMaintenanceModal" role="dialog" aria-modal="true" aria-labelledby="systemMaintenanceTitle">
       <div class="editor-modal-head system-maintenance-head">
-        <div><span class="eyebrow">Administración del sistema</span><h3 id="systemMaintenanceTitle">Mantenedor del Sistema</h3><small>Respaldo y reinicio operacional para puesta en producción. Usuarios, productos y parametrización permanecen intactos.</small></div>
+        <div><span class="eyebrow">Administración del sistema</span><h3 id="systemMaintenanceTitle">Mantenedor del Sistema</h3><small>Elige qué módulos conservar y cuáles reiniciar. Usuarios y datos maestros permanecen protegidos.</small></div>
         <button type="button" class="editor-close-x" data-system-maintenance-close aria-label="Cerrar">×</button>
       </div>
 
@@ -8672,12 +8728,14 @@ Torta chocolate | 1 | 25000"></textarea></label>
       <div class="system-maintenance-content">
         <section class="system-maintenance-pane active" data-system-maintenance-pane="overview">
           <div class="system-maintenance-kpis">
-            <div><span>Registros operacionales</span><strong id="systemMaintenanceOperationalCount">—</strong><small>Datos que se limpiarán</small></div>
+            <div><span>Registros operacionales</span><strong id="systemMaintenanceOperationalCount">—</strong><small>Registros seleccionados para limpiar</small></div>
             <div><span>Último respaldo</span><strong id="systemMaintenanceLastBackup">—</strong><small id="systemMaintenanceLastBackupDate">Sin respaldo</small></div>
             <div><span>Última operación</span><strong id="systemMaintenanceLastEvent">—</strong><small id="systemMaintenanceLastEventDate">Sin registros</small></div>
           </div>
           <div class="system-maintenance-section-title"><div><span class="eyebrow">Módulos del sistema</span><h4>Qué se conserva y qué se reinicia</h4></div><span class="system-maintenance-safe-badge"><i class="bi bi-shield-lock"></i> Maestros protegidos</span></div>
-          <div class="system-maintenance-module-grid" id="systemMaintenanceModules"></div>
+          <div class="system-selection-bar"><p id="systemSelectionSummary" aria-live="polite"></p><button type="button" class="btn btn-light btn-compact" data-system-selection-clear>Conservar todos</button></div>
+          <div id="systemSelectionStatus" class="system-operation-status" role="status" tabindex="-1">Cargando módulos…</div>
+          <div class="system-maintenance-module-grid" id="systemMaintenanceModules" tabindex="-1"></div>
         </section>
 
         <section class="system-maintenance-pane" data-system-maintenance-pane="backup">
@@ -8700,7 +8758,8 @@ Torta chocolate | 1 | 25000"></textarea></label>
         </section>
 
         <section class="system-maintenance-pane" data-system-maintenance-pane="reset">
-          <div class="system-reset-warning"><i class="bi bi-exclamation-triangle"></i><div><strong>Reinicio operacional para puesta en producción</strong><span>Elimina datos de prueba y deja stocks, saldos y movimientos en cero. No elimina usuarios, productos, recetas, insumos, proveedores, bodegas, configuración, APIs, certificados ni CAF.</span></div></div>
+          <div class="system-reset-warning"><i class="bi bi-exclamation-triangle"></i><div><strong>Reinicio operacional para puesta en producción</strong><span>Se limpian únicamente los módulos elegidos. El stock se pone en cero solo si seleccionas Inventario. Usuarios, maestros, configuración y folios SII se conservan.</span></div></div>
+          <div class="system-selection-bar"><p id="systemResetSelectionSummary"></p><button type="button" class="btn btn-light btn-compact" data-system-selection-edit>Editar selección</button></div>
           <div class="system-reset-flow">
             <div class="system-reset-step"><span>1</span><div><strong>Respaldo obligatorio</strong><small>Selecciona un respaldo reciente generado por tu usuario.</small></div></div>
             <div class="system-reset-step"><span>2</span><div><strong>Revalidación de acceso</strong><small>Debes ingresar nuevamente tu contraseña de administrador.</small></div></div>
@@ -8713,7 +8772,7 @@ Torta chocolate | 1 | 25000"></textarea></label>
             <label class="field-group system-control"><span>Contraseña actual <b>*</b></span><div class="system-input-shell"><i class="bi bi-shield-lock"></i><input id="systemResetPassword" type="password" autocomplete="current-password" placeholder="Ingresa tu contraseña"></div></label>
             <label class="field-group system-control"><span>Confirmación <b>*</b></span><div class="system-input-shell"><i class="bi bi-keyboard"></i><input id="systemResetConfirmation" autocomplete="off" placeholder="REINICIAR SISTEMA"></div></label>
           </div>
-          <label class="system-reset-consent"><input id="systemResetConsent" type="checkbox"><span>Confirmo que revisé el resumen, generé un respaldo y deseo eliminar los datos operacionales de prueba para iniciar la operación real.</span></label>
+          <label class="system-reset-consent"><input id="systemResetConsent" type="checkbox"><span>Confirmo que revisé el resumen, generé un respaldo y deseo reiniciar únicamente los módulos seleccionados.</span></label>
           <div class="system-reset-readiness" id="systemResetReadiness" aria-live="polite"><i class="bi bi-info-circle"></i><span>Completa los requisitos y luego presiona Reiniciar operación. El sistema te indicará si falta algún dato.</span></div>
           <div class="system-process-progress hidden" id="systemResetProgress" aria-live="polite">
             <div class="system-process-track"><span data-progress-step="1">Validación</span><span data-progress-step="2">Limpieza</span><span data-progress-step="3">Verificación</span><span data-progress-step="4">Finalizando</span></div>
@@ -8749,5 +8808,5 @@ Torta chocolate | 1 | 25000"></textarea></label>
 </div>
 <div class="notification-toast-stack" id="notificationToastStack" aria-live="polite"></div>
 <div class="toast" id="adminToast"></div>
-<script src="./config.js?v=R9.18.178"></script><script src="./api.js?v=R9.18.178"></script><script src="./sii-api.js?v=R9.18.178"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./facturacion-api.js?v=R9.18.178"></script><script src="./cpanel.js?v=R9.18.178"></script><script src="./mantenedor-sistema.js?v=R9.18.181"></script>
+<script src="./config.js?v=R9.18.178"></script><script src="./api.js?v=R9.18.178"></script><script src="./sii-api.js?v=R9.18.178"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./facturacion-api.js?v=R9.18.178"></script><script src="./cpanel.js?v=R9.18.178"></script><script src="./mantenedor-sistema.js?v=R9.18.182"></script>
 </body></html>

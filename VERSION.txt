@@ -1,2 +1,2 @@
-ALE ATENCIO R9.18.177
-Historial global multiproveedor + búsqueda de pedido por número corto
+ALE ATENCIO R9.18.182
+Mantenedor con reinicio selectivo y modal sin desbordes.

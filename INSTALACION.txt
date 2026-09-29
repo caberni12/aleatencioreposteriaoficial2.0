@@ -1,12 +1,55 @@
-ALE ATENCIO R9.18.181 - MENSAJE POST REINICIO
+ALE ATENCIO R9.18.182 — MANTENEDOR SELECTIVO
 
-Reemplazar solamente:
-- mantenedor-sistema.js
-- cpanel.html
+ACTUALIZAR TU SISTEMA EXISTENTE
+1. En Supabase > SQL Editor, ejecutar:
+   INSTALACION_SUPABASE/39_ALE_ATENCIO_SQL_R9_18_182_REINICIO_SELECTIVO.sql
+   Este archivo instala las funciones; NO ejecuta ningún reinicio ni borra datos.
+2. Actualizar la Edge Function mantenedor-sistema con:
+   INSTALACION_SUPABASE_EDGE_FUNCTIONS/mantenedor-sistema/index.ts
+   Mantener Verify JWT desactivado, como en la instalación actual.
+   Se conserva la validación propia de sesión ADMIN y contraseña.
+3. Publicar los archivos web del ZIP. Los modificados son:
+   cpanel.html, cpanel.css y mantenedor-sistema.js.
+4. Recargar el cPanel con Ctrl+F5.
 
-No requiere SQL.
-No requiere redesplegar Edge Functions.
-Mantiene JWT desactivado.
+No basta con reemplazar solo el HTML/JS: el SQL y la función son necesarios
+para que el servidor respete lo elegido. El nuevo frontend bloquea el reinicio
+selectivo cuando detecta un servidor anterior.
 
-Cambio:
-Después de un reinicio exitoso se muestra una confirmación a pantalla completa con contador de 7 segundos y luego se recarga el cPanel para volver al inicio de sesión.
+USO
+- Abrir Configuración > Mantenedor del Sistema > Estado.
+- Cambiar cada módulo permitido entre Conservar y Reiniciar.
+- Al abrir una página nueva, todos parten en Conservar.
+- La selección permanece al cambiar de pestaña, actualizar el resumen o generar
+  un respaldo; cambiarla obliga a marcar nuevamente la confirmación.
+- Revisar el total y los módulos seleccionados antes de continuar.
+- Generar un respaldo con la contraseña del administrador.
+- En Reinicio operacional, indicar motivo, contraseña y REINICIAR SISTEMA;
+  marcar la confirmación y ejecutar.
+- Al terminar aparece la confirmación y la espera de 7 segundos antes del login.
+
+ALCANCE
+- Usuarios, contraseñas, permisos, clientes, catálogo de productos, recetas,
+  proveedores, bodegas, configuración, certificados y CAF se conservan.
+- Inventario reinicia movimientos, reservas, existencias y stock de productos,
+  tamaños e insumos. Libro Mayor refleja esos mismos movimientos.
+- Mayorista limpia su operación y libera el saldo utilizado; conserva los cupos.
+- Insumos y Costos limpia solo el historial de costos, conservando costos vigentes.
+- Reportes y Dashboard limpia visitas web. Los indicadores de ventas siguen
+  mostrando los pedidos que se conserven.
+- Los contadores internos se reinician solo en los módulos seleccionados.
+- Folios SII, códigos de bodegas, respaldos y auditoría del mantenedor se conservan.
+- Si una selección afectaría registros vinculados de un módulo conservado,
+  el proceso se detiene y muestra la relación para corregir la selección.
+- Una selección vacía nunca provoca una limpieza total.
+
+COMPROBACIONES DE ESTA ENTREGA
+Pruebas locales de PostgreSQL con datos de ensayo: selección, conservación,
+relaciones entre tablas, protección de usuarios, restauración de triggers,
+reversión de borrados y secuencias ante error. Flujo de sesión y contraseña
+comprobado con servicios simulados. Modal verificado en 1440, 978, 390 y 320 px.
+No se ejecutó ningún reinicio ni se desplegaron cambios en tu servidor.
+
+El ZIP integra la base completa R9.18.178 y los cambios de R9.18.180/181/182.
+Incluye un único archivo vigente del SQL del mantenedor (39), sin los anteriores.
+Los restantes módulos y la función independiente facturacion-sii se mantienen.

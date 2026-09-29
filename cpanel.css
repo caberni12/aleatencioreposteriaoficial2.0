@@ -4548,3 +4548,57 @@ body > #requestClientEditor:not(.hidden) .editor-actions{
 .system-reset-consent{margin-top:12px!important;border-radius:14px!important;padding:12px 14px!important;background:#fff!important}.system-reset-readiness{margin-top:10px!important}
 #systemResetExecute{min-width:215px!important}
 @media(max-width:860px){.system-backup-create{grid-template-columns:1fr!important}.system-reset-form{grid-template-columns:1fr!important}.system-reset-form .span-2{grid-column:auto!important}.system-process-track{grid-template-columns:1fr 1fr}.system-action-button{width:100%!important}}
+
+/* R9.18.182: un único scroll vertical y contenido ajustado al modal. */
+#systemMaintenanceModal:not(.hidden){display:flex!important;flex-direction:column!important;width:min(1120px,calc(100vw - 32px))!important;height:min(90dvh,860px)!important;max-height:calc(100dvh - 24px)!important;padding:0!important;overflow:hidden!important;min-width:0!important}
+#systemMaintenanceModal .system-maintenance-head{position:static!important;top:auto!important;flex:0 0 auto;display:flex!important;align-items:flex-start;gap:16px;margin:0!important;padding:18px 22px!important;min-width:0}
+#systemMaintenanceModal .system-maintenance-head>div{min-width:0;flex:1}
+#systemMaintenanceModal .editor-close-x{position:static!important;flex:0 0 38px;width:38px;height:38px;margin:0!important}
+#systemMaintenanceModal .system-maintenance-toolbar{flex:0 0 auto;flex-wrap:wrap;overflow:visible;padding:10px 18px;gap:6px}
+#systemMaintenanceModal .system-maintenance-toolbar .btn{margin-left:auto}
+#systemMaintenanceModal .system-maintenance-tab{min-width:0;white-space:normal;text-align:left}
+#systemMaintenanceModal .system-maintenance-content{flex:1 1 auto;min-height:0;min-width:0;width:100%;max-height:none!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;scrollbar-gutter:stable;padding:18px 20px}
+#systemMaintenanceModal .system-maintenance-footer{flex:0 0 auto;position:static!important;bottom:auto!important;margin:0!important;padding:12px 20px!important}
+#systemMaintenanceModal .system-maintenance-pane>.editor-actions{position:static!important;margin:14px 0 0!important;padding:12px 0 0!important}
+#systemMaintenanceModal .system-maintenance-pane,#systemMaintenanceModal .system-maintenance-kpis>div,#systemMaintenanceModal .system-reset-step>div,#systemMaintenanceModal .system-reset-warning>div,#systemMaintenanceModal .system-control,#systemMaintenanceModal .system-input-shell,#systemMaintenanceModal .system-select-shell{min-width:0;max-width:100%}
+#systemMaintenanceModal .system-maintenance-kpis strong{font-size:clamp(16px,1.7vw,21px);line-height:1.35;overflow-wrap:anywhere;word-break:normal;white-space:normal;min-width:0}
+#systemMaintenanceModal small,#systemMaintenanceModal strong,#systemMaintenanceModal p,#systemMaintenanceModal .system-operation-status,#systemMaintenanceModal .system-reset-readiness span,#systemMaintenanceModal .system-maintenance-state-pill{overflow-wrap:anywhere;white-space:normal}
+#systemMaintenanceModal .system-maintenance-module-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#systemMaintenanceModal .system-module-card{padding:14px;gap:10px;min-width:0;align-items:flex-start}
+#systemMaintenanceModal .system-module-card>div{flex:1;min-width:0;gap:7px}
+#systemMaintenanceModal .system-module-card strong{font-size:13px;line-height:1.4}
+#systemMaintenanceModal .system-module-card small{font-size:11px;line-height:1.5}
+#systemMaintenanceModal .system-module-card.reset{border-color:#d8a8b3;background:#fffafb}
+#systemMaintenanceModal .system-module-state{font-size:9px;line-height:1.5;gap:4px;max-width:100%;width:fit-content}
+#systemMaintenanceModal .system-module-choice{display:grid;gap:5px;min-width:0}
+#systemMaintenanceModal .system-module-choice>span{font-size:10px;color:#806b62}
+#systemMaintenanceModal .system-module-choice select{display:block;width:100%;min-width:0;max-width:100%;min-height:40px;padding:8px 26px 8px 10px;border:1px solid #d8cec7;border-radius:9px;background:#fff;color:#523c34;font-size:12px;font-weight:700}
+#systemMaintenanceModal .system-module-choice select:focus-visible{outline:3px solid #d7b678;outline-offset:2px}
+#systemMaintenanceModal .system-module-card.reset select{border-color:#bb7788;color:#913951}
+#systemMaintenanceModal .system-module-count{font-weight:700}
+#systemMaintenanceModal .system-selection-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin:0 0 14px;background:#f6eee7;border:1px solid #e5d8cc;border-radius:12px;min-width:0}
+#systemMaintenanceModal .system-selection-bar p{margin:0;font-size:12px;line-height:1.55;flex:1;min-width:0}
+#systemMaintenanceModal .system-selection-bar .btn{flex:0 0 auto;font-size:11px}
+#systemMaintenanceModal .system-operation-status:not(.hidden){display:flex;min-width:0;margin-bottom:14px}
+#systemMaintenanceModal .system-maintenance-table-wrap{width:100%;max-width:100%;overflow:auto;max-height:45dvh}
+#systemMaintenanceModal .system-maintenance-table-wrap table{table-layout:fixed;min-width:650px;width:100%}
+#systemMaintenanceModal .system-maintenance-table-wrap td,#systemMaintenanceModal .system-maintenance-table-wrap th{overflow-wrap:anywhere;white-space:normal}
+#systemMaintenanceModal input,#systemMaintenanceModal select{max-width:100%;min-width:0}
+#systemMaintenanceModal button:disabled,#systemMaintenanceModal select:disabled{opacity:.6;cursor:not-allowed}
+@media(max-width:900px){#systemMaintenanceModal .system-maintenance-module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){
+ #systemMaintenanceModal:not(.hidden){width:calc(100vw - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100dvh - 16px)!important;border-radius:16px!important}
+ #systemMaintenanceModal .system-maintenance-head{padding:12px 14px!important;gap:8px}
+ #systemMaintenanceModal .system-maintenance-head h3{font-size:23px}
+ #systemMaintenanceModal .system-maintenance-head small{font-size:11px}
+ #systemMaintenanceModal .system-maintenance-head .eyebrow{font-size:9px;margin-bottom:5px}
+ #systemMaintenanceModal .system-maintenance-toolbar{padding:8px 10px;gap:4px}
+ #systemMaintenanceModal .system-maintenance-tab{padding:7px 8px;font-size:10px;min-height:34px}
+ #systemMaintenanceModal .system-maintenance-tab span{display:inline}
+ #systemMaintenanceModal .system-maintenance-toolbar .btn{margin-left:0;padding:8px;font-size:10px}
+ #systemMaintenanceModal .system-maintenance-content{padding:12px}
+ #systemMaintenanceModal .system-maintenance-module-grid,#systemMaintenanceModal .system-maintenance-kpis{grid-template-columns:minmax(0,1fr)}
+ #systemMaintenanceModal .system-selection-bar{align-items:stretch;flex-direction:column}
+ #systemMaintenanceModal .system-maintenance-footer{padding:9px 12px!important}
+ #systemMaintenanceModal .system-reset-form{padding:12px!important}
+}
