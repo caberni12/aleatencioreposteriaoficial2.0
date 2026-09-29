@@ -1,5 +1,5 @@
 window.ALE_ATENCIO_CONFIG = {
-  // ALE ATENCIO R9.18.171 · FACTURACION MULTIPROVEEDOR.
+  // ALE ATENCIO R9.18.172 · FACTURACION MULTIPROVEEDOR FINAL.
   // La interfaz de Facturación es única. El proveedor activo solo cambia la API/driver utilizada.
   API_URL: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/dynamic-processor",
 
@@ -18,6 +18,14 @@ window.ALE_ATENCIO_CONFIG = {
   FACTURACION_PROVIDERS: {
     SII_PROPIO: { api: "SII_API_URL", driver: "facturacion-sii" },
     FACTURACION_CL: { api: "FACTURACION_CL_GATEWAY_URL", driver: "facturacion-cl-gateway" }
+  },
+
+  // Las cuatro Edge Functions que componen el sistema.
+  SYSTEM_ENDPOINTS: {
+    CORE: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/dynamic-processor",
+    PROVEEDORES_FACTURACION: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-proveedores",
+    FACTURACION_PROPIA: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-sii",
+    FACTURACION_CL: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-cl-gateway"
   },
 
   REQUEST_TIMEOUT_MS: 12000,

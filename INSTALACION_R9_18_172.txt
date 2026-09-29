@@ -1,0 +1,114 @@
+ALE ATENCIO R9.18.172 · ENTREGA FINAL FACTURACION MULTIPROVEEDOR
+=================================================================
+
+ARQUITECTURA DEFINITIVA
+- Una sola interfaz de Facturación en el cPanel.
+- Un solo ambiente global: CERTIFICACION o PRODUCCION.
+- Un Mantenedor de Proveedores de Facturación.
+- Solo un proveedor puede estar Activo al mismo tiempo.
+- Cambiar el proveedor NO cambia la interfaz: únicamente cambia la API/TS utilizada.
+
+LAS 4 EDGE FUNCTIONS DEL SISTEMA
+1) Núcleo general:
+   https://btvliyzripnhjexdgoef.supabase.co/functions/v1/dynamic-processor
+
+2) Mantenedor de proveedores de facturación:
+   https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-proveedores
+
+3) Facturación Propia / SII:
+   https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-sii
+
+4) Facturacion.cl:
+   https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-cl-gateway
+
+CONFIG.JS
+Las cuatro URL anteriores quedan centralizadas en config.js.
+El cPanel NO permite editar esas URL: solo seleccionar el proveedor Activo.
+
+MANTENEDOR DE PROVEEDORES
+Incluye:
+- Facturación Propia · driver: facturacion-sii
+- Facturacion.cl · driver: facturacion-cl-gateway
+
+Acciones de sistema:
+- Editar
+- Guardar
+- Cancelar
+- Probar conexión
+- Actualizar
+- Switch: Activo
+
+SEGURIDAD
+- Las URL de Edge Functions no son credenciales.
+- Usuario, RUT, clave y tokens de Facturacion.cl NO se guardan en config.js, HTML, JavaScript, GitHub, localStorage ni sessionStorage.
+- El token temporal de Facturacion.cl se obtiene y renueva dentro de facturacion-cl-gateway.
+- facturacion-cl-gateway ya NO puede cambiar el proveedor activo ni el ambiente global; eso pertenece exclusivamente a facturacion-proveedores.
+
+SECRETS DE FACTURACION.CL
+Configura en Supabase Secrets según corresponda:
+- FACTURACION_CL_API_URL=https://rest.facturacion.cl
+- FACTURACION_CL_PRUEBA_USUARIO
+- FACTURACION_CL_PRUEBA_RUT
+- FACTURACION_CL_PRUEBA_CLAVE
+- FACTURACION_CL_PRODUCCION_USUARIO
+- FACTURACION_CL_PRODUCCION_RUT
+- FACTURACION_CL_PRODUCCION_CLAVE
+
+Datos de emisor admitidos por ambiente (si tu integración los requiere):
+- FACTURACION_CL_PRUEBA_RAZON_SOCIAL
+- FACTURACION_CL_PRUEBA_GIRO
+- FACTURACION_CL_PRUEBA_ACTECO
+- FACTURACION_CL_PRUEBA_DIRECCION
+- FACTURACION_CL_PRUEBA_COMUNA
+- FACTURACION_CL_PRUEBA_CIUDAD
+- FACTURACION_CL_PRUEBA_SUCURSAL
+- FACTURACION_CL_PRODUCCION_RAZON_SOCIAL
+- FACTURACION_CL_PRODUCCION_GIRO
+- FACTURACION_CL_PRODUCCION_ACTECO
+- FACTURACION_CL_PRODUCCION_DIRECCION
+- FACTURACION_CL_PRODUCCION_COMUNA
+- FACTURACION_CL_PRODUCCION_CIUDAD
+- FACTURACION_CL_PRODUCCION_SUCURSAL
+
+INSTALACION / ACTUALIZACION
+1. En Supabase SQL Editor ejecuta UNICAMENTE:
+   INSTALACION_SUPABASE/32_ALE_ATENCIO_SQL_R9_18_172_FACTURACION_MULTIPROVEEDOR_UNICO.sql
+
+2. Despliega las Edge Functions incluidas con estos nombres EXACTOS:
+   - dynamic-processor
+   - facturacion-proveedores
+   - facturacion-sii
+   - facturacion-cl-gateway
+
+3. Sube/reemplaza los archivos web/cPanel de esta entrega.
+
+4. Configura los Secrets de Facturacion.cl.
+
+5. En cPanel entra a:
+   Facturación > Mantenedor de Proveedores de Facturación
+
+6. Selecciona el Ambiente de facturación.
+
+7. Pulsa Probar conexión en el proveedor correspondiente.
+
+8. Activa con el switch el proveedor que utilizará el sistema.
+
+FLUJO
+Pedidos / Facturación
+  -> mismo botón Generar documento
+  -> facturacion-proveedores determina proveedor activo
+  -> Facturación Propia: facturacion-sii
+  -> Facturacion.cl: facturacion-cl-gateway
+
+DYNAMIC-PROCESSOR
+- Continúa siendo el núcleo general del sistema.
+- NO contiene URLs hardcodeadas de los proveedores de facturación.
+- No necesita conocer cada proveedor nuevo que agreguemos en el futuro.
+
+AMBIENTE
+- CERTIFICACION + Facturación Propia = CERTIFICACION SII.
+- CERTIFICACION + Facturacion.cl = PRUEBA internamente.
+- PRODUCCION + cualquier proveedor = PRODUCCION.
+
+IMPORTANTE
+Antes de emitir en PRODUCCION, valida credenciales y configuración tributaria mediante Probar conexión.

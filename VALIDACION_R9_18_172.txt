@@ -1,0 +1,33 @@
+ALE ATENCIO R9.18.172 · VALIDACION LOCAL / ESTATICA
+===================================================
+
+[OK] config.js: sintaxis JavaScript
+[OK] facturacion-api.js: sintaxis JavaScript
+[OK] cpanel.js: sintaxis JavaScript
+[OK] sii-api.js: sintaxis JavaScript
+[OK] api.js: sintaxis JavaScript
+[OK] app.js: sintaxis JavaScript
+[OK] mayoristas.js: sintaxis JavaScript
+[OK] dte.js: sintaxis JavaScript
+[OK] dynamic-processor/index.ts: sintaxis TypeScript
+[OK] facturacion-proveedores/index.ts: sintaxis TypeScript
+[OK] facturacion-sii/index.ts: sintaxis TypeScript
+[OK] facturacion-cl-gateway/index.ts: sintaxis TypeScript
+[OK] 0 IDs duplicados en cpanel.html
+[OK] config.js contiene las 4 URL del sistema
+[OK] dynamic-processor se mantiene desacoplado de proveedores de facturación
+[OK] Mantenedor central: facturacion-proveedores
+[OK] Facturación Propia: facturacion-sii
+[OK] Facturacion.cl: facturacion-cl-gateway
+[OK] Un solo ambiente global CERTIFICACION / PRODUCCION
+[OK] Un solo proveedor activo mediante índice único + RPC atómica
+[OK] Switch Activo conectado al mantenedor
+[OK] Generar documento conserva la misma interfaz
+[OK] facturacion-sii bloquea emisión si Facturación Propia no es el proveedor activo
+[OK] facturacion-cl-gateway bloquea emisión si Facturacion.cl no es el proveedor activo
+[OK] facturacion-cl-gateway no puede cambiar proveedor activo ni ambiente global
+[OK] Probar conexión de Facturacion.cl informa credenciales faltantes en vez de éxito falso
+[OK] SQL único preparado para Supabase SQL Editor
+
+LIMITACION DE ESTA VALIDACION
+No se realizó una emisión tributaria real contra Facturacion.cl ni SII productivo porque requiere credenciales/ambiente reales configurados en Supabase Secrets.
