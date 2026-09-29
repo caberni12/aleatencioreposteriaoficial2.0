@@ -3042,8 +3042,31 @@ function setSiiEnvBadge(env){const el=$("#siiEnvironmentBadge");if(!el)return;co
 function renderSiiConfig(){const c=siiState.config||{};$("#siiEnvironment").value=c.ambiente||"CERTIFICACION";$("#siiEnabled").value=c.habilitado?"SI":"NO";$("#siiRutEmisor").value=c.rut_emisor||"";$("#siiRazonSocial").value=c.razon_social||"";$("#siiGiro").value=c.giro||"";$("#siiActeco").value=c.acteco||"";$("#siiDireccion").value=c.direccion_origen||"";$("#siiComuna").value=c.comuna_origen||"";$("#siiCiudad").value=c.ciudad_origen||"";if($("#siiDireccionRegional"))$("#siiDireccionRegional").value=c.direccion_regional_sii||"";if($("#siiBoletaApiEnabled"))$("#siiBoletaApiEnabled").value=c.boleta_api_habilitada?"SI":"NO";if($("#siiBoletaEmissionModel"))$("#siiBoletaEmissionModel").value=c.boleta_modelo_emision||"POR_DEFINIR";if($("#siiBoletaFormat"))$("#siiBoletaFormat").value=c.boleta_formato||"TICKET_80";if($("#siiBoletaPrintFormat"))$("#siiBoletaPrintFormat").value=c.boleta_formato||"TICKET_80";$("#siiEmail").value=c.email_emisor||"";$("#siiResolucionNumero").value=c.numero_resolucion??"";$("#siiResolucionFecha").value=c.fecha_resolucion?String(c.fecha_resolucion).slice(0,10):"";setSiiEnvBadge(c.ambiente)}
 function renderSiiCertificates(){const host=$("#siiCertificateList"),active=String(siiState.config?.certificado_activo_id||"");if(!host)return;host.innerHTML=siiState.certificados.length?siiState.certificados.map(x=>{const isActive=String(x.id)===active;return `<div class="sii-list-item ${isActive?'is-active':''}"><div><strong>${esc(x.alias||'Certificado SII')}</strong><small>${esc(x.rut_firmante||'')} · vence ${esc(siiFormatDate(x.valido_hasta))}</small></div><div class="sii-list-actions">${isActive?'<span class="sii-status-pill ok">Activo</span>':`<button class="btn btn-light btn-compact" type="button" data-sii-cert-activate="${esc(x.id)}">Usar</button>`}</div></div>`}).join(""):'<div class="muted">No hay certificado digital cargado.</div>'}
 function renderSiiCaf(){const tbody=$("#siiCafTable");if(!tbody)return;const rows=siiState.caf||[];tbody.innerHTML=rows.length?rows.map(x=>{const total=Math.max(1,Number(x.folio_hasta||0)-Number(x.folio_desde||0)+1),available=Math.max(0,Number(x.folio_hasta||0)-Number(x.proximo_folio||0)+1),pct=Math.round(available*100/total),local=Boolean(x.es_prueba_local),state=x.agotado?"Agotado":local?"PRUEBA LOCAL":x.activo?"CAF SII ACTIVO":"Inactivo",stateClass=x.agotado?"error":local?"local":"ok",expiry=local&&x.vence_prueba?`<small class="sii-local-expiry">Vence ${siiFormatDate(x.vence_prueba)}</small>`:"",low=!x.agotado&&x.activo&&(available<=5||pct<=20),lowBadge=low?`<small class="sii-folio-low">⚠ ${available<=5?'QUEDAN '+available:pct+'% DISPONIBLE'}</small>`:"";return `<tr class="${local?'sii-local-row':''} ${low?'sii-low-row':''}"><td><strong>${Number(x.tipo_dte)}</strong><small>${esc(SII_DTE_NAMES[x.tipo_dte]||'DTE')}</small>${local?'<small class="sii-local-label">NO AUTORIZADO SII</small>':''}</td><td class="folio-cell">${Number(x.folio_desde).toLocaleString('es-CL')} – ${Number(x.folio_hasta).toLocaleString('es-CL')}</td><td class="folio-cell">${Number(x.proximo_folio||0).toLocaleString('es-CL')}</td><td class="folio-cell"><strong>${available.toLocaleString('es-CL')}</strong><small>${pct}% del rango</small>${lowBadge}${expiry}</td><td><span class="sii-status-pill ${stateClass}">${state}</span></td></tr>`}).join(""):'<tr><td colspan="5" class="sii-document-empty">Aún no hay CAF ni rangos de prueba cargados para este ambiente.</td></tr>';const alert=$("#siiFolioAlert"),low=rows.filter(x=>x.activo&&!x.agotado&&Math.max(0,Number(x.folio_hasta||0)-Number(x.proximo_folio||0)+1)<=Math.max(5,Math.ceil((Number(x.folio_hasta||0)-Number(x.folio_desde||0)+1)*.2)));if(alert){alert.classList.toggle("hidden",!low.length);alert.innerHTML=low.length?`<i class="bi bi-exclamation-triangle"></i><span><strong>Folios por agotarse:</strong> ${low.map(x=>`DTE ${Number(x.tipo_dte)} · ${Math.max(0,Number(x.folio_hasta||0)-Number(x.proximo_folio||0)+1)} disponibles`).join(' · ')}</span>`:""}}
-function renderSiiDocuments(){const tbody=$("#siiDocumentsTable");if(!tbody)return;tbody.innerHTML=siiState.documentos.length?siiState.documentos.map(x=>{const local=Boolean(x.es_prueba_local);return `<tr class="${local?'sii-local-row':''}"><td>${esc(siiFormatDate(x.fecha_emision||x.creado_en))}</td><td><strong>${Number(x.tipo_dte)}</strong><small>${esc(SII_DTE_NAMES[x.tipo_dte]||'DTE')}</small>${local?'<small class="sii-local-label">PRUEBA LOCAL</small>':''}</td><td class="folio-cell"><strong>${Number(x.folio||0).toLocaleString('es-CL')}</strong></td><td class="sii-order-number"><strong>${esc(x.pedido_numero||((data.orders||[]).find(o=>String(o.id)===String(x.pedido_id))?.numero_pedido)||x.pedido_id||'—')}</strong></td><td class="sii-doc-name"><strong>${esc(x.razon_social_receptor||'')}</strong><small>${esc(x.rut_receptor||'')}</small></td><td class="money-cell">${money(x.total||0)}</td><td><span class="sii-status-pill ${siiStatusClass(x.estado)}">${esc(x.estado||'—')}</span>${x.estado_sii?`<small>SII: ${esc(x.estado_sii)}</small>`:''}</td><td class="sii-track">${local?'NO ENVIADO':esc(x.track_id||'—')}</td><td><div class="sii-action-row">${x.track_id?`<button class="btn btn-light btn-compact" type="button" data-sii-query="${esc(x.id)}">Consultar SII</button>`:''}<button class="btn btn-light btn-compact" type="button" data-sii-pdf="${esc(x.id)}"><i class="bi bi-file-earmark-pdf"></i> PDF</button><button class="btn btn-light btn-compact" type="button" data-sii-detail="${esc(x.id)}">Ver XML</button></div></td></tr>`}).join(""):'<tr><td colspan="9" class="sii-document-empty">No hay documentos tributarios emitidos.</td></tr>'}
-function renderSiiRuntime(){const c=siiState.config||{},cert=siiState.certificados.find(x=>String(x.id)===String(c.certificado_activo_id)),last=siiState.documentos[0],official=siiState.caf.filter(x=>x.activo&&!x.agotado&&!x.es_prueba_local).length,local=siiState.caf.filter(x=>x.activo&&!x.agotado&&x.es_prueba_local).length;$("#siiServiceStatus").textContent=SiiAPI?.configured()?"Configurado":"URL pendiente";$("#siiServiceVersion").textContent=c.version||"facturacion-sii";$("#siiCertificateStatus").textContent=cert?`${cert.alias||'Certificado'} · ${cert.rut_firmante||''}`:"Sin certificado";$("#siiCertificateExpiry").textContent=cert?`Vence ${siiFormatDate(cert.valido_hasta)}`:"Carga PFX/P12";$("#siiCafStatus").textContent=local?`${official} CAF SII · ${local} prueba local`:`${official} CAF activos`;$("#siiLastDteStatus").textContent=last?`${last.tipo_dte}-${last.folio} · ${last.estado}`:"Sin emisiones";$("#siiLastTrack").textContent=last?.track_id?`TrackID ${last.track_id}`:"—"}
+function renderSiiDocuments(){
+  const tbody=$("#siiDocumentsTable");if(!tbody)return;
+  const external=window.FacturacionAPI?.activeCodeCached?.()&&window.FacturacionAPI.activeCodeCached()!=="SII_PROPIO";
+  tbody.innerHTML=siiState.documentos.length?siiState.documentos.map(x=>{
+    if(external||x.external_provider){
+      const order=(data.orders||[]).find(o=>String(o.id)===String(x.pedido_id));
+      const folio=Number(x.folio||0),tipo=Number(x.tipo_dte||0),provider=window.FacturacionAPI?.label?.(window.FacturacionAPI?.activeCodeCached?.())||"Proveedor";
+      return `<tr><td>${esc(siiFormatDate(x.fecha_emision||x.creado_en))}</td><td><strong>${tipo}</strong><small>${esc(SII_DTE_NAMES[tipo]||`DTE ${tipo}`)}</small></td><td class="folio-cell"><strong>${folio?folio.toLocaleString('es-CL'):'—'}</strong></td><td class="sii-order-number"><strong>${esc(order?.numero_pedido||x.pedido_id||'—')}</strong></td><td class="sii-doc-name"><strong>${esc(x.receptor_razon||x.razon_social_receptor||'')}</strong><small>${esc(x.receptor_rut||x.rut_receptor||'')}</small></td><td class="money-cell">${money(x.total||0)}</td><td><span class="sii-status-pill ${siiStatusClass(x.estado)}">${esc(x.estado||'—')}</span><small>${esc(provider)}</small></td><td class="sii-track">—</td><td><div class="sii-action-row">${folio?`<button class="btn btn-light btn-compact" type="button" data-billing-pdf="${folio}" data-billing-pdf-tipo="${tipo}"><i class="bi bi-file-earmark-pdf"></i> PDF</button>`:'—'}</div></td></tr>`;
+    }
+    const local=Boolean(x.es_prueba_local);return `<tr class="${local?'sii-local-row':''}"><td>${esc(siiFormatDate(x.fecha_emision||x.creado_en))}</td><td><strong>${Number(x.tipo_dte)}</strong><small>${esc(SII_DTE_NAMES[x.tipo_dte]||'DTE')}</small>${local?'<small class="sii-local-label">PRUEBA LOCAL</small>':''}</td><td class="folio-cell"><strong>${Number(x.folio||0).toLocaleString('es-CL')}</strong></td><td class="sii-order-number"><strong>${esc(x.pedido_numero||((data.orders||[]).find(o=>String(o.id)===String(x.pedido_id))?.numero_pedido)||x.pedido_id||'—')}</strong></td><td class="sii-doc-name"><strong>${esc(x.razon_social_receptor||'')}</strong><small>${esc(x.rut_receptor||'')}</small></td><td class="money-cell">${money(x.total||0)}</td><td><span class="sii-status-pill ${siiStatusClass(x.estado)}">${esc(x.estado||'—')}</span>${x.estado_sii?`<small>SII: ${esc(x.estado_sii)}</small>`:''}</td><td class="sii-track">${local?'NO ENVIADO':esc(x.track_id||'—')}</td><td><div class="sii-action-row">${x.track_id?`<button class="btn btn-light btn-compact" type="button" data-sii-query="${esc(x.id)}">Consultar SII</button>`:''}<button class="btn btn-light btn-compact" type="button" data-sii-pdf="${esc(x.id)}"><i class="bi bi-file-earmark-pdf"></i> PDF</button><button class="btn btn-light btn-compact" type="button" data-sii-detail="${esc(x.id)}">Ver XML</button></div></td></tr>`
+  }).join(""):'<tr><td colspan="9" class="sii-document-empty">No hay documentos tributarios emitidos.</td></tr>'
+}
+function renderSiiRuntime(){
+  const c=siiState.config||{},active=window.FacturacionAPI?.activeCodeCached?.()||"SII_PROPIO",external=active!=="SII_PROPIO",last=siiState.documentos[0];
+  if(external){
+    const provider=window.FacturacionAPI?.activeProvider?.(),name=window.FacturacionAPI?.label?.(active)||active;
+    $("#siiServiceStatus").textContent=name;$("#siiServiceVersion").textContent=provider?.driver||"API externa";
+    $("#siiCertificateStatus").textContent="Gestionado por proveedor";$("#siiCertificateExpiry").textContent="No requiere certificado local";
+    $("#siiCafStatus").textContent="Gestionado por proveedor";
+    $("#siiLastDteStatus").textContent=last?`${last.tipo_dte}-${last.folio||'—'} · ${last.estado||'—'}`:"Sin emisiones";
+    $("#siiLastTrack").textContent=name;setSiiEnvBadge(window.FacturacionAPI?.state?.ambiente||c.ambiente||"CERTIFICACION");return;
+  }
+  const cert=siiState.certificados.find(x=>String(x.id)===String(c.certificado_activo_id)),official=siiState.caf.filter(x=>x.activo&&!x.agotado&&!x.es_prueba_local).length,local=siiState.caf.filter(x=>x.activo&&!x.agotado&&x.es_prueba_local).length;
+  $("#siiServiceStatus").textContent=SiiAPI?.configured()?"Facturación Propia":"URL pendiente";$("#siiServiceVersion").textContent=c.version||"facturacion-sii";$("#siiCertificateStatus").textContent=cert?`${cert.alias||'Certificado'} · ${cert.rut_firmante||''}`:"Sin certificado";$("#siiCertificateExpiry").textContent=cert?`Vence ${siiFormatDate(cert.valido_hasta)}`:"Carga PFX/P12";$("#siiCafStatus").textContent=local?`${official} CAF SII · ${local} prueba local`:`${official} CAF activos`;$("#siiLastDteStatus").textContent=last?`${last.tipo_dte}-${last.folio} · ${last.estado}`:"Sin emisiones";$("#siiLastTrack").textContent=last?.track_id?`TrackID ${last.track_id}`:"—";setSiiEnvBadge(c.ambiente)
+}
 
 function siiDownloadXml(filename,xml){const blob=new Blob([String(xml||"")],{type:"application/xml;charset=ISO-8859-1"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=String(filename||"respuesta.xml").replace(/[^a-zA-Z0-9._-]/g,"_");document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)}
 function siiDteDeadline(row){if(!row?.fecha_limite_eventos)return"";const d=new Date(row.fecha_limite_eventos);if(Number.isNaN(d.getTime()))return"";const days=Math.ceil((d.getTime()-Date.now())/86400000);return days<0?`Plazo vencido ${siiFormatDate(d)}`:days===0?`Vence hoy · ${siiFormatDate(d)}`:`${days} día${days===1?'':'s'} · ${siiFormatDate(d)}`}
@@ -3066,6 +3089,7 @@ window.openOrderSiiIssue=async(orderId,tipoDte=33)=>{
   const o=data.orders.find(x=>String(x.id)===String(orderId));
   if(!o)return toast('✕ Pedido no encontrado');
   if(orderState(o.estado)==='CANCELADO')return toast('✕ Un pedido CANCELADO no puede emitir documentos tributarios.');
+  try{if(window.FacturacionAPI)await FacturacionAPI.load(false,token)}catch(err){console.warn('load billing provider from order',err)}
   try{await loadSiiBilling(false)}catch(err){console.warn('load sii from order',err)}
   $('#siiTipoDte').value=String(tipoDte);
   $('#siiPedidoId').value=String(o.numero_pedido||o.id||'');
@@ -3079,7 +3103,24 @@ window.openOrderSiiIssue=async(orderId,tipoDte=33)=>{
   toggleSiiReferenceFields();openSiiModal('siiEmitModal');
   try{await loadSiiOrderData()}catch(err){console.warn('prefill sii order',err);toast('Revisa los datos tributarios del cliente antes de emitir.')}
 };
-async function loadSiiBilling(force=false){if(!window.SiiAPI||!SiiAPI.configured()){renderSiiRuntime();toast("Configura SII_API_URL en config.js");return}if(siiState.loaded&&!force){renderSiiAll();return}try{const out=await SiiAPI.status(token);siiState.config=out.config||{};siiState.certificados=out.certificados||[];siiState.caf=out.caf||[];siiState.documentos=out.documentos||[];siiState.loaded=true;renderSiiAll()}catch(err){console.warn("SII status",err);toast(`✕ Facturación SII: ${err.message||err}`)}}
+async function loadSiiBilling(force=false){
+  let active="SII_PROPIO";
+  try{if(window.FacturacionAPI){await FacturacionAPI.load(force,token);active=FacturacionAPI.activeCodeCached()||"SII_PROPIO"}}catch(err){console.warn("Facturación provider status",err)}
+  if(siiState.loaded&&!force){renderSiiAll();return}
+  if(active!=="SII_PROPIO"){
+    let own={};
+    if(window.SiiAPI?.configured()){try{own=await SiiAPI.status(token)}catch(err){console.warn("Facturación propia standby",err)}}
+    try{
+      const ext=await FacturacionAPI.documents(token);
+      siiState.config={...(own.config||{}),ambiente:FacturacionAPI.state.ambiente||"CERTIFICACION"};
+      siiState.certificados=own.certificados||[];siiState.caf=own.caf||[];
+      siiState.documentos=(ext.documents||[]).map(x=>({...x,external_provider:true,razon_social_receptor:x.receptor_razon||"",rut_receptor:x.receptor_rut||""}));
+      siiState.loaded=true;renderSiiAll();return;
+    }catch(err){console.warn("Proveedor facturación externo",err);toast(`✕ Facturación: ${err.message||err}`);renderSiiRuntime();return}
+  }
+  if(!window.SiiAPI||!SiiAPI.configured()){renderSiiRuntime();toast("Configura SII_API_URL en config.js");return}
+  try{const out=await SiiAPI.status(token);siiState.config=out.config||{};siiState.certificados=out.certificados||[];siiState.caf=out.caf||[];siiState.documentos=out.documentos||[];siiState.loaded=true;renderSiiAll()}catch(err){console.warn("SII status",err);toast(`✕ Facturación Propia: ${err.message||err}`)}
+}
 async function saveSiiConfig(){const payload={ambiente:$("#siiEnvironment").value,habilitado:$("#siiEnabled").value==="SI",rut_emisor:$("#siiRutEmisor").value.trim(),razon_social:$("#siiRazonSocial").value.trim(),giro:$("#siiGiro").value.trim(),acteco:$("#siiActeco").value.trim(),direccion_origen:$("#siiDireccion").value.trim(),comuna_origen:$("#siiComuna").value.trim(),ciudad_origen:$("#siiCiudad").value.trim(),direccion_regional_sii:$("#siiDireccionRegional")?.value.trim()||"",email_emisor:$("#siiEmail").value.trim(),numero_resolucion:$("#siiResolucionNumero").value,fecha_resolucion:$("#siiResolucionFecha").value,boleta_api_habilitada:$("#siiBoletaApiEnabled")?.value==="SI",boleta_modelo_emision:$("#siiBoletaEmissionModel")?.value||"POR_DEFINIR",boleta_formato:$("#siiBoletaFormat")?.value||"TICKET_80"};const out=await SiiAPI.saveConfig(payload,token);siiState.config=out.config||payload;renderSiiAll();toast("✓ Configuración SII guardada")}
 async function uploadSiiCertificate(){const file=$("#siiCertFile")?.files?.[0];if(!file)return toast("Selecciona un certificado PFX/P12");const password=$("#siiCertPassword").value;if(!password)return toast("Ingresa la contraseña del certificado");const rut=$("#siiCertRut").value.trim();if(!rut)return toast("Ingresa el RUT del firmante");const pfx_base64=await fileAsBase64(file);await SiiAPI.uploadCertificate({alias:$("#siiCertAlias").value.trim()||"Certificado SII",rut_firmante:rut,password,pfx_base64},token);$("#siiCertPassword").value="";$("#siiCertFile").value="";siiState.loaded=false;await loadSiiBilling(true);toast("✓ Certificado cifrado y cargado")}
 async function uploadSiiCaf(){const file=$("#siiCafFile")?.files?.[0];if(!file)return toast("Selecciona un CAF XML o un XML de folios de prueba local");const xml=await fileAsText(file);try{const out=await SiiAPI.uploadCaf(xml,token);$("#siiCafFile").value="";const name=$("#siiCafModal .file-name");if(name)name.textContent="Sin archivo seleccionado";siiState.loaded=false;await loadSiiBilling(true);if(out?.modo==="PRUEBA_LOCAL")toast(`✓ Folios de PRUEBA LOCAL importados · DTE ${out.caf?.tipo_dte} · ${Number(out.caf?.folio_desde||0).toLocaleString('es-CL')}–${Number(out.caf?.folio_hasta||0).toLocaleString('es-CL')}`);else toast(`✓ CAF SII importado · DTE ${out.caf?.tipo_dte} · ${Number(out.caf?.folio_desde||0).toLocaleString('es-CL')}–${Number(out.caf?.folio_hasta||0).toLocaleString('es-CL')}`)}catch(err){console.warn("sii caf upload",err);const code=String(err?.message||err||"");const msg=code.includes("FOLIOS_PRUEBA_RUT_NO_COINCIDE")?"El RUT del archivo de prueba no coincide con el RUT emisor configurado":code.includes("PRUEBA_LOCAL_NO_PERMITIDOS_EN_PRODUCCION")?"Los folios de prueba local solo se pueden cargar en CERTIFICACIÓN":code.includes("CAF_ESTRUCTURA_INVALIDA")?"El XML no corresponde a un CAF oficial SII ni a un archivo de prueba local compatible":code;toast(`✕ ${msg}`);throw err}}
@@ -3103,6 +3144,13 @@ function updateSiiIssueModeUi(){
   const showStatus=(text,tone="warn")=>{if(note){note.className=`sii-issue-status span-2 ${tone}`;note.innerHTML=`<i class="bi ${tone==="error"?"bi-exclamation-triangle":tone==="ok"?"bi-check-circle":"bi-info-circle"}"></i><span>${esc(text)}</span>`}};
   clearStatus();
   btn.disabled=false;
+
+  const activeBillingProvider=window.FacturacionAPI?.activeCodeCached?.();
+  if(activeBillingProvider&&activeBillingProvider!=="SII_PROPIO") {
+    btn.innerHTML='<i class="bi bi-receipt"></i> Generar documento';
+    showStatus(`Proveedor activo: ${window.FacturacionAPI?.label?.(activeBillingProvider)||activeBillingProvider}`,"ok");
+    return;
+  }
 
   if(existing){
     btn.innerHTML=`<i class="bi bi-eye"></i> Ver documento`;
@@ -3132,6 +3180,7 @@ function updateSiiIssueModeUi(){
   btn.innerHTML='<i class="bi bi-receipt"></i> Generar documento';
   if(!m.official){btn.disabled=true;showStatus("CAF no disponible","error")}
 }
+window.updateSiiIssueModeUi=updateSiiIssueModeUi;
 function toggleSiiReferenceFields(){const tipo=Number($("#siiTipoDte")?.value||0),show=[56,61].includes(tipo),boleta=[39,41].includes(tipo);$$('.sii-reference-field').forEach(x=>x.classList.toggle('hidden',!show));$$('.sii-boleta-format-field').forEach(x=>x.classList.toggle('hidden',!boleta));if(boleta&&$("#siiBoletaPrintFormat")&&!$("#siiBoletaPrintFormat").value)$("#siiBoletaPrintFormat").value=siiState.config?.boleta_formato||"TICKET_80";updateSiiIssueModeUi()}
 function siiPdfMoney(v){return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(Number(v||0))}
 function siiPdfText(v){return String(v??'').replace(/[\r\n]+/g,' ').trim()}
@@ -3242,7 +3291,7 @@ async function generateSiiRepresentationPdf(rep,targetWindow=null){
 }
 async function loadSiiOrderData(){
   const ref=$("#siiPedidoId").value.trim();if(!ref)return toast("Ingresa el ID, N.º de pedido o solo el número; por ejemplo 24");
-  const out=await SiiAPI.orderPreview(ref,token),o=out?.pedido||{};if(!o?.id)throw new Error("PEDIDO_NO_ENCONTRADO");
+  const out=window.FacturacionAPI?await FacturacionAPI.orderPreview(ref,token):await SiiAPI.orderPreview(ref,token),o=out?.pedido||{};if(!o?.id)throw new Error("PEDIDO_NO_ENCONTRADO");
   siiLoadedOrderId=String(o.id);siiLoadedOrderDocs=Array.isArray(out.documentos_existentes)?out.documentos_existentes:[];siiLoadedOrderItems=Array.isArray(out.items)?out.items:[];
   $("#siiPedidoId").value=o.numero_pedido||ref;$("#siiRutReceptor").value=o.rut||"";$("#siiRazonReceptor").value=o.razon_social||o.nombre||"";$("#siiGiroReceptor").value=o.giro||"";$("#siiDireccionReceptor").value=o.direccion||"";$("#siiComunaReceptor").value=o.comuna||"";$("#siiCiudadReceptor").value=o.ciudad||"";
   const preview=$("#siiOrderPreview");if(preview){
@@ -3260,10 +3309,40 @@ async function loadSiiOrderData(){
   }
   const ctx=$("#siiEmitContext");if(ctx)ctx.textContent=`Pedido ${o.numero_pedido||o.id} cargado · ${SII_DTE_NAMES[Number($("#siiTipoDte").value)]||"Documento tributario"}`;updateSiiIssueModeUi();toast(`✓ Pedido ${o.numero_pedido||o.id} cargado · ${Number(out.items_count||0)} ítem(s)`)
 }
+async function openExternalBillingPdf(tipo,folio,targetWindow=null){
+  if(!window.FacturacionAPI||!folio)return false;
+  const out=await FacturacionAPI.pdf(tipo,folio,token);
+  if(!out?.pdf_base64)return false;
+  const bin=atob(out.pdf_base64),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+  if(targetWindow&&!targetWindow.closed)targetWindow.location.replace(url);else window.open(url,'_blank','noopener');
+  setTimeout(()=>URL.revokeObjectURL(url),120000);return true;
+}
+async function emitActiveExternalDte(tipo,pedido_id){
+  const payload={tipo_dte:tipo,pedido_id};
+  if([56,61].includes(tipo)){
+    if(!$("#siiRefFolio").value.trim())return toast("La Nota requiere el folio del documento de referencia");
+    payload.referencia={tipo_dte:Number($("#siiRefTipo").value||33),folio:Number($("#siiRefFolio").value||0),fecha:$("#siiRefFecha").value,codigo:Number($("#siiRefCodigo").value||1),razon:$("#siiRefRazon").value.trim()||"Referencia tributaria"};
+  }
+  let pdfWindow=null;
+  try{
+    pdfWindow=window.open('about:blank','_blank');if(pdfWindow)pdfWindow.document.write('<title>Generando documento</title><body style="font-family:Arial,sans-serif;padding:30px">Generando documento tributario…</body>');
+    const out=await FacturacionAPI.issue(payload,token),doc=out?.document||{},folio=Number(doc.folio||out?.provider?.folio||out?.folio||0);
+    if(folio){try{const opened=await openExternalBillingPdf(tipo,folio,pdfWindow);if(!opened&&pdfWindow&&!pdfWindow.closed)pdfWindow.close()}catch(err){console.warn('external billing pdf',err);if(pdfWindow&&!pdfWindow.closed)pdfWindow.close()}}else if(pdfWindow&&!pdfWindow.closed)pdfWindow.close();
+    toast(`✓ ${out.provider_name||'Proveedor'} · DTE ${tipo}${folio?` · folio ${folio.toLocaleString('es-CL')}`:''}`);
+    try{if(typeof loadAdminModules==='function')await loadAdminModules({modules:['clients','orders'],retry:false})}catch(e){console.warn('refresh orders after external DTE',e)}
+    return out;
+  }catch(err){try{if(pdfWindow&&!pdfWindow.closed)pdfWindow.close()}catch(_){}throw err}
+}
 async function emitSiiDte(){
   const tipo=Number($("#siiTipoDte").value),pedido_id=$("#siiPedidoId").value.trim();if(!pedido_id)return toast("Ingresa el ID, N.º de pedido o solo el número; por ejemplo 24");
   if(!siiLoadedOrderId)return toast("Primero busca/carga el pedido y revisa su detalle antes de generar el documento.");
   if(!Array.isArray(siiLoadedOrderItems)||!siiLoadedOrderItems.length)return toast("El pedido no tiene detalle de productos. No se puede generar el documento.");
+  if(window.FacturacionAPI){
+    await FacturacionAPI.load(false,token);
+    const active=FacturacionAPI.activeCodeCached();
+    if(active&&active!=="SII_PROPIO")return emitActiveExternalDte(tipo,pedido_id);
+  }
   const mode=resolveSiiIssueMode(),existing=siiExistingForIssue(tipo,mode);
   if(existing){let tab=null;try{tab=window.open('about:blank','_blank');const detail=await SiiAPI.detail(existing.id,token);if(detail?.representacion){const pdf=await generateSiiRepresentationPdf(detail.representacion,tab);await persistSiiPdf(existing.id,pdf)}else tab?.close();toast(`✓ Documento existente · folio ${Number(existing.folio||0).toLocaleString('es-CL')} · no se consumió otro folio`);return{reutilizado:true,...existing}}catch(err){try{tab?.close()}catch(_){}throw err}}
   if(mode.mode==="PRUEBA_LOCAL_SIN_FOLIOS")return toast("No hay folios PRUEBA LOCAL disponibles para este DTE");if(mode.mode==="SII"&&!mode.official)return toast("No hay CAF oficial disponible para este DTE. Selecciona PRUEBA LOCAL o importa un CAF SII.");
@@ -3308,7 +3387,7 @@ $$('[data-sii-open]').forEach(b=>b.addEventListener('click',()=>openSiiManagerMo
 $$('[data-sii-close]').forEach(b=>b.addEventListener('click',closeSiiModals));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('sii-modal-open'))closeSiiModals()});
 $$('.admin-nav button').forEach(b=>b.addEventListener('click',()=>{if(document.body.classList.contains('sii-modal-open'))closeSiiModals()}));
-$(".admin-nav button[data-view='billing-sii']")?.addEventListener("click",()=>loadSiiBilling(false));
+$(".admin-nav button[data-view='billing-sii']")?.addEventListener("click",async()=>{try{if(window.FacturacionAPI)await FacturacionAPI.load(true,token)}catch(err){console.warn("billing provider load",err)}loadSiiBilling(false)});
 $("#siiRefresh")?.addEventListener("click",e=>busy(e.currentTarget,()=>loadSiiBilling(true)));
 $("#siiRefreshDocuments")?.addEventListener("click",e=>busy(e.currentTarget,()=>loadSiiBilling(true)));
 $("#siiSaveConfig")?.addEventListener("click",e=>busy(e.currentTarget,saveSiiConfig));
@@ -3336,7 +3415,7 @@ $("#siiRegistryApply")?.addEventListener("click",e=>busy(e.currentTarget,async()
 $("#siiCertificationRefresh")?.addEventListener("click",e=>busy(e.currentTarget,()=>loadSiiCertification()));
 $("#siiOpenCertificationPortal")?.addEventListener("click",()=>window.open('https://www.sii.cl/servicios_online/1039-menu_certificacion-1184.html','_blank','noopener,noreferrer'));
 $("#siiCertificationTable")?.addEventListener("click",async e=>{const b=e.target.closest('[data-sii-cert-save]');if(!b)return;await busy(b,async()=>{try{const code=b.dataset.siiCertSave,state=$("#siiCertificationTable")?.querySelector(`.sii-cert-state[data-code="${CSS.escape(code)}"]`)?.value||'PENDIENTE',detalle=$("#siiCertificationTable")?.querySelector(`.sii-cert-detail[data-code="${CSS.escape(code)}"]`)?.value||'',evidencia=$("#siiCertificationTable")?.querySelector(`.sii-cert-evidence[data-code="${CSS.escape(code)}"]`)?.value||'';await SiiAPI.certificationUpdate({codigo:code,estado:state,detalle,evidencia},token);await loadSiiCertification();toast(`✓ Etapa ${code} actualizada`)}catch(err){toast(`✕ ${err.message||err}`)}})});
-$("#siiDocumentsTable")?.addEventListener("click",async e=>{const query=e.target.closest('[data-sii-query]'),detail=e.target.closest('[data-sii-detail]'),pdf=e.target.closest('[data-sii-pdf]');if(query){await busy(query,async()=>{try{const out=await SiiAPI.queryTrack(query.dataset.siiQuery,token);siiState.loaded=false;await loadSiiBilling(true);toast(`SII: ${out.estado||'consultado'}${out.glosa?` · ${out.glosa}`:''}`)}catch(err){toast(`✕ ${err.message||err}`)}})}else if(pdf){await busy(pdf,async()=>{let tab=null;try{tab=window.open('about:blank','_blank');const out=await SiiAPI.detail(pdf.dataset.siiPdf,token);if(out.representacion){const generated=await generateSiiRepresentationPdf(out.representacion,tab);await persistSiiPdf(pdf.dataset.siiPdf,generated)}else throw new Error('REPRESENTACION_PDF_NO_DISPONIBLE')}catch(err){try{tab?.close()}catch(_){}toast(`✕ ${err.message||err}`)}})}else if(detail){await busy(detail,async()=>{try{const out=await SiiAPI.detail(detail.dataset.siiDetail,token),d=out.documento||{};const blob=new Blob([d.xml_envio||d.xml_dte||""],{type:"text/xml;charset=ISO-8859-1"}),url=URL.createObjectURL(blob);window.open(url,"_blank","noopener");setTimeout(()=>URL.revokeObjectURL(url),60000)}catch(err){toast(`✕ ${err.message||err}`)}})}});
+$("#siiDocumentsTable")?.addEventListener("click",async e=>{const externalPdf=e.target.closest('[data-billing-pdf]'),query=e.target.closest('[data-sii-query]'),detail=e.target.closest('[data-sii-detail]'),pdf=e.target.closest('[data-sii-pdf]');if(externalPdf){await busy(externalPdf,async()=>{try{const tipo=Number(externalPdf.dataset.billingPdfTipo||0),folio=Number(externalPdf.dataset.billingPdf||0);if(!tipo||!folio)throw new Error('DOCUMENTO_INVALIDO');await openExternalBillingPdf(tipo,folio)}catch(err){toast(`✕ ${err.message||err}`)}})}else if(query){await busy(query,async()=>{try{const out=await SiiAPI.queryTrack(query.dataset.siiQuery,token);siiState.loaded=false;await loadSiiBilling(true);toast(`SII: ${out.estado||'consultado'}${out.glosa?` · ${out.glosa}`:''}`)}catch(err){toast(`✕ ${err.message||err}`)}})}else if(pdf){await busy(pdf,async()=>{let tab=null;try{tab=window.open('about:blank','_blank');const out=await SiiAPI.detail(pdf.dataset.siiPdf,token);if(out.representacion){const generated=await generateSiiRepresentationPdf(out.representacion,tab);await persistSiiPdf(pdf.dataset.siiPdf,generated)}else throw new Error('REPRESENTACION_PDF_NO_DISPONIBLE')}catch(err){try{tab?.close()}catch(_){}toast(`✕ ${err.message||err}`)}})}else if(detail){await busy(detail,async()=>{try{const out=await SiiAPI.detail(detail.dataset.siiDetail,token),d=out.documento||{};const blob=new Blob([d.xml_envio||d.xml_dte||""],{type:"text/xml;charset=ISO-8859-1"}),url=URL.createObjectURL(blob);window.open(url,"_blank","noopener");setTimeout(()=>URL.revokeObjectURL(url),60000)}catch(err){toast(`✕ ${err.message||err}`)}})}});
 document.addEventListener("keydown",e=>{
   if(e.key!=="Escape")return;
   const ids=["ledgerHistoryEditor","inventoryPartEditor","inventoryImportEditor","warehouseChannelEditor","warehouseEditor"];
@@ -3355,3 +3434,6 @@ async function renderWholesaleCreditPaymentsAdmin(){
   }catch(err){console.warn(err);const code=String(err?.message||err||'').toUpperCase();host.innerHTML=code.includes('ACCION_NO_VALIDA')?'<div class="empty-state">Despliega la Edge Function R9.18.137 para habilitar esta bandeja.</div>':'<div class="empty-state">No fue posible cargar los pagos de crédito.</div>'}
 }
 window.reviewWholesaleCreditPayment=async(id,decision,source)=>{let motivo='';if(decision==='RECHAZAR'){motivo=prompt('Motivo del rechazo del comprobante:','')||'';if(!motivo.trim())return}await busy(source,async()=>{try{await AleAPI.post('adminwholesalecreditpaymentdecision',{id,decision,motivo},token);toast(decision==='APROBAR'?'✓ Pago aprobado y aplicado a la línea de crédito':'✓ Comprobante rechazado');await loadAdminModules({modules:['wholesale'],retry:true});renderWholesaleCredits();renderWholesale()}catch(err){console.warn(err);toast(`✕ No fue posible ${decision==='APROBAR'?'aprobar':'rechazar'} el pago · ${String(err?.message||err||'')}`)}},decision==='APROBAR'?'Aprobando…':'Rechazando…')};
+
+window.addEventListener('ale:billing-provider-changed',()=>{try{updateSiiIssueModeUi()}catch(_){};try{siiState.loaded=false;loadSiiBilling(true)}catch(_){}});
+window.addEventListener('ale:billing-environment-changed',e=>{try{const v=String(e.detail?.ambiente||'CERTIFICACION');if($('#siiEnvironment'))$('#siiEnvironment').value=v;siiState.loaded=false;loadSiiBilling(true)}catch(_){}});

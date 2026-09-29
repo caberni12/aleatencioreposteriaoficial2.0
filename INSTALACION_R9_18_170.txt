@@ -1,0 +1,52 @@
+ALE ATENCIO R9.18.170 · FACTURACION MULTIPROVEEDOR
+====================================================
+
+OBJETIVO
+- Mantener una sola interfaz de Facturacion en cPanel.
+- Cambiar exclusivamente la API/driver usado por el sistema segun el proveedor activo.
+- Mantener Facturacion Propia en la Edge Function existente: facturacion-sii.
+- Mantener Facturacion.cl en la Edge Function: facturacion-cl-gateway.
+- Administrar ambos desde un unico Mantenedor de Proveedores de Facturacion.
+- Mantener un solo Ambiente de Facturacion: CERTIFICACION o PRODUCCION.
+
+URL CONFIGURADAS EN config.js
+- API principal: dynamic-processor
+- Facturacion Propia: /functions/v1/facturacion-sii
+- Facturacion.cl: /functions/v1/facturacion-cl-gateway
+- Mantenedor de proveedores: /functions/v1/facturacion-proveedores
+
+INSTALACION
+1. Ejecutar:
+   INSTALACION_SUPABASE/30_ALE_ATENCIO_SQL_R9_18_170_PROVEEDORES_FACTURACION.sql
+
+2. Desplegar NUEVA Edge Function:
+   INSTALACION_SUPABASE_EDGE_FUNCTIONS/facturacion-proveedores/index.ts
+   Nombre: facturacion-proveedores
+   Usar la misma modalidad de autenticacion de las otras funciones ALE (sesion propia / no JWT).
+
+3. Verificar o volver a desplegar:
+   INSTALACION_SUPABASE_EDGE_FUNCTIONS/facturacion-cl-gateway/index.ts
+   Nombre: facturacion-cl-gateway
+
+4. NO reemplazar ni renombrar la Edge Function existente de facturacion propia:
+   facturacion-sii
+
+5. Subir los archivos Web/cPanel de esta entrega.
+
+CPANEL
+- Finanzas / SII > Facturacion
+- Mantenedor de Proveedores de Facturacion:
+    Facturacion Propia  -> driver facturacion-sii
+    Facturacion.cl      -> driver facturacion-cl-gateway
+- Solo un proveedor puede quedar Activo.
+- El switch Activo decide que API usa Generar documento.
+- Probar conexion valida el proveedor seleccionado.
+- Ambiente de facturacion es UNICO para ambos proveedores.
+
+SEGURIDAD
+- Las URL de las Edge Functions se definen en config.js y no son credenciales.
+- Usuario, RUT, clave y tokens de Facturacion.cl permanecen en Supabase Secrets.
+- El navegador nunca recibe esas credenciales.
+
+NOTA
+La interfaz de emision NO cambia cuando se activa otro proveedor. Solo cambia el driver/API utilizado por debajo.

@@ -1,0 +1,26 @@
+ALE ATENCIO R9.18.171 · VALIDACION LOCAL / ESTATICA
+===================================================
+
+[OK] config.js: sintaxis JavaScript
+[OK] facturacion-api.js: sintaxis JavaScript
+[OK] cpanel.js: sintaxis JavaScript
+[OK] sii-api.js: sintaxis JavaScript
+[OK] api.js: sintaxis JavaScript
+[OK] app.js: sintaxis JavaScript
+[OK] facturacion-proveedores/index.ts: sintaxis TypeScript
+[OK] facturacion-cl-gateway/index.ts: sintaxis TypeScript
+[OK] facturacion-sii/index.ts: sintaxis TypeScript
+[OK] 0 IDs HTML duplicados
+[OK] URL facturacion-sii configurada en config.js
+[OK] URL facturacion-cl-gateway configurada en config.js
+[OK] URL facturacion-proveedores configurada en config.js
+[OK] Ambiente global CERTIFICACION / PRODUCCION
+[OK] Facturacion.cl traduce CERTIFICACION a PRUEBA solo internamente
+[OK] Solo un proveedor activo mediante índice + activación atómica
+[OK] Mantenedor incluye Facturación Propia y Facturacion.cl
+[OK] Switch Activo conectado a persistencia real
+[OK] Acciones estándar: Editar, Guardar, Cancelar, Probar conexión, Actualizar
+[OK] Generar documento usa la API del proveedor activo
+[OK] Historial/PDF usa el proveedor activo
+
+NOTA: validación local/estática. La emisión real contra Facturacion.cl requiere sus credenciales configuradas en Supabase Secrets y sus servicios disponibles.

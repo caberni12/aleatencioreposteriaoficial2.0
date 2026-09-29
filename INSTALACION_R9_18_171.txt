@@ -1,0 +1,72 @@
+ALE ATENCIO R9.18.171 · FACTURACION MULTIPROVEEDOR DEFINITIVA
+==============================================================
+
+ARQUITECTURA
+- La interfaz de Facturacion es UNICA.
+- El ambiente de Facturacion es UNICO: CERTIFICACION o PRODUCCION.
+- Lo unico que cambia al activar un proveedor es la API/TS utilizada.
+- Facturacion Propia mantiene su Edge Function existente: facturacion-sii.
+- Facturacion.cl utiliza: facturacion-cl-gateway.
+- El Mantenedor de Proveedores utiliza: facturacion-proveedores.
+
+URL EN config.js
+- Facturacion Propia:
+  https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-sii
+- Facturacion.cl:
+  https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-cl-gateway
+- Mantenedor:
+  https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-proveedores
+
+IMPORTANTE
+Estas URL no son credenciales. Usuario, RUT, clave y token del proveedor permanecen en Supabase Secrets.
+
+INSTALACION DESDE R9.18.170
+1. Ejecutar:
+   INSTALACION_SUPABASE/31_ALE_ATENCIO_SQL_R9_18_171_AMBIENTE_FACTURACION_GLOBAL.sql
+
+2. Volver a desplegar:
+   INSTALACION_SUPABASE_EDGE_FUNCTIONS/facturacion-proveedores/index.ts
+   Nombre de la funcion: facturacion-proveedores
+
+3. Volver a desplegar:
+   INSTALACION_SUPABASE_EDGE_FUNCTIONS/facturacion-cl-gateway/index.ts
+   Nombre de la funcion: facturacion-cl-gateway
+
+4. Mantener y NO renombrar:
+   INSTALACION_SUPABASE_EDGE_FUNCTIONS/facturacion-sii/index.ts
+   Nombre de la funcion: facturacion-sii
+
+5. Reemplazar en el sitio/cPanel:
+   config.js
+   cpanel.html
+   cpanel.js
+   facturacion-api.js
+
+INSTALACION NUEVA
+1. Ejecutar:
+   INSTALACION_SUPABASE/30_ALE_ATENCIO_SQL_R9_18_171_PROVEEDORES_FACTURACION.sql
+2. Ejecutar tambien 31 (es idempotente y sirve como verificacion/migracion final).
+3. Desplegar las tres Edge Functions indicadas arriba.
+
+CPANEL
+Facturacion > Mantenedor de Proveedores de Facturacion
+- Facturacion Propia · facturacion-sii
+- Facturacion.cl · facturacion-cl-gateway
+- Switch: Activo
+- Solo un proveedor puede quedar activo.
+- Acciones: Editar · Probar conexion
+- Botones del mantenedor: Guardar · Cancelar · Actualizar
+
+FLUJO
+Generar documento
+  -> consulta proveedor activo
+  -> usa la API configurada en config.js
+  -> mantiene la misma pantalla, mismo pedido y mismo flujo de usuario
+
+AMBIENTE
+- CERTIFICACION: facturacion-sii usa CERTIFICACION; Facturacion.cl traduce internamente a PRUEBA.
+- PRODUCCION: ambos usan PRODUCCION.
+
+SEGURIDAD
+- Nunca guardar credenciales ni tokens en config.js, HTML, JavaScript, localStorage o GitHub.
+- Facturacion.cl obtiene/renueva su token dentro de facturacion-cl-gateway.
