@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="./styles.css?v=R9.18.173"><link rel="stylesheet" href="./cpanel.css?v=R9.18.173">
+  <link rel="stylesheet" href="./styles.css?v=R9.18.174"><link rel="stylesheet" href="./cpanel.css?v=R9.18.174">
   <style id="ale-production-css-fallback-r918151">
 /* R9.18.152: fallback embebido para GitHub Pages/Cloudflare. Mantener también archivos CSS externos. */
 :root{
@@ -7333,7 +7333,7 @@ body > #requestClientEditor:not(.hidden) .editor-actions{
 @media(max-width:1150px){.dash-map-layout{grid-template-columns:1fr}.dash-map-side{display:grid;grid-template-columns:1fr 1fr}.dash-chile-total{margin-top:0}}
 @media(max-width:720px){.dash-map-stage{min-height:520px}.dash-map-layout{grid-template-columns:1fr}.dash-map-side{grid-template-columns:1fr 1fr}.dash-region-label{font-size:9px}}
 
-/* R9.18.173 · Facturación multiproveedor · interfaz única · proveedor seleccionable */
+/* R9.18.174 · Facturación multiproveedor · interfaz única · proveedor seleccionable */
 .fcl-provider-banner{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid #dcecdf;background:#f6fff8;border-radius:16px;margin:14px 0}.fcl-provider-banner i{font-size:22px;color:#2f7a4b}.fcl-provider-banner strong{display:block;color:#315c40}.fcl-provider-banner small{display:block;color:#64756a;margin-top:3px;line-height:1.35}.fcl-runtime-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}.fcl-runtime-grid>div{background:#fff;border:1px solid #eaded8;border-radius:15px;padding:14px}.fcl-runtime-grid span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#9a8278;font-weight:900}.fcl-runtime-grid strong{display:block;font-size:18px;margin-top:5px;color:#513a32}.fcl-runtime-grid small{display:block;margin-top:4px;color:#8e776d;overflow-wrap:anywhere}.fcl-runtime-grid .is-ok{color:#2d7b4c}.fcl-runtime-grid .is-warn{color:#a26a22}.fcl-runtime-grid .is-error{color:#a33f4f}.fcl-two-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.fcl-box{border:1px solid #eaded8;border-radius:17px;background:#fff;padding:16px}.fcl-box h3{margin:0 0 4px;color:#4d372f}.fcl-box>p{margin:0 0 14px;color:#88746b;font-size:12px}.fcl-code{display:block;border:1px solid #e8ddd7;background:#fbf8f6;padding:10px 12px;border-radius:10px;overflow-wrap:anywhere;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:#674f45}.fcl-pill{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:900;background:#f4ece8;color:#73584d}.fcl-pill.ok{background:#e9f8ef;color:#277346}.fcl-pill.err{background:#fff0f1;color:#a13f53}.fcl-standby-badge{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;background:#fff4df;border:1px solid #efd7a7;color:#9a671c;font-size:10px;font-weight:900;letter-spacing:.07em}.fcl-standby-badge.active{background:#e9f8ef;border-color:#bfe3cd;color:#277346}.sii-launch-btn.is-standby{opacity:.52;cursor:not-allowed;filter:grayscale(.25)}@media(max-width:980px){.fcl-runtime-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fcl-two-col{grid-template-columns:1fr}}@media(max-width:560px){.fcl-runtime-grid{grid-template-columns:1fr}.fcl-box{padding:12px}}
 </style>
 
@@ -8646,9 +8646,74 @@ Torta chocolate | 1 | 25000"></textarea></label>
           <div class="span-2 form-help">Guarda aquí tus enlaces reales. La web mostrará únicamente WhatsApp y las redes sociales configuradas.</div>
           <div class="field-group file-field span-2" data-file-picker="image"><span>Logo del negocio · también se usa en los DTE</span><input id="sLogo" class="file-input" type="file" accept="image/*"><label class="file-picker-btn" for="sLogo"><i class="bi bi-image"></i><span class="file-picker-text">Seleccionar logo</span></label><small class="file-name">Sin archivo seleccionado</small></div>
         </div>
-        <button class="btn btn-primary" id="saveSettings">Guardar configuración</button>
+        <div class="settings-action-row">
+          <button class="btn btn-primary" id="saveSettings">Guardar configuración</button>
+          <button class="btn btn-light system-maintenance-open" id="openSystemMaintenance" type="button"><i class="bi bi-hdd-stack"></i> Mantenedor del Sistema</button>
+        </div>
       </div>
     </section>
+
+    <div class="editor hidden sii-modal system-maintenance-modal" id="systemMaintenanceModal" role="dialog" aria-modal="true" aria-labelledby="systemMaintenanceTitle">
+      <div class="editor-modal-head system-maintenance-head">
+        <div><span class="eyebrow">Administración del sistema</span><h3 id="systemMaintenanceTitle">Mantenedor del Sistema</h3><small>Respaldo y reinicio operacional para puesta en producción. Usuarios, productos y parametrización permanecen intactos.</small></div>
+        <button type="button" class="editor-close-x" data-system-maintenance-close aria-label="Cerrar">×</button>
+      </div>
+
+      <div class="system-maintenance-toolbar">
+        <button class="system-maintenance-tab active" type="button" data-system-maintenance-tab="overview"><i class="bi bi-grid-1x2"></i><span>Estado</span></button>
+        <button class="system-maintenance-tab" type="button" data-system-maintenance-tab="backup"><i class="bi bi-database-check"></i><span>Respaldos</span></button>
+        <button class="system-maintenance-tab danger" type="button" data-system-maintenance-tab="reset"><i class="bi bi-arrow-counterclockwise"></i><span>Reinicio operacional</span></button>
+        <button class="system-maintenance-tab" type="button" data-system-maintenance-tab="audit"><i class="bi bi-shield-check"></i><span>Auditoría</span></button>
+        <button class="btn btn-light btn-compact" id="systemMaintenanceRefresh" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button>
+      </div>
+
+      <div class="system-maintenance-content">
+        <section class="system-maintenance-pane active" data-system-maintenance-pane="overview">
+          <div class="system-maintenance-kpis">
+            <div><span>Registros operacionales</span><strong id="systemMaintenanceOperationalCount">—</strong><small>Datos que se limpiarán</small></div>
+            <div><span>Último respaldo</span><strong id="systemMaintenanceLastBackup">—</strong><small id="systemMaintenanceLastBackupDate">Sin respaldo</small></div>
+            <div><span>Última operación</span><strong id="systemMaintenanceLastEvent">—</strong><small id="systemMaintenanceLastEventDate">Sin registros</small></div>
+          </div>
+          <div class="system-maintenance-section-title"><div><span class="eyebrow">Módulos del sistema</span><h4>Qué se conserva y qué se reinicia</h4></div><span class="system-maintenance-safe-badge"><i class="bi bi-shield-lock"></i> Maestros protegidos</span></div>
+          <div class="system-maintenance-module-grid" id="systemMaintenanceModules"></div>
+        </section>
+
+        <section class="system-maintenance-pane" data-system-maintenance-pane="backup">
+          <div class="system-maintenance-section-title"><div><span class="eyebrow">Respaldo</span><h4>Respaldos previos al reinicio</h4></div></div>
+          <div class="system-maintenance-info"><i class="bi bi-info-circle"></i><span>El respaldo guarda una copia JSON de los datos operacionales y de los valores que serán reiniciados. No se eliminan archivos de productos, imágenes ni configuración.</span></div>
+          <div class="system-backup-create">
+            <label class="field-group"><span>Motivo</span><input id="systemBackupReason" maxlength="500" value="Respaldo previo a puesta en producción"></label>
+            <label class="field-group"><span>Contraseña actual <b>*</b></span><input id="systemBackupPassword" type="password" autocomplete="current-password" placeholder="Revalidar acceso"></label>
+            <button class="btn btn-primary" id="systemMaintenanceCreateBackup" type="button"><i class="bi bi-database-add"></i> Generar respaldo</button>
+          </div>
+          <div class="table-wrap system-maintenance-table-wrap"><table><thead><tr><th>Folio</th><th>Fecha</th><th>Registros</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="systemMaintenanceBackupsTable"><tr><td colspan="5">Sin respaldos.</td></tr></tbody></table></div>
+        </section>
+
+        <section class="system-maintenance-pane" data-system-maintenance-pane="reset">
+          <div class="system-reset-warning"><i class="bi bi-exclamation-triangle"></i><div><strong>Reinicio operacional para puesta en producción</strong><span>Elimina datos de prueba y deja stocks, saldos y movimientos en cero. No elimina usuarios, productos, recetas, insumos, proveedores, bodegas, configuración, APIs, certificados ni CAF.</span></div></div>
+          <div class="system-reset-flow">
+            <div class="system-reset-step"><span>1</span><div><strong>Respaldo obligatorio</strong><small>Selecciona un respaldo reciente generado por tu usuario.</small></div></div>
+            <div class="system-reset-step"><span>2</span><div><strong>Revalidación de acceso</strong><small>Debes ingresar nuevamente tu contraseña de administrador.</small></div></div>
+            <div class="system-reset-step"><span>3</span><div><strong>Confirmación escrita</strong><small>Escribe exactamente REINICIAR SISTEMA.</small></div></div>
+            <div class="system-reset-step"><span>4</span><div><strong>Cierre de sesión</strong><small>Al finalizar se revocan todas las sesiones y deberás ingresar nuevamente.</small></div></div>
+          </div>
+          <div class="form-grid system-reset-form">
+            <label class="field-group span-2"><span>Respaldo previo <b>*</b></span><select id="systemResetBackup"><option value="">Selecciona un respaldo</option></select></label>
+            <label class="field-group span-2"><span>Motivo <b>*</b></span><input id="systemResetReason" maxlength="500" value="Puesta en producción" placeholder="Ej: Inicio de operación con datos reales"></label>
+            <label class="field-group"><span>Contraseña actual <b>*</b></span><input id="systemResetPassword" type="password" autocomplete="current-password" placeholder="Contraseña del administrador"></label>
+            <label class="field-group"><span>Confirmación <b>*</b></span><input id="systemResetConfirmation" autocomplete="off" placeholder="REINICIAR SISTEMA"></label>
+          </div>
+          <label class="system-reset-consent"><input id="systemResetConsent" type="checkbox"><span>Confirmo que revisé el resumen, generé un respaldo y deseo eliminar los datos operacionales de prueba para iniciar la operación real.</span></label>
+          <div class="editor-actions"><button class="btn btn-danger" id="systemResetExecute" type="button" disabled><i class="bi bi-arrow-counterclockwise"></i> Reiniciar operación</button></div>
+        </section>
+
+        <section class="system-maintenance-pane" data-system-maintenance-pane="audit">
+          <div class="system-maintenance-section-title"><div><span class="eyebrow">Trazabilidad</span><h4>Auditoría protegida</h4></div><span class="system-maintenance-safe-badge"><i class="bi bi-lock"></i> No se limpia</span></div>
+          <div class="table-wrap system-maintenance-table-wrap"><table><thead><tr><th>Fecha</th><th>Usuario</th><th>Evento</th><th>Estado</th><th>Motivo</th></tr></thead><tbody id="systemMaintenanceAuditTable"><tr><td colspan="5">Sin eventos.</td></tr></tbody></table></div>
+        </section>
+      </div>
+      <div class="editor-actions system-maintenance-footer"><button class="btn btn-light" type="button" data-system-maintenance-close>Cerrar</button></div>
+    </div>
     <div class="editor hidden operational-modal movement-detail-editor" id="movementDetailEditor" role="dialog" aria-modal="true" aria-labelledby="movementDetailTitle">
       <div class="editor-modal-head"><div><span class="eyebrow" id="movementDetailEyebrow">Movimiento</span><h3 id="movementDetailTitle">Detalle del movimiento</h3><small id="movementDetailSubtitle">Información completa del registro seleccionado.</small></div><button type="button" class="editor-close-x" id="closeMovementDetail" aria-label="Cerrar">×</button></div>
       <div class="movement-detail-grid" id="movementDetailGrid"></div>
@@ -8668,5 +8733,5 @@ Torta chocolate | 1 | 25000"></textarea></label>
 </div>
 <div class="notification-toast-stack" id="notificationToastStack" aria-live="polite"></div>
 <div class="toast" id="adminToast"></div>
-<script src="./config.js?v=R9.18.173"></script><script src="./api.js?v=R9.18.173"></script><script src="./sii-api.js?v=R9.18.173"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./facturacion-api.js?v=R9.18.173"></script><script src="./cpanel.js?v=R9.18.173"></script>
+<script src="./config.js?v=R9.18.174"></script><script src="./api.js?v=R9.18.174"></script><script src="./sii-api.js?v=R9.18.174"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./facturacion-api.js?v=R9.18.174"></script><script src="./cpanel.js?v=R9.18.174"></script><script src="./mantenedor-sistema.js?v=R9.18.174"></script>
 </body></html>

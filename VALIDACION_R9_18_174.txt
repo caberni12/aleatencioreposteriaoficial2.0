@@ -1,0 +1,24 @@
+ALE ATENCIO R9.18.174 · VALIDACIÓN LOCAL/ESTÁTICA
+================================================
+
+[OK] Mantenedor del Sistema dentro de Configuración y abierto en modal.
+[OK] Vista de Estado con módulos protegidos y módulos que se reinician.
+[OK] Respaldos con revalidación de contraseña.
+[OK] Descarga JSON del respaldo.
+[OK] Reinicio operacional exige respaldo, contraseña, motivo y frase REINICIAR SISTEMA.
+[OK] Edge Function independiente mantenedor-sistema.
+[OK] Sesión ADMIN validada en servidor.
+[OK] Contraseña revalidada con ale_verificar_credenciales.
+[OK] Tabla de auditoría protegida sistema_auditoria fuera del proceso de limpieza.
+[OK] Usuarios y productos no se eliminan.
+[OK] Stock de productos/tamaños/insumos vuelve a 0.
+[OK] Operación de prueba se limpia mediante RPC transaccional.
+[OK] Folios SII no se reinician.
+[OK] Sesiones revocadas después del reinicio.
+[OK] URL mantenedor-sistema centralizada en config.js.
+[OK] cpanel.html: 0 IDs duplicados.
+[OK] JavaScript: node --check sin errores.
+[OK] TypeScript: transpileModule sin diagnósticos sintácticos en las 5 Edge Functions.
+
+NOTA
+La validación es local/estática. El reinicio destructivo NO se ejecutó contra la base de producción del usuario durante la generación del paquete.

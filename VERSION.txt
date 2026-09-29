@@ -1,2 +1,2 @@
-ALE ATENCIO R9.18.173
-Facturación · panel compacto + mantenedor de proveedores en modal
+ALE ATENCIO R9.18.174
+Mantenedor del Sistema · respaldo + reinicio operacional protegido para puesta en producción

@@ -1,0 +1,91 @@
+ALE ATENCIO R9.18.174 · MANTENEDOR DEL SISTEMA
+================================================
+
+OBJETIVO
+Dejar ALE ATENCIO limpio de datos operacionales/de prueba para comenzar a utilizarlo con datos reales, SIN eliminar la parametrización del sistema.
+
+SE CONSERVA
+- Usuarios, roles y permisos.
+- Productos, categorías, imágenes, precios y configuración comercial.
+- Tamaños, personas, recetas e ingredientes.
+- Catálogo de insumos y costo vigente (stock queda en 0).
+- Proveedores y bodegas.
+- Listas de precios y configuración mayorista.
+- Configuración general del negocio.
+- Proveedores de facturación, URLs/API y ambiente.
+- Certificado, CAF y configuración de Facturación Propia.
+- Galería, Web, catálogo y contenido configurado.
+- Auditoría protegida del Mantenedor del Sistema.
+
+SE REINICIA / LIMPIA
+- Clientes de prueba no vinculados a usuarios.
+- Solicitudes y cotizaciones.
+- Pedidos, detalle, estados, enlaces de pago y pagos.
+- Facturas, boletas, NC, ND, guías y DTE de prueba almacenados en la aplicación.
+- Documentos y eventos de Facturacion.cl de prueba.
+- Movimientos, reservas, ajustes, transferencias, ingresos y existencias de inventario.
+- Compras e ingresos de insumos de prueba.
+- Historial de costos de prueba.
+- Movimientos/pagos/documentos/notificaciones mayoristas de prueba.
+- Estadísticas, analítica Web y notificaciones operacionales.
+- Auditoría operacional de pruebas; luego se registra el reinicio realizado.
+- Stock de productos, tamaños e insumos vuelve a 0.
+- Saldos utilizados de crédito vuelven a 0 y el disponible vuelve al límite configurado.
+- Correlativos internos de inventario/ingresos vuelven a su inicio. NO se alteran folios SII.
+
+SEGURIDAD
+- Solo rol ADMIN.
+- Requiere sesión válida.
+- Requiere reingresar la contraseña del ADMIN.
+- Requiere respaldo previo generado por el mismo usuario.
+- Requiere escribir exactamente: REINICIAR SISTEMA
+- Registra la acción en sistema_auditoria (tabla protegida que no se limpia).
+- Al terminar revoca todas las sesiones y obliga a iniciar sesión nuevamente.
+
+INSTALACIÓN DESDE R9.18.173
+1. En Supabase SQL Editor ejecutar:
+   INSTALACION_SUPABASE/33_ALE_ATENCIO_SQL_R9_18_174_MANTENEDOR_SISTEMA.sql
+
+2. Crear/desplegar la nueva Edge Function con nombre EXACTO:
+   mantenedor-sistema
+
+   Código:
+   INSTALACION_SUPABASE_EDGE_FUNCTIONS/mantenedor-sistema/index.ts
+
+   Desplegar igual que las demás Edge Functions del sistema, con --no-verify-jwt.
+   La función valida internamente la sesión de ALE ATENCIO.
+
+3. La URL queda configurada en config.js:
+   https://btvliyzripnhjexdgoef.supabase.co/functions/v1/mantenedor-sistema
+
+4. Reemplazar en la Web/cPanel:
+   - config.js
+   - cpanel.html
+   - cpanel.css
+   - mantenedor-sistema.js
+
+5. Limpiar caché con Ctrl+F5.
+
+NO REQUIERE
+- No requiere modificar dynamic-processor.
+- No requiere modificar facturacion-sii.
+- No requiere modificar facturacion-cl-gateway.
+- No requiere modificar facturacion-proveedores.
+- No requiere Secrets nuevos.
+
+USO RECOMENDADO PARA PUESTA EN PRODUCCIÓN
+1. Configuración > Mantenedor del Sistema.
+2. Revisar Estado y módulos.
+3. Ir a Respaldos.
+4. Ingresar contraseña actual y generar respaldo.
+5. Descargar el respaldo JSON como copia adicional.
+6. Ir a Reinicio operacional.
+7. Seleccionar el respaldo recién generado.
+8. Ingresar motivo y contraseña.
+9. Escribir REINICIAR SISTEMA.
+10. Marcar la confirmación y ejecutar.
+11. El sistema cerrará todas las sesiones.
+12. Volver a iniciar sesión y comprobar que operaciones/stock están en cero.
+
+IMPORTANTE
+Este reinicio está pensado para retirar DATOS DE PRUEBA antes de comenzar la operación real. No utilizar como procedimiento rutinario una vez que existan documentos tributarios/operaciones reales sin revisar previamente el alcance y el respaldo.

@@ -1,5 +1,5 @@
 window.ALE_ATENCIO_CONFIG = {
-  // ALE ATENCIO R9.18.173 · FACTURACION UI COMPACTA / MULTIPROVEEDOR.
+  // ALE ATENCIO R9.18.174 · MANTENEDOR DEL SISTEMA / PUESTA EN PRODUCCION.
   // La interfaz de Facturación es única. El proveedor activo solo cambia la API/driver utilizada.
   API_URL: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/dynamic-processor",
 
@@ -14,18 +14,22 @@ window.ALE_ATENCIO_CONFIG = {
   // Mantenedor central de proveedores de facturación.
   FACTURACION_PROVIDERS_API_URL: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-proveedores",
 
+  // Mantenedor administrativo: respaldo y reinicio operacional protegido.
+  SYSTEM_MAINTENANCE_API_URL: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/mantenedor-sistema",
+
   // Mapa lógico: el cPanel nunca modifica estas URL; solo activa un proveedor.
   FACTURACION_PROVIDERS: {
     SII_PROPIO: { api: "SII_API_URL", driver: "facturacion-sii" },
     FACTURACION_CL: { api: "FACTURACION_CL_GATEWAY_URL", driver: "facturacion-cl-gateway" }
   },
 
-  // Las cuatro Edge Functions que componen el sistema.
+  // Endpoints principales del sistema.
   SYSTEM_ENDPOINTS: {
     CORE: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/dynamic-processor",
     PROVEEDORES_FACTURACION: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-proveedores",
     FACTURACION_PROPIA: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-sii",
-    FACTURACION_CL: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-cl-gateway"
+    FACTURACION_CL: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/facturacion-cl-gateway",
+    MANTENEDOR_SISTEMA: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/mantenedor-sistema"
   },
 
   REQUEST_TIMEOUT_MS: 12000,
