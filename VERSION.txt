@@ -1,2 +1,2 @@
-ALE ATENCIO R9.18.182
-Mantenedor con reinicio selectivo y modal sin desbordes.
+ALE ATENCIO R9.18.183
+Refresco global del módulo activo junto a la campana de notificaciones.

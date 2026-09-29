@@ -1,4 +1,4 @@
-ALE ATENCIO R9.18.182 — MANTENEDOR SELECTIVO
+ALE ATENCIO R9.18.183 — REFRESCO GLOBAL DE MÓDULOS
 
 ACTUALIZAR TU SISTEMA EXISTENTE
 1. En Supabase > SQL Editor, ejecutar:
@@ -53,3 +53,11 @@ No se ejecutó ningún reinicio ni se desplegaron cambios en tu servidor.
 El ZIP integra la base completa R9.18.178 y los cambios de R9.18.180/181/182.
 Incluye un único archivo vigente del SQL del mantenedor (39), sin los anteriores.
 Los restantes módulos y la función independiente facturacion-sii se mantienen.
+
+
+R9.18.183
+- Botón Actualizar global en el encabezado, inmediatamente a la izquierda de la campana.
+- Disponible en todos los módulos del cPanel.
+- Actualiza el módulo activo sin redirigir al Dashboard ni recargar la página completa.
+- El botón exclusivo del Dashboard fue retirado para evitar duplicidad.
+- No requiere cambios SQL adicionales sobre R9.18.182.

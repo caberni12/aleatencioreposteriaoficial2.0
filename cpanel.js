@@ -2960,7 +2960,93 @@ function openGallery(id=""){clearGallery();const x=(data.gallery||[]).find(v=>St
 $("#newGalleryItem")?.addEventListener("click",()=>openGallery());$("#closeGalleryEditor")?.addEventListener("click",()=>showEditor("galleryEditor",false));$("#cancelGalleryEditor")?.addEventListener("click",()=>showEditor("galleryEditor",false));$("#galleryAdminGrid")?.addEventListener("click",e=>{const b=e.target.closest("[data-edit-gallery]");if(b)openGallery(b.dataset.editGallery)});
 $("#saveGalleryItem")?.addEventListener("click",e=>busy(e.currentTarget,async()=>{try{let imageId=$("#galleryImageId").value,imageUrl=$("#galleryImageUrl").value;const file=$("#galleryImage")?.files?.[0];if(file){const up=await upload(file,"GALERIA");imageId=up.fileId;imageUrl=up.imageUrl||imageUrl}const payload={id:$("#galleryId").value,titulo:$("#galleryTitle").value.trim(),categoria:$("#galleryCategory").value.trim(),fecha_evento:$("#galleryDate").value,orden:Number($("#galleryOrder").value||0),descripcion:$("#galleryDescription").value.trim(),drive_file_id:imageId,image_url:imageUrl,visible_publico:$("#galleryPublic").value,activo:$("#galleryActive").value};if(!payload.titulo)return toast("Título obligatorio");if(!payload.image_url&&!payload.drive_file_id)return toast("Selecciona una imagen");await AleAPI.post("saveGalleryItem",payload,token);data=normalizePanelData(await AleAPI.adminModuleReliable("gallery",token,2));showEditor("galleryEditor",false);renderGallery();toast("✓ Imagen guardada en Galería") }catch(err){console.warn(err);toast("✕ No fue posible guardar la imagen")}}));
 
-function openAdminView(view){const target=$(`.admin-nav button[data-view="${CSS.escape(String(view||"dashboard"))}"]`);if(!target)return;if(target.closest('.nav-group'))openNavGroupForButton(target);else{$$('.nav-group').forEach(x=>x.removeAttribute('open'));try{localStorage.removeItem(NAV_GROUP_STORAGE)}catch{}}if(String(target.dataset.view)!=="wholesale-credits"&&typeof closeAllWholesaleCreditModals==="function")closeAllWholesaleCreditModals();$$('.admin-nav button').forEach(x=>x.classList.remove("active"));target.classList.add("active");$$('.admin-view').forEach(x=>x.classList.remove("active"));$("#view-"+target.dataset.view)?.classList.add("active");$("#viewTitle").textContent=target.textContent.trim();if(target.dataset.view==="dashboard"){renderModernDashboard()}if(target.dataset.view==="products"){if($("#productSearch"))$("#productSearch").value="";if($("#productFilter"))$("#productFilter").value="";renderProducts()}if(target.dataset.view==="wholesale"){renderWholesale()}if(target.dataset.view==="wholesale-credits"){renderWholesaleCredits()}if(target.dataset.view==="suppliers"){renderSuppliers()}if(target.dataset.view==="purchases"){loadSiiExchange().catch(err=>{console.warn("purchases dte",err);toast(`✕ ${err.message||err}`)})}if(target.dataset.view==="warehouses"){renderWarehouses()}if(target.dataset.view==="stock"){renderWarehouseStock()}if(target.dataset.view==="ledger"){renderLedger()}if(target.dataset.view==="inventory"){renderInventory()}if(target.dataset.view==="gallery"){renderGallery()}if(target.dataset.view==="folio-manager"){loadFolioManager(false).catch(err=>console.warn("folio manager open",err))}if(target.dataset.view==="reports"){loadReports(true).catch(err=>console.warn("reports open",err))}if(sidebarIsMobile())setSidebarOpen(false);window.scrollTo({top:0,behavior:"smooth"})}
+
+// R9.18.183 · Refresco global del módulo activo desde el header.
+const GLOBAL_REFRESH_MODULES={
+  dashboard:["products","categories","banners","orders","requests","quotes"],
+  orders:["orders"],
+  requests:["requests"],
+  quotes:["quotes","products","clients"],
+  clients:["clients"],
+  products:["products","categories","stock","warehouses"],
+  categories:["categories"],
+  banners:["banners"],
+  "web-content":["config"],
+  gallery:["gallery"],
+  suppliers:["suppliers"],
+  warehouses:["warehouses"],
+  stock:["stock","warehouses","products"],
+  inventory:["inventory","products","suppliers","warehouses","stock"],
+  wholesale:["wholesale"],
+  "wholesale-credits":["wholesale"],
+  payments:["config"],
+  ledger:["ledger","warehouses"],
+  integrations:["config"],
+  users:["users"],
+  settings:["config"]
+};
+function activeAdminViewName(){
+  const active=document.querySelector('.admin-view.active[id^="view-"]');
+  return active?String(active.id).replace(/^view-/,""):"dashboard";
+}
+function adminViewLabel(view){
+  const nav=$(`.admin-nav button[data-view="${CSS.escape(String(view||"dashboard"))}"]`);
+  return nav?.textContent?.trim()||$("#viewTitle")?.textContent?.trim()||"módulo";
+}
+function syncGlobalRefreshButton(view=activeAdminViewName()){
+  const btn=$("#moduleRefreshBtn");if(!btn)return;
+  const label=adminViewLabel(view);
+  btn.title=`Actualizar ${label}`;
+  btn.setAttribute("aria-label",`Actualizar ${label}`);
+  btn.dataset.view=String(view||"dashboard");
+}
+async function refreshActiveAdminView(){
+  const btn=$("#moduleRefreshBtn");
+  if(!btn||btn.disabled)return;
+  const view=activeAdminViewName(),label=adminViewLabel(view);
+  btn.disabled=true;btn.classList.add("is-loading");btn.setAttribute("aria-busy","true");
+  try{
+    if(view==="dashboard"){
+      const modules=GLOBAL_REFRESH_MODULES.dashboard;
+      const [base]=await Promise.all([loadAdminModules({modules,retry:true}),loadModernDashboard(true)]);
+      if(base?.ok===false)throw new Error(`No se pudieron actualizar: ${(base.failed||[]).join(", ")}`);
+    }else if(view==="purchases"){
+      await Promise.all([loadSiiExchange(),loadAdminModules({modules:["suppliers","inventory"],retry:true})]);
+      renderPurchaseDte();
+    }else if(view==="billing-sii"){
+      try{if(window.FacturacionAPI)await FacturacionAPI.load(true,token)}catch(err){console.warn("billing provider refresh",err)}
+      siiState.loaded=false;await loadSiiBilling(true);
+    }else if(view==="folio-manager"){
+      folioManagerState.loaded=false;await loadFolioManager(true);
+    }else if(view==="reports"){
+      await loadReports(false);
+      if(!reportAnalytics)throw new Error("No fue posible actualizar los reportes");
+    }else{
+      const modules=GLOBAL_REFRESH_MODULES[view]||[];
+      if(modules.length){
+        const out=await loadAdminModules({modules,retry:true});
+        if(out?.ok===false)throw new Error(`No se pudieron actualizar: ${(out.failed||[]).join(", ")}`);
+      }else{
+        await reload();
+      }
+      if(view==="wholesale-credits"){
+        renderWholesaleCredits();
+        await renderWholesaleCreditPaymentsAdmin();
+      }
+    }
+    syncGlobalRefreshButton(view);
+    toast(`✓ ${label} actualizado`);
+  }catch(err){
+    console.warn("global module refresh",view,err);
+    toast(`✕ No fue posible actualizar ${label}`);
+  }finally{
+    btn.disabled=false;btn.classList.remove("is-loading");btn.removeAttribute("aria-busy");
+  }
+}
+$("#moduleRefreshBtn")?.addEventListener("click",refreshActiveAdminView);
+syncGlobalRefreshButton();
+
+function openAdminView(view){const target=$(`.admin-nav button[data-view="${CSS.escape(String(view||"dashboard"))}"]`);if(!target)return;if(target.closest('.nav-group'))openNavGroupForButton(target);else{$$('.nav-group').forEach(x=>x.removeAttribute('open'));try{localStorage.removeItem(NAV_GROUP_STORAGE)}catch{}}if(String(target.dataset.view)!=="wholesale-credits"&&typeof closeAllWholesaleCreditModals==="function")closeAllWholesaleCreditModals();$$('.admin-nav button').forEach(x=>x.classList.remove("active"));target.classList.add("active");$$('.admin-view').forEach(x=>x.classList.remove("active"));$("#view-"+target.dataset.view)?.classList.add("active");$("#viewTitle").textContent=target.textContent.trim();syncGlobalRefreshButton(target.dataset.view);if(target.dataset.view==="dashboard"){renderModernDashboard()}if(target.dataset.view==="products"){if($("#productSearch"))$("#productSearch").value="";if($("#productFilter"))$("#productFilter").value="";renderProducts()}if(target.dataset.view==="wholesale"){renderWholesale()}if(target.dataset.view==="wholesale-credits"){renderWholesaleCredits()}if(target.dataset.view==="suppliers"){renderSuppliers()}if(target.dataset.view==="purchases"){loadSiiExchange().catch(err=>{console.warn("purchases dte",err);toast(`✕ ${err.message||err}`)})}if(target.dataset.view==="warehouses"){renderWarehouses()}if(target.dataset.view==="stock"){renderWarehouseStock()}if(target.dataset.view==="ledger"){renderLedger()}if(target.dataset.view==="inventory"){renderInventory()}if(target.dataset.view==="gallery"){renderGallery()}if(target.dataset.view==="folio-manager"){loadFolioManager(false).catch(err=>console.warn("folio manager open",err))}if(target.dataset.view==="reports"){loadReports(true).catch(err=>console.warn("reports open",err))}if(sidebarIsMobile())setSidebarOpen(false);window.scrollTo({top:0,behavior:"smooth"})}
 $$('.admin-nav button').forEach(btn=>btn.addEventListener("click",()=>openAdminView(btn.dataset.view)));
 function formatDate(v){if(!v)return"";const d=new Date(v);return isNaN(d)?String(v):d.toLocaleString("es-CL")}
 let sessionRestoreTimer=null,sessionRestoreBusy=false;
