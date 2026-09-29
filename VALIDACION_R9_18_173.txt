@@ -1,0 +1,21 @@
+ALE ATENCIO R9.18.173 · VALIDACION LOCAL / ESTATICA
+===================================================
+
+[OK] Mantenedor de Proveedores movido a modal.
+[OK] Barra superior compacta de Facturación.
+[OK] Botones de sistema: Proveedores, Generar documento, Configuración, Certificado, CAF y folios, Intercambio DTE, Certificación SII, Actualizar.
+[OK] Estado de ambiente y proveedor activo visible en encabezado compacto.
+[OK] Select de ambiente con estilo visual del sistema.
+[OK] Select de estado del proveedor con estilo visual del sistema.
+[OK] 966 IDs HTML / 966 únicos / 0 duplicados.
+[OK] config.js: sintaxis JavaScript válida.
+[OK] facturacion-api.js: sintaxis JavaScript válida.
+[OK] cpanel.js: sintaxis JavaScript válida.
+[OK] api.js: sintaxis JavaScript válida.
+[OK] sii-api.js: sintaxis JavaScript válida.
+[OK] Arquitectura multiproveedor R9.18.172 preservada.
+[OK] Sin SQL nuevo.
+[OK] Sin cambios requeridos en Edge Functions.
+
+ACTUALIZAR: cpanel.html + facturacion-api.js + config.js
+CACHE: Ctrl+F5 después de subir.

@@ -1,5 +1,5 @@
 window.ALE_ATENCIO_CONFIG = {
-  // ALE ATENCIO R9.18.172 · FACTURACION MULTIPROVEEDOR FINAL.
+  // ALE ATENCIO R9.18.173 · FACTURACION UI COMPACTA / MULTIPROVEEDOR.
   // La interfaz de Facturación es única. El proveedor activo solo cambia la API/driver utilizada.
   API_URL: "https://btvliyzripnhjexdgoef.supabase.co/functions/v1/dynamic-processor",
 

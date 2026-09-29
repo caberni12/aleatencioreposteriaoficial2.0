@@ -1,0 +1,22 @@
+ALE ATENCIO R9.18.173 · FACTURACIÓN UI COMPACTA
+
+CAMBIOS
+- El Mantenedor de Proveedores de Facturación deja de ocupar espacio permanente y se abre en un modal.
+- Facturación usa una barra superior compacta con acciones del sistema.
+- Ambiente y proveedor activo quedan visibles en el encabezado compacto.
+- Los controles select del mantenedor usan presentación visual del sistema.
+- Se mantienen las mismas APIs y la misma arquitectura multiproveedor de R9.18.172.
+
+ACTUALIZACIÓN DESDE R9.18.172
+1. Reemplazar cpanel.html.
+2. Reemplazar facturacion-api.js.
+3. Reemplazar config.js (las URLs de las 4 Edge Functions se conservan).
+4. No requiere SQL nuevo.
+5. No requiere redeploy de Edge Functions si R9.18.172 ya está instalado correctamente.
+6. Limpiar caché con Ctrl+F5.
+
+Las funciones siguen siendo:
+- dynamic-processor
+- facturacion-proveedores
+- facturacion-sii
+- facturacion-cl-gateway
