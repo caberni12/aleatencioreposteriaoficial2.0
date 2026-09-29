@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='R9.18.176';
+  const VERSION='R9.18.181';
   const $=s=>document.querySelector(s);
   const $$=s=>Array.from(document.querySelectorAll(s));
   const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
@@ -37,14 +37,21 @@
   function fmtInt(n){return new Intl.NumberFormat('es-CL').format(Number(n||0))}
   function fmtDate(v){if(!v)return'—';try{return new Intl.DateTimeFormat('es-CL',{dateStyle:'short',timeStyle:'short'}).format(new Date(v))}catch(_){return String(v)}}
   function apiError(code){
+    const raw=String(code||'').trim();
+    const base=(raw.split(':')[0]||raw).trim();
+    const extra=raw.includes(':')?raw.slice(raw.indexOf(':')+1).trim():'';
     const map={
       SOLO_ADMINISTRADOR:'Solo un usuario ADMIN puede utilizar el Mantenedor del Sistema.',
       CLAVE_REQUERIDA:'Ingresa tu contraseña actual.',CLAVE_INVALIDA:'La contraseña ingresada no es válida.',
       RESPALDO_REQUERIDO:'Selecciona un respaldo antes de continuar.',RESPALDO_VALIDO_REQUERIDO:'El respaldo seleccionado no está disponible.',
       RESPALDO_PREVIO_VENCIDO:'El respaldo es demasiado antiguo. Genera uno nuevo.',
-      CONFIRMACION_INVALIDA:'Escribe exactamente REINICIAR SISTEMA.',SESION_EXPIRADA:'La sesión venció. Ingresa nuevamente.',SESION_INVALIDA:'La sesión ya no es válida.',SESION_REQUERIDA:'Debes iniciar sesión nuevamente.',MANTENEDOR_SISTEMA_NO_CONFIGURADO:'La URL del Mantenedor del Sistema no está configurada.',TIEMPO_DE_ESPERA_AGOTADO:'La operación tardó demasiado. Revisa la conexión y vuelve a intentarlo.',USUARIO_SIN_LOGIN:'No fue posible determinar el usuario actual para revalidar la contraseña.',RESPALDO_NO_ENCONTRADO:'El respaldo seleccionado ya no existe.',RESPALDO_PERTENECE_A_OTRO_USUARIO:'Ese respaldo fue generado por otro usuario.',ACCION_NO_VALIDA:'La versión desplegada del Mantenedor del Sistema no reconoce esta operación.',NO_FUE_POSIBLE_CONECTAR_MANTENEDOR:'No fue posible conectar con mantenedor-sistema. Revisa que la Edge Function esté desplegada y accesible.'
+      CONFIRMACION_INVALIDA:'Escribe exactamente REINICIAR SISTEMA.',SESION_EXPIRADA:'La sesión venció. Ingresa nuevamente.',SESION_INVALIDA:'La sesión ya no es válida.',SESION_REQUERIDA:'Debes iniciar sesión nuevamente.',MANTENEDOR_SISTEMA_NO_CONFIGURADO:'La URL del Mantenedor del Sistema no está configurada.',TIEMPO_DE_ESPERA_AGOTADO:'La operación tardó demasiado. Revisa la conexión y vuelve a intentarlo.',USUARIO_SIN_LOGIN:'No fue posible determinar el usuario actual para revalidar la contraseña.',RESPALDO_NO_ENCONTRADO:'El respaldo seleccionado ya no existe.',RESPALDO_PERTENECE_A_OTRO_USUARIO:'Ese respaldo fue generado por otro usuario.',ACCION_NO_VALIDA:'La versión desplegada del Mantenedor del Sistema no reconoce esta operación.',NO_FUE_POSIBLE_CONECTAR_MANTENEDOR:'No fue posible conectar con mantenedor-sistema. Revisa que la Edge Function esté desplegada y accesible.',
+      REINICIO_SQL_ERROR:'La base de datos detuvo el reinicio de forma segura. No se aplicó una limpieza parcial.',
+      REINICIO_BLOQUEADO_FK:'Existe una relación de datos que impide limpiar una tabla operacional. El detalle indica cuál.',
+      REINICIO_RPC_SIN_RESPUESTA:'La función de reinicio no devolvió un resultado válido.'
     };
-    return map[code]||code||'No fue posible completar la operación.';
+    const friendly=map[base]||raw||'No fue posible completar la operación.';
+    return extra&&map[base]?`${friendly} Detalle: ${extra}`:friendly;
   }
   function extractError(payload,status){
     const base=String(payload?.error||payload?.message||payload?.code||`HTTP_${status}`);
@@ -187,6 +194,56 @@
   async function downloadBackup(id,btn){
     btn.disabled=true;try{const out=await call('backup_export',{respaldo_id:id},180000);const folio=out?.respaldo?.folio||'RESPALDO-ALE';const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${folio}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);notify('✓ Respaldo descargado')}finally{btn.disabled=false}
   }
+  function showRestartCompleteOverlay(out={}){
+    document.getElementById('systemRestartCompleteOverlay')?.remove();
+    const total=fmtInt(out?.registros_eliminados||0);
+    const overlay=document.createElement('div');
+    overlay.id='systemRestartCompleteOverlay';
+    overlay.setAttribute('role','alertdialog');
+    overlay.setAttribute('aria-modal','true');
+    overlay.innerHTML=`
+      <div style="position:fixed;inset:0;z-index:2147483647;background:rgba(17,24,39,.78);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:24px;">
+        <section style="width:min(560px,100%);background:#fff;border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.35);overflow:hidden;border:1px solid rgba(180,145,52,.24);">
+          <div style="height:7px;background:linear-gradient(90deg,#b89034,#e4c975,#b89034);"></div>
+          <div style="padding:34px 34px 30px;text-align:center;">
+            <div style="width:74px;height:74px;margin:0 auto 20px;border-radius:50%;display:grid;place-items:center;background:#eef9f1;color:#1f8a46;font-size:38px;box-shadow:inset 0 0 0 1px #d4eedb;">
+              <i class="bi bi-check2-circle"></i>
+            </div>
+            <h2 style="margin:0 0 10px;font-size:26px;line-height:1.2;color:#18202a;">Sistema reiniciado correctamente</h2>
+            <p style="margin:0 auto;color:#5e6875;font-size:15px;line-height:1.65;max-width:450px;">
+              El reinicio operacional fue completado${Number(out?.registros_eliminados||0)>0?` y se limpiaron <strong style="color:#26313d">${esc(total)}</strong> registros de prueba`:''}.
+              Por seguridad, las sesiones activas fueron cerradas.
+            </p>
+            <div style="margin:22px 0 18px;padding:15px 18px;border-radius:14px;background:#fff8e6;border:1px solid #eedda9;color:#67552a;font-weight:700;line-height:1.5;">
+              Debe esperar unos segundos antes de volver a iniciar sesión.
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;color:#56616e;">
+              <span style="width:26px;height:26px;border:3px solid #d9dde2;border-top-color:#b89034;border-radius:50%;display:inline-block;animation:aleRestartSpin .85s linear infinite;"></span>
+              <span>Redirigiendo al inicio de sesión en <strong id="systemRestartCountdown" style="font-size:20px;color:#18202a;">7</strong> segundos…</span>
+            </div>
+          </div>
+        </section>
+      </div>`;
+    const style=document.createElement('style');
+    style.id='systemRestartCompleteStyle';
+    style.textContent='@keyframes aleRestartSpin{to{transform:rotate(360deg)}}';
+    document.getElementById(style.id)?.remove();
+    document.head.appendChild(style);
+    document.body.appendChild(overlay);
+    document.body.style.overflow='hidden';
+
+    let remaining=7;
+    const target=overlay.querySelector('#systemRestartCountdown');
+    const ticker=setInterval(()=>{
+      remaining-=1;
+      if(target)target.textContent=String(Math.max(0,remaining));
+      if(remaining<=0){
+        clearInterval(ticker);
+        location.reload();
+      }
+    },1000);
+  }
+
   async function executeReset(btn){
     clearStatus('reset');clearProgress('reset');
     const check=validateReset();
@@ -207,13 +264,16 @@
       setProgress('reset',3,'Verificando stocks, saldos y correlativos internos…');
       await new Promise(r=>setTimeout(r,180));
       setProgress('reset',4,'Proceso completado. Cerrando la sesión por seguridad…');
-      setStatus('reset','success',`Reinicio completado. ${fmtInt(out.registros_eliminados)} registros operacionales fueron limpiados y los valores operacionales quedaron en cero.`);
-      notify(`✓ Reinicio completado · ${fmtInt(out.registros_eliminados)} registros limpiados`);
+      setStatus('reset','success',`Sistema reiniciado correctamente. ${fmtInt(out.registros_eliminados)} registros operacionales fueron limpiados y los valores operacionales quedaron en cero.`);
+      notify(`✓ Sistema reiniciado correctamente`);
       localStorage.removeItem('aleAdminToken');sessionStorage.removeItem('aleAdminToken');
-      setTimeout(()=>location.reload(),2400);
+      showRestartCompleteOverlay(out);
     }catch(err){
-      const msg=apiError(err.message);setStatus('reset','error',msg);setProgress('reset',1,'El servidor rechazó o no pudo completar el reinicio.');
+      const msg=apiError(err?.message||err);
+      setStatus('reset','error',msg);
+      setProgress('reset',1,'Reinicio detenido de forma segura. Revisa el detalle mostrado y vuelve a intentar después de aplicar la corrección.');
       setFormLocked('reset',false);setButtonLoading(btn,false);
+      console.error('[MANTENEDOR][REINICIO]',err);
     }finally{clearInterval(timer)}
   }
 

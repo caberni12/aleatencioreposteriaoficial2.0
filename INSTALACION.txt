@@ -1,0 +1,12 @@
+ALE ATENCIO R9.18.181 - MENSAJE POST REINICIO
+
+Reemplazar solamente:
+- mantenedor-sistema.js
+- cpanel.html
+
+No requiere SQL.
+No requiere redesplegar Edge Functions.
+Mantiene JWT desactivado.
+
+Cambio:
+Después de un reinicio exitoso se muestra una confirmación a pantalla completa con contador de 7 segundos y luego se recarga el cPanel para volver al inicio de sesión.
