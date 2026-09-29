@@ -1,0 +1,23 @@
+ALE ATENCIO R9.18.176 · VALIDACION LOCAL / ESTATICA
+====================================================
+[OK] config.js: sintaxis JavaScript valida.
+[OK] cpanel.js: sintaxis JavaScript valida.
+[OK] facturacion-api.js: sintaxis JavaScript valida.
+[OK] mantenedor-sistema.js: sintaxis JavaScript valida.
+[OK] 5 Edge Functions: TypeScript transpila sin errores sintacticos.
+[OK] cpanel.html: 0 IDs duplicados.
+[OK] URL mantenedor-sistema configurada.
+[OK] VERIFY_JWT=false mantenido.
+[OK] Cliente no envia Bearer JWT; usa X-Ale-Session con sesion propia.
+[OK] Loader de respaldo implementado.
+[OK] Loader de reinicio implementado.
+[OK] Progreso por etapas implementado.
+[OK] Enter en contraseña de respaldo ejecuta Generar respaldo.
+[OK] Respaldo reciente se selecciona automaticamente para el reinicio.
+[OK] Clientes se conservan; estadisticas operacionales quedan en cero.
+[OK] Usuarios y productos se conservan.
+[OK] Folios SII no se reinician.
+
+NOTA:
+No se ejecuto un reinicio contra la base productiva del usuario durante esta validacion.
+La prueba final debe realizarse primero con datos de prueba y un respaldo generado por el propio mantenedor.

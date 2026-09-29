@@ -1,0 +1,84 @@
+ALE ATENCIO R9.18.176 · FIX MANTENEDOR DEL SISTEMA
+====================================================
+
+OBJETIVO
+- Corrige el flujo del Mantenedor del Sistema.
+- Mantiene JWT DESACTIVADO para las Edge Functions.
+- Usa la sesion propia de ALE ATENCIO mediante X-Ale-Session.
+- Agrega loader y progreso visible al generar respaldo y al reiniciar.
+- Mejora la interfaz del respaldo/reinicio.
+- Conserva clientes; solo pone a cero sus estadisticas operacionales.
+
+1) SQL
+Ejecutar despues de R9.18.174/175:
+INSTALACION_SUPABASE/34_ALE_ATENCIO_SQL_R9_18_176_FIX_REINICIO_OPERACIONAL.sql
+
+2) EDGE FUNCTION
+Volver a desplegar:
+INSTALACION_SUPABASE_EDGE_FUNCTIONS/mantenedor-sistema/index.ts
+
+Nombre exacto:
+mantenedor-sistema
+
+Mantener JWT desactivado:
+supabase functions deploy mantenedor-sistema --no-verify-jwt
+
+URL configurada:
+https://btvliyzripnhjexdgoef.supabase.co/functions/v1/mantenedor-sistema
+
+3) WEB / CPANEL
+Reemplazar:
+- cpanel.html
+- cpanel.css
+- mantenedor-sistema.js
+- config.js
+
+Luego hacer Ctrl+F5.
+
+4) FLUJO CORRECTO
+A. Configuracion > Mantenedor del Sistema.
+B. Respaldos > ingresar contraseña actual > Generar respaldo.
+C. El boton muestra loader y etapas de proceso.
+D. Reinicio operacional > seleccionar respaldo (el mas reciente queda seleccionado automaticamente).
+E. Ingresar contraseña, motivo, escribir REINICIAR SISTEMA y marcar confirmacion.
+F. Pulsar Reiniciar operacion.
+G. Se muestra loader/progreso hasta finalizar.
+H. Al finalizar se cierran las sesiones y se debe iniciar sesion nuevamente.
+
+DATOS QUE SE CONSERVAN
+- Usuarios
+- Clientes
+- Productos
+- Categorias
+- Imagenes
+- Precios
+- Tamanos
+- Recetas e ingredientes
+- Insumos y costo vigente
+- Proveedores
+- Bodegas
+- Configuracion
+- APIs / proveedores de facturacion
+- Certificados y CAF
+
+DATOS OPERACIONALES QUE SE LIMPIAN
+- Solicitudes
+- Cotizaciones
+- Pedidos y detalles
+- Pagos de prueba
+- Facturas / boletas / DTE de prueba registrados localmente
+- Compras / ingresos de prueba
+- Movimientos de inventario
+- Historial de costos de prueba
+- Movimientos de credito mayorista
+- Notificaciones / analitica de prueba
+
+VALORES QUE QUEDAN EN CERO
+- Stock productos
+- Stock tamanos
+- Stock insumos
+- Saldos utilizados de credito
+- Estadisticas operacionales de clientes
+
+NO SE REINICIAN FOLIOS TRIBUTARIOS SII.
+Solo se reinician correlativos internos del sistema.
