@@ -61,3 +61,15 @@ R9.18.183
 - Actualiza el módulo activo sin redirigir al Dashboard ni recargar la página completa.
 - El botón exclusivo del Dashboard fue retirado para evitar duplicidad.
 - No requiere cambios SQL adicionales sobre R9.18.182.
+
+
+R9.18.184 — FACTURACION.CL API REST / CREDENCIALES
+- Base: R9.18.183.
+- En Facturación > Proveedores > Facturacion.cl > Editar se agregan credenciales REST separadas para PRUEBA y PRODUCCIÓN.
+- Usuario, RUT y Clave se guardan como Supabase Secrets; los valores no se vuelven a mostrar ni quedan en localStorage.
+- Botón Probar login autentica contra https://rest.facturacion.cl/login y valida /wsds/version sin devolver el token al navegador.
+- El gateway mantiene el token en servidor y lo renueva automáticamente antes de expirar.
+- No requiere SQL adicional.
+- Actualizar estas Edge Functions: dynamic-processor y facturacion-cl-gateway. Mantener Verify JWT desactivado porque ALE ATENCIÓN valida su propia sesión.
+- Para guardar Secrets desde el cPanel debe existir una sola vez ALE_MANAGEMENT_TOKEN en Supabase, igual que en el gestor de credenciales de pago.
+- Publicar cpanel.html, cpanel.css y facturacion-api.js, y recargar con Ctrl+F5.

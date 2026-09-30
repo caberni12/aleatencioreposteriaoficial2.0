@@ -4,6 +4,7 @@
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
   const adminToken=()=>localStorage.getItem('aleAdminToken')||sessionStorage.getItem('aleAdminToken')||'';
   let state={loaded:false,ambiente:'CERTIFICACION',proveedor_activo:null,mostrar_todos_documentos:false,proveedores:[]};
+  let fclCredentialState={bootstrap_ready:null,prueba_ready:false,produccion_ready:false};
 
   function makeError(message,status=0,payload=null){const e=new Error(String(message||payload?.error||'FACTURACION_API_ERROR'));e.status=status;e.payload=payload;return e}
   function validUrl(v){return /^https:\/\/[a-z0-9-]+\.supabase\.co\/functions\/v1\/[A-Za-z0-9_-]+\/?$/i.test(String(v||'').trim())}
@@ -52,6 +53,48 @@
     }
     if(c==='FACTURACION_CL')return rawCall(providerUrl(c),'health',{},token,30000);
     throw makeError('PROVEEDOR_NO_SOPORTADO');
+  }
+  async function fclGateway(action,data={},token=adminToken(),timeoutMs=30000){return rawCall(providerUrl('FACTURACION_CL'),action,data,token,timeoutMs)}
+  function fclEnvIds(env){const prod=String(env).toUpperCase()==='PRODUCCION';return{usuario:prod?'#fclProduccionUsuario':'#fclPruebaUsuario',rut:prod?'#fclProduccionRut':'#fclPruebaRut',clave:prod?'#fclProduccionClave':'#fclPruebaClave',status:prod?'#fclProduccionStatus':'#fclPruebaStatus',result:prod?'#fclProduccionResult':'#fclPruebaResult'}}
+  function setFclStatus(env,ready,label){const ids=fclEnvIds(env),el=$(ids.status);if(!el)return;el.textContent=label||(ready?'Guardadas':'Pendientes');el.classList.toggle('is-ready',!!ready);el.classList.toggle('is-warning',!ready);el.classList.remove('is-error')}
+  function setFclResult(env,message,type=''){const el=$(fclEnvIds(env).result);if(!el)return;el.textContent=message||'';el.classList.toggle('is-ok',type==='ok');el.classList.toggle('is-error',type==='error')}
+  function clearFclCredentialInputs(env){const ids=fclEnvIds(env);[ids.usuario,ids.rut,ids.clave].forEach(id=>{const el=$(id);if(el)el.value=''});const pass=$(ids.clave);if(pass)pass.type='password'}
+  async function loadFclCredentialStatus(){
+    const section=$('#billingFacturacionClCredentials');if(!section)return fclCredentialState;
+    let secure=null,gateway=null;
+    try{secure=await window.AleAPI.post('facturacionclcredentialsstatus',{},adminToken())}catch(err){secure={ok:false,bootstrap_ready:false,error:String(err?.message||err)}}
+    try{gateway=await fclGateway('config',{},adminToken(),20000)}catch(err){gateway={ok:false,error:String(err?.message||err)}}
+    const prueba=Boolean(gateway?.credentials_ready_prueba??secure?.prueba_ready),produccion=Boolean(gateway?.credentials_ready_produccion??secure?.produccion_ready);
+    fclCredentialState={bootstrap_ready:secure?.bootstrap_ready===true,prueba_ready:prueba,produccion_ready:produccion};
+    setFclStatus('PRUEBA',prueba);setFclStatus('PRODUCCION',produccion);
+    const bootstrap=$('#fclSecretBootstrap');if(bootstrap)bootstrap.classList.toggle('hidden',secure?.bootstrap_ready!==false);
+    section.querySelectorAll('[data-fcl-credentials-save],[data-fcl-credentials-delete]').forEach(b=>b.disabled=secure?.bootstrap_ready===false);
+    return fclCredentialState;
+  }
+  async function saveFclCredentials(env,button){
+    const ids=fclEnvIds(env),usuario=$(ids.usuario)?.value?.trim()||'',rut=$(ids.rut)?.value?.trim()||'',clave=$(ids.clave)?.value||'';
+    if(!usuario||!rut||!clave.trim())throw makeError('Completa Usuario, RUT y Clave antes de guardar');
+    button.disabled=true;setFclResult(env,'Guardando en Supabase Secrets…');
+    try{
+      await window.AleAPI.post('facturacionclcredentialsset',{environment:env,usuario,rut,clave},adminToken(),{timeoutMs:30000});
+      clearFclCredentialInputs(env);setFclResult(env,'✓ Credenciales guardadas. Los valores fueron eliminados de los campos del navegador.','ok');
+      await new Promise(r=>setTimeout(r,700));await loadFclCredentialStatus();
+      return true;
+    }finally{button.disabled=false}
+  }
+  async function testFclLogin(env,button){
+    button.disabled=true;setFclResult(env,'Autenticando contra https://rest.facturacion.cl/login …');
+    try{
+      let out;let last;
+      for(let attempt=0;attempt<3;attempt++){try{out=await fclGateway('test_login',{environment:env},adminToken(),30000);last=null;break}catch(err){last=err;if(attempt<2)await new Promise(r=>setTimeout(r,700*(attempt+1)))}}
+      if(last)throw last;
+      setFclStatus(env,true,'Login OK');setFclResult(env,`✓ Login REST correcto${out?.remote_version?` · servicio ${out.remote_version}`:''}. El token quedó solamente en el gateway.`,'ok');
+      return out;
+    }catch(err){setFclStatus(env,false,'Error');const code=String(err?.message||err);setFclResult(env,`✕ ${code}`,'error');throw err}finally{button.disabled=false}
+  }
+  async function deleteFclCredentials(env,button){
+    if(!confirm(`¿Eliminar las credenciales de ${env==='PRODUCCION'?'PRODUCCIÓN':'PRUEBA'} de Facturacion.cl del servidor?`))return;
+    button.disabled=true;try{await window.AleAPI.post('facturacionclcredentialsdelete',{environment:env},adminToken(),{timeoutMs:30000});clearFclCredentialInputs(env);setFclResult(env,'Credenciales eliminadas del servidor.','');await loadFclCredentialStatus()}finally{button.disabled=false}
   }
   async function orderPreview(ref,token=adminToken()){
     if(!state.loaded)await load(false,token);const code=activeCodeCached();
@@ -118,9 +161,12 @@
     const p=state.proveedores.find(x=>String(x.codigo)===String(code));if(!p)return;
     const modal=$('#billingProviderEditor');if(!modal)return;
     $('#billingProviderCode').value=p.codigo||'';$('#billingProviderName').value=p.nombre||'';$('#billingProviderType').value=p.tipo||'';$('#billingProviderEnabled').value=p.habilitado?'SI':'NO';$('#billingProviderNotes').value=p.observaciones||'';
+    const fcl=$('#billingFacturacionClCredentials');if(fcl)fcl.classList.toggle('hidden',String(p.codigo).toUpperCase()!=='FACTURACION_CL');
+    clearFclCredentialInputs('PRUEBA');clearFclCredentialInputs('PRODUCCION');
     modal.classList.remove('hidden');document.body.classList.add('sii-modal-open');
+    if(String(p.codigo).toUpperCase()==='FACTURACION_CL')loadFclCredentialStatus().catch(()=>{});
   }
-  function closeProviderEditor(){const modal=$('#billingProviderEditor');if(modal)modal.classList.add('hidden');if(!document.querySelector('.sii-modal:not(.hidden)'))document.body.classList.remove('sii-modal-open')}
+  function closeProviderEditor(){clearFclCredentialInputs('PRUEBA');clearFclCredentialInputs('PRODUCCION');const modal=$('#billingProviderEditor');if(modal)modal.classList.add('hidden');if(!document.querySelector('.sii-modal:not(.hidden)'))document.body.classList.remove('sii-modal-open')}
   async function persistProviderEditor(token=adminToken()){
     const codigo=$('#billingProviderCode')?.value||'',nombre=$('#billingProviderName')?.value?.trim()||'',habilitado=$('#billingProviderEnabled')?.value==='SI',observaciones=$('#billingProviderNotes')?.value?.trim()||'';
     if(!codigo)throw makeError('PROVEEDOR_REQUERIDO');if(!nombre)throw makeError('NOMBRE_REQUERIDO');
@@ -143,6 +189,10 @@
     const providersClose=e.target.closest?.('[data-billing-providers-close]');if(providersClose){closeProvidersModal();return}
     const providersOpen=e.target.closest?.('#billingProvidersOpen');if(providersOpen){providersOpen.disabled=true;try{await load(true);openProvidersModal()}catch(err){notify(`✕ ${err.message||err}`)}finally{providersOpen.disabled=false}return}
     const close=e.target.closest?.('[data-billing-provider-close]');if(close){closeProviderEditor();return}
+    const eye=e.target.closest?.('[data-fcl-secret-eye]');if(eye){const input=$('#'+eye.dataset.fclSecretEye);if(input){input.type=input.type==='password'?'text':'password';const i=eye.querySelector('i');if(i)i.className=`bi ${input.type==='password'?'bi-eye':'bi-eye-slash'}`}return}
+    const fclSave=e.target.closest?.('[data-fcl-credentials-save]');if(fclSave){try{await saveFclCredentials(fclSave.dataset.fclCredentialsSave,fclSave);notify('✓ Credenciales Facturacion.cl guardadas en el servidor')}catch(err){setFclResult(fclSave.dataset.fclCredentialsSave,`✕ ${err.message||err}`,'error');notify(`✕ ${err.message||err}`)}return}
+    const fclTest=e.target.closest?.('[data-fcl-login-test]');if(fclTest){try{await testFclLogin(fclTest.dataset.fclLoginTest,fclTest);notify(`✓ Login Facturacion.cl ${fclTest.dataset.fclLoginTest} correcto`)}catch(err){notify(`✕ Facturacion.cl: ${err.message||err}`)}return}
+    const fclDelete=e.target.closest?.('[data-fcl-credentials-delete]');if(fclDelete){try{await deleteFclCredentials(fclDelete.dataset.fclCredentialsDelete,fclDelete);notify('✓ Credenciales eliminadas')}catch(err){notify(`✕ ${err.message||err}`)}return}
     const edit=e.target.closest?.('[data-billing-provider-edit]');if(edit){openProviderEditor(edit.dataset.billingProviderEdit);return}
     const save=e.target.closest?.('#billingProviderSave');if(save){save.disabled=true;try{await persistProviderEditor();notify('✓ Proveedor guardado')}catch(err){notify(`✕ ${err.message||err}`)}finally{save.disabled=false}return}
     const test=e.target.closest?.('[data-billing-provider-test]');if(test){test.disabled=true;try{const out=await testConnection(test.dataset.billingProviderTest);notify(`✓ Conexión correcta · ${label(test.dataset.billingProviderTest)}${out?.version?` · ${out.version}`:''}`)}catch(err){notify(`✕ ${label(test.dataset.billingProviderTest)}: ${err.message||err}`)}finally{test.disabled=false}return}
@@ -150,6 +200,6 @@
     if(e.target.closest?.('#billingEnvironmentSave')){const b=e.target.closest('#billingEnvironmentSave');b.disabled=true;try{await saveEnvironment($('#billingEnvironment')?.value);notify('✓ Ambiente de facturación guardado')}catch(err){notify(`✕ ${err.message||err}`)}finally{b.disabled=false}return}
     const nav=e.target.closest?.('[data-view="billing-sii"]');if(nav)setTimeout(()=>load(true).catch(err=>notify(`✕ ${err.message||err}`)),10);
   });
-  window.FacturacionAPI={load,manager,activate,saveEnvironment,saveDocumentsView,saveProvider,testConnection,orderPreview,issue,pdf,pdfForProvider,documents,documentsForProvider,activeCodeCached,activeProvider,label,providerUrl,openProvidersModal,closeProvidersModal,openProviderEditor,closeProviderEditor,get state(){return state}};
+  window.FacturacionAPI={load,manager,activate,saveEnvironment,saveDocumentsView,saveProvider,testConnection,loadFclCredentialStatus,saveFclCredentials,testFclLogin,orderPreview,issue,pdf,pdfForProvider,documents,documentsForProvider,activeCodeCached,activeProvider,label,providerUrl,openProvidersModal,closeProvidersModal,openProviderEditor,closeProviderEditor,get state(){return state}};
   document.addEventListener('DOMContentLoaded',()=>load(false).catch(()=>{}));
 })();

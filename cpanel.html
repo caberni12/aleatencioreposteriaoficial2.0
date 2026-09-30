@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="./styles.css?v=R9.18.178"><link rel="stylesheet" href="./cpanel.css?v=R9.18.183">
+  <link rel="stylesheet" href="./styles.css?v=R9.18.178"><link rel="stylesheet" href="./cpanel.css?v=R9.18.184">
   <style id="ale-production-css-fallback-r918151">
 /* R9.18.152: fallback embebido para GitHub Pages/Cloudflare. Mantener también archivos CSS externos. */
 :root{
@@ -8575,7 +8575,35 @@ Torta chocolate | 1 | 25000"></textarea></label>
           <label class="field-group"><span>Estado</span><span class="system-select-shell"><select id="billingProviderEnabled"><option value="SI">Habilitado</option><option value="NO">Inactivo</option></select><i class="bi bi-chevron-down" aria-hidden="true"></i></span></label>
           <label class="field-group span-2"><span>Observaciones</span><textarea id="billingProviderNotes" rows="4" maxlength="1000"></textarea></label>
         </div>
-        <div class="editor-actions"><button class="btn btn-primary" id="billingProviderSave" type="button"><i class="bi bi-floppy"></i> Guardar</button><button class="btn btn-light" type="button" data-billing-provider-close>Cancelar</button></div>
+
+        <section class="fcl-credentials-manager hidden" id="billingFacturacionClCredentials" aria-label="Credenciales Facturacion.cl">
+          <div class="fcl-credentials-head">
+            <div><span class="eyebrow">API REST</span><h4>Credenciales Facturacion.cl</h4><p>Ingresa las credenciales entregadas por Facturacion.cl. Se guardan como <strong>Supabase Secrets</strong>; la clave nunca vuelve a mostrarse en el navegador.</p></div>
+            <div class="fcl-api-endpoint"><small>Endpoint</small><code>https://rest.facturacion.cl</code></div>
+          </div>
+          <div class="fcl-secret-bootstrap hidden" id="fclSecretBootstrap"><i class="bi bi-key"></i><div><strong>Activación inicial requerida</strong><span>El gestor seguro necesita una sola vez el Secret <code>ALE_MANAGEMENT_TOKEN</code> en Supabase. Después podrás cargar y reemplazar las credenciales desde este mismo cPanel.</span></div></div>
+          <div class="fcl-credential-grid">
+            <article class="fcl-credential-card" data-fcl-env-card="PRUEBA">
+              <div class="fcl-credential-card-head"><div><span>Ambiente</span><strong>PRUEBA</strong></div><span class="fcl-credential-status" id="fclPruebaStatus">Verificando…</span></div>
+              <label class="field-group"><span>Usuario REST</span><input id="fclPruebaUsuario" autocomplete="off" spellcheck="false" placeholder="Usuario entregado por Facturacion.cl"></label>
+              <label class="field-group"><span>RUT REST</span><input id="fclPruebaRut" autocomplete="off" spellcheck="false" placeholder="Ej: 1-9"></label>
+              <label class="field-group"><span>Clave REST</span><span class="fcl-password-shell"><input id="fclPruebaClave" type="password" autocomplete="new-password" spellcheck="false" placeholder="Clave de integración"><button type="button" class="fcl-secret-eye" data-fcl-secret-eye="fclPruebaClave" aria-label="Mostrar u ocultar clave"><i class="bi bi-eye"></i></button></span></label>
+              <div class="fcl-credential-actions"><button class="btn btn-primary" type="button" data-fcl-credentials-save="PRUEBA"><i class="bi bi-shield-lock"></i> Guardar credenciales</button><button class="btn btn-light" type="button" data-fcl-login-test="PRUEBA"><i class="bi bi-plug"></i> Probar login</button><button class="btn btn-light fcl-delete-credentials" type="button" data-fcl-credentials-delete="PRUEBA" title="Eliminar credenciales de prueba"><i class="bi bi-trash3"></i></button></div>
+              <small class="fcl-credential-result" id="fclPruebaResult">Los campos quedan vacíos después de guardar por seguridad.</small>
+            </article>
+            <article class="fcl-credential-card" data-fcl-env-card="PRODUCCION">
+              <div class="fcl-credential-card-head"><div><span>Ambiente</span><strong>PRODUCCIÓN</strong></div><span class="fcl-credential-status" id="fclProduccionStatus">Verificando…</span></div>
+              <label class="field-group"><span>Usuario REST</span><input id="fclProduccionUsuario" autocomplete="off" spellcheck="false" placeholder="Usuario productivo"></label>
+              <label class="field-group"><span>RUT REST</span><input id="fclProduccionRut" autocomplete="off" spellcheck="false" placeholder="RUT productivo"></label>
+              <label class="field-group"><span>Clave REST</span><span class="fcl-password-shell"><input id="fclProduccionClave" type="password" autocomplete="new-password" spellcheck="false" placeholder="Clave productiva"><button type="button" class="fcl-secret-eye" data-fcl-secret-eye="fclProduccionClave" aria-label="Mostrar u ocultar clave"><i class="bi bi-eye"></i></button></span></label>
+              <div class="fcl-credential-actions"><button class="btn btn-primary" type="button" data-fcl-credentials-save="PRODUCCION"><i class="bi bi-shield-lock"></i> Guardar credenciales</button><button class="btn btn-light" type="button" data-fcl-login-test="PRODUCCION"><i class="bi bi-plug"></i> Probar login</button><button class="btn btn-light fcl-delete-credentials" type="button" data-fcl-credentials-delete="PRODUCCION" title="Eliminar credenciales de producción"><i class="bi bi-trash3"></i></button></div>
+              <small class="fcl-credential-result" id="fclProduccionResult">Déjalas vacías hasta que Facturacion.cl habilite producción.</small>
+            </article>
+          </div>
+          <div class="fcl-security-note"><i class="bi bi-shield-check"></i><span>El token que entrega <code>/login</code> se administra únicamente en <strong>facturacion-cl-gateway</strong> y nunca se devuelve al cPanel. ALE ATENCIÓN lo renueva automáticamente cuando corresponde.</span></div>
+        </section>
+
+        <div class="editor-actions"><button class="btn btn-primary" id="billingProviderSave" type="button"><i class="bi bi-floppy"></i> Guardar proveedor</button><button class="btn btn-light" type="button" data-billing-provider-close>Cancelar</button></div>
       </div>
 
       <div class="admin-card sii-documents-card">
@@ -8829,5 +8857,5 @@ Torta chocolate | 1 | 25000"></textarea></label>
 </div>
 <div class="notification-toast-stack" id="notificationToastStack" aria-live="polite"></div>
 <div class="toast" id="adminToast"></div>
-<script src="./config.js?v=R9.18.178"></script><script src="./api.js?v=R9.18.178"></script><script src="./sii-api.js?v=R9.18.178"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./facturacion-api.js?v=R9.18.178"></script><script src="./cpanel.js?v=R9.18.183"></script><script src="./mantenedor-sistema.js?v=R9.18.182"></script>
+<script src="./config.js?v=R9.18.178"></script><script src="./api.js?v=R9.18.184"></script><script src="./sii-api.js?v=R9.18.178"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./facturacion-api.js?v=R9.18.184"></script><script src="./cpanel.js?v=R9.18.184"></script><script src="./mantenedor-sistema.js?v=R9.18.182"></script>
 </body></html>

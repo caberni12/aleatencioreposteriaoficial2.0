@@ -123,8 +123,8 @@
       return pingReliable();
     },
 
-    async post(action, data = {}, token = "") {
-      return request(action, data, token);
+    async post(action, data = {}, token = "", options = {}) {
+      return request(action, data, token, options);
     },
 
     async bulkDeleteEntities(data = {}, token = "") {
