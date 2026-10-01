@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="./styles.css?v=R9.18.178"><link rel="stylesheet" href="./cpanel.css?v=R9.18.184">
+  <link rel="stylesheet" href="./styles.css?v=R9.18.178"><link rel="stylesheet" href="./cpanel.css?v=R9.18.188">
   <style id="ale-production-css-fallback-r918151">
 /* R9.18.152: fallback embebido para GitHub Pages/Cloudflare. Mantener también archivos CSS externos. */
 :root{
@@ -7945,7 +7945,7 @@ Torta chocolate | 1 | 25000"></textarea></label>
             <label class="field-group"><span>Teléfono / WhatsApp</span><input id="qPhone" placeholder="+56..."></label>
             <label class="field-group"><span>Correo</span><input id="qEmail" type="email" placeholder="correo@cliente.cl"></label>
             <label class="field-group"><span>Validez (días)</span><input id="qValidity" type="number" min="1" max="365" value="15"></label>
-            <label class="field-group"><span>IVA (%)</span><input id="qIva" type="number" min="0" max="100" step="0.01" value="19"></label>
+            <label class="field-group"><span>IVA general (%)</span><input id="qIva" type="number" min="0" max="100" step="0.01" value="19" readonly title="Se administra desde Configuración o desde el módulo de Facturación"><small>Valor general del sistema. Para cambiarlo utiliza Configuración o Facturación.</small></label>
             <label class="field-group"><span>Estado</span><select id="qStatus"><option>BORRADOR</option><option>ENVIADA</option><option>ACEPTADA</option><option>RECHAZADA</option><option>VENCIDA</option><option>ANULADA</option><option disabled>UTILIZADA</option></select></label>
           </div>
 
@@ -8537,6 +8537,7 @@ Torta chocolate | 1 | 25000"></textarea></label>
         </div>
         <div class="billing-command-bar" role="toolbar" aria-label="Acciones de facturación">
           <button class="billing-command-btn" id="billingProvidersOpen" type="button"><i class="bi bi-diagram-3"></i><span>Proveedores</span></button>
+          <button class="billing-command-btn" id="billingFacturacionClConnect" type="button"><i class="bi bi-plug"></i><span>Conectar Facturacion.cl</span></button>
           <button class="billing-command-btn is-primary" id="siiOwnEmitLauncher" type="button" data-sii-open="siiEmitModal"><i class="bi bi-receipt-cutoff"></i><span>Generar documento</span></button>
           <button class="billing-command-btn" type="button" data-sii-open="siiConfigModal"><i class="bi bi-building-gear"></i><span>Configuración</span></button>
           <button class="billing-command-btn" type="button" data-sii-open="siiCertificateModal"><i class="bi bi-patch-check"></i><span>Certificado</span></button>
@@ -8549,7 +8550,14 @@ Torta chocolate | 1 | 25000"></textarea></label>
           <div><span>Servicio</span><strong id="siiServiceStatus">Verificando…</strong><small id="siiServiceVersion">—</small></div>
           <div><span>Certificado</span><strong id="siiCertificateStatus">—</strong><small id="siiCertificateExpiry">—</small></div>
           <div><span>CAF / folios</span><strong id="siiCafStatus">—</strong><small>Por tipo de DTE</small></div>
+          <div><span>IVA general</span><strong id="billingIvaStatus">19%</strong><small>Mismo valor del sistema</small></div>
           <div><span>Último DTE</span><strong id="siiLastDteStatus">—</strong><small id="siiLastTrack">—</small></div>
+        </div>
+        <div class="billing-tax-card" aria-label="Configuración de IVA general">
+          <div class="billing-tax-icon"><i class="bi bi-percent"></i></div>
+          <div class="billing-tax-copy"><span class="eyebrow">Impuesto compartido</span><strong>IVA general del sistema</strong><small>Este porcentaje se usa como base para nuevas cotizaciones, pedidos y DTE. Los documentos ya emitidos conservan sus montos históricos.</small></div>
+          <label class="billing-tax-field"><span>IVA (%)</span><input id="billingIvaQuick" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="19"></label>
+          <button class="btn btn-primary billing-tax-save" id="billingIvaQuickSave" type="button"><i class="bi bi-floppy"></i> Guardar IVA</button>
         </div>
       </div>
 
@@ -8557,9 +8565,10 @@ Torta chocolate | 1 | 25000"></textarea></label>
         <div class="editor-modal-head"><div><span class="eyebrow">Facturación</span><h3 id="billingProvidersModalTitle">Mantenedor de Proveedores de Facturación</h3><small>Administra el ambiente, el proveedor que emite y el alcance del historial de documentos.</small></div><button type="button" class="editor-close-x" data-billing-providers-close aria-label="Cerrar">×</button></div>
         <div class="billing-maintainer-toolbar">
           <label class="field-group billing-environment-field"><span>Ambiente de facturación</span><span class="system-select-shell"><select id="billingEnvironment"><option value="CERTIFICACION">CERTIFICACIÓN</option><option value="PRODUCCION">PRODUCCIÓN</option></select><i class="bi bi-chevron-down" aria-hidden="true"></i></span><small>El ambiente es único para todo el módulo y no cambia al seleccionar otro proveedor.</small></label>
+          <label class="field-group billing-iva-field"><span>IVA general (%)</span><input id="billingIva" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="19"><small>Se comparte con cotizaciones, pedidos y emisión de DTE.</small></label>
           <div class="billing-active-summary"><span>Proveedor activo para emitir</span><strong id="billingActiveProviderNameModal">Se muestra en la barra superior</strong><small>Solo un proveedor puede emitir al mismo tiempo.</small></div>
           <div class="billing-history-summary"><div><span>Historial de documentos</span><strong id="billingDocumentsScope">Solo proveedor activo</strong><small>Este switch solo cambia lo que ves; no cambia quién emite.</small></div><label class="billing-provider-switch billing-history-switch" title="Mostrar todos los documentos"><input id="billingShowAllDocuments" type="checkbox"><span></span></label></div>
-          <button class="btn btn-primary" id="billingEnvironmentSave" type="button"><i class="bi bi-floppy"></i> Guardar</button>
+          <button class="btn btn-primary" id="billingEnvironmentSave" type="button"><i class="bi bi-floppy"></i> Guardar facturación</button>
         </div>
         <div class="billing-modal-tools"><button class="btn btn-light" id="billingProvidersRefresh" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div>
         <div class="table-wrap billing-provider-table-wrap"><table class="sii-table billing-provider-table"><thead><tr><th>Proveedor</th><th>Tipo</th><th>Conexión</th><th>Estado</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="billingProviderTable"><tr><td colspan="6">Cargando proveedores…</td></tr></tbody></table></div>
@@ -8567,9 +8576,9 @@ Torta chocolate | 1 | 25000"></textarea></label>
       </div>
 
       <div class="editor hidden sii-modal billing-provider-editor" id="billingProviderEditor" role="dialog" aria-modal="true" aria-labelledby="billingProviderEditorTitle">
-        <div class="editor-modal-head"><div><span class="eyebrow">Facturación</span><h3 id="billingProviderEditorTitle">Editar proveedor</h3><small>La URL de conexión se administra en config.js. Aquí se mantiene la configuración funcional del proveedor.</small></div><button type="button" class="editor-close-x" data-billing-provider-close aria-label="Cerrar">×</button></div>
+        <div class="editor-modal-head"><div><span class="eyebrow">Facturación</span><h3 id="billingProviderEditorTitle">Editar proveedor</h3><small>Configura tu proveedor y conecta las credenciales del ambiente que utilizarás.</small></div><button type="button" class="editor-close-x" data-billing-provider-close aria-label="Cerrar">×</button></div>
         <input id="billingProviderCode" type="hidden">
-        <div class="form-grid">
+        <div class="form-grid" id="billingProviderGeneralFields">
           <label class="field-group"><span>Nombre</span><input id="billingProviderName" maxlength="120"></label>
           <label class="field-group"><span>Tipo</span><input id="billingProviderType" readonly></label>
           <label class="field-group"><span>Estado</span><span class="system-select-shell"><select id="billingProviderEnabled"><option value="SI">Habilitado</option><option value="NO">Inactivo</option></select><i class="bi bi-chevron-down" aria-hidden="true"></i></span></label>
@@ -8578,29 +8587,53 @@ Torta chocolate | 1 | 25000"></textarea></label>
 
         <section class="fcl-credentials-manager hidden" id="billingFacturacionClCredentials" aria-label="Credenciales Facturacion.cl">
           <div class="fcl-credentials-head">
-            <div><span class="eyebrow">API REST</span><h4>Credenciales Facturacion.cl</h4><p>Ingresa las credenciales entregadas por Facturacion.cl. Se guardan como <strong>Supabase Secrets</strong>; la clave nunca vuelve a mostrarse en el navegador.</p></div>
-            <div class="fcl-api-endpoint"><small>Endpoint</small><code>https://rest.facturacion.cl</code></div>
+            <div>
+              <span class="eyebrow">API REST</span>
+              <h4>Conectar Facturacion.cl</h4>
+              <p>Ingresa el <strong>RUT, login y clave</strong> entregados por el proveedor. La vista inicia en Producción; las credenciales DEMO permanecen ocultas hasta que las solicites.</p>
+            </div>
+            <button class="btn btn-light fcl-demo-toggle" id="fclDemoToggle" type="button" aria-pressed="false">
+              <i class="bi bi-flask"></i><span>Usar credenciales DEMO</span>
+            </button>
           </div>
-          <div class="fcl-secret-bootstrap hidden" id="fclSecretBootstrap"><i class="bi bi-key"></i><div><strong>Activación inicial requerida</strong><span>El gestor seguro necesita una sola vez el Secret <code>ALE_MANAGEMENT_TOKEN</code> en Supabase. Después podrás cargar y reemplazar las credenciales desde este mismo cPanel.</span></div></div>
-          <div class="fcl-credential-grid">
-            <article class="fcl-credential-card" data-fcl-env-card="PRUEBA">
-              <div class="fcl-credential-card-head"><div><span>Ambiente</span><strong>PRUEBA</strong></div><span class="fcl-credential-status" id="fclPruebaStatus">Verificando…</span></div>
-              <label class="field-group"><span>Usuario REST</span><input id="fclPruebaUsuario" autocomplete="off" spellcheck="false" placeholder="Usuario entregado por Facturacion.cl"></label>
-              <label class="field-group"><span>RUT REST</span><input id="fclPruebaRut" autocomplete="off" spellcheck="false" placeholder="Ej: 1-9"></label>
-              <label class="field-group"><span>Clave REST</span><span class="fcl-password-shell"><input id="fclPruebaClave" type="password" autocomplete="new-password" spellcheck="false" placeholder="Clave de integración"><button type="button" class="fcl-secret-eye" data-fcl-secret-eye="fclPruebaClave" aria-label="Mostrar u ocultar clave"><i class="bi bi-eye"></i></button></span></label>
-              <div class="fcl-credential-actions"><button class="btn btn-primary" type="button" data-fcl-credentials-save="PRUEBA"><i class="bi bi-shield-lock"></i> Guardar credenciales</button><button class="btn btn-light" type="button" data-fcl-login-test="PRUEBA"><i class="bi bi-plug"></i> Probar login</button><button class="btn btn-light fcl-delete-credentials" type="button" data-fcl-credentials-delete="PRUEBA" title="Eliminar credenciales de prueba"><i class="bi bi-trash3"></i></button></div>
-              <small class="fcl-credential-result" id="fclPruebaResult">Los campos quedan vacíos después de guardar por seguridad.</small>
+          <div class="fcl-secret-bootstrap hidden" id="fclSecretBootstrap"><i class="bi bi-key"></i><div><strong>Activación inicial requerida</strong><span>Falta instalar el esquema base de integración Facturacion.cl (SQL 40). Revisa INSTALACION.txt; después podrás conectar el proveedor desde este cPanel.</span></div></div>
+          <div class="fcl-credential-grid fcl-single-grid">
+            <article class="fcl-credential-card fcl-production-card" id="fclProduccionCard" data-fcl-env-card="PRODUCCION">
+              <div class="fcl-credential-card-head">
+                <div><span>Ambiente actual</span><strong>PRODUCCIÓN</strong><small>Credenciales reales del proveedor</small></div>
+                <span class="fcl-credential-status" id="fclProduccionStatus">Verificando…</span>
+              </div>
+              <div class="fcl-credential-fields">
+                <label class="field-group"><span>RUT Empresa</span><input id="fclProduccionRut" autocomplete="off" spellcheck="false" placeholder="Ej: 76.123.456-7"><small>Editable para usar el RUT definitivo de producción.</small></label>
+                <label class="field-group"><span>Login proveedor</span><input id="fclProduccionUsuario" autocomplete="off" spellcheck="false" placeholder="Login entregado por Facturacion.cl"></label>
+                <label class="field-group"><span>Clave del servicio</span><span class="fcl-password-shell"><input id="fclProduccionClave" type="password" autocomplete="new-password" spellcheck="false" placeholder="Clave entregada por Facturacion.cl"><button type="button" class="fcl-secret-eye" data-fcl-secret-eye="fclProduccionClave" aria-label="Mostrar u ocultar clave"><i class="bi bi-eye"></i></button></span></label>
+              </div>
+              <div class="fcl-credential-actions fcl-main-actions">
+                <button class="btn btn-primary fcl-connect-main" type="button" data-fcl-credentials-save="PRODUCCION"><i class="bi bi-plug-fill"></i> Guardar y conectar</button>
+                <button class="btn btn-light fcl-delete-credentials" type="button" data-fcl-credentials-delete="PRODUCCION" title="Eliminar credenciales de producción"><i class="bi bi-trash3"></i></button>
+              </div>
+              <small class="fcl-credential-result" id="fclProduccionResult">Completa los datos productivos cuando Facturacion.cl los habilite.</small>
             </article>
-            <article class="fcl-credential-card" data-fcl-env-card="PRODUCCION">
-              <div class="fcl-credential-card-head"><div><span>Ambiente</span><strong>PRODUCCIÓN</strong></div><span class="fcl-credential-status" id="fclProduccionStatus">Verificando…</span></div>
-              <label class="field-group"><span>Usuario REST</span><input id="fclProduccionUsuario" autocomplete="off" spellcheck="false" placeholder="Usuario productivo"></label>
-              <label class="field-group"><span>RUT REST</span><input id="fclProduccionRut" autocomplete="off" spellcheck="false" placeholder="RUT productivo"></label>
-              <label class="field-group"><span>Clave REST</span><span class="fcl-password-shell"><input id="fclProduccionClave" type="password" autocomplete="new-password" spellcheck="false" placeholder="Clave productiva"><button type="button" class="fcl-secret-eye" data-fcl-secret-eye="fclProduccionClave" aria-label="Mostrar u ocultar clave"><i class="bi bi-eye"></i></button></span></label>
-              <div class="fcl-credential-actions"><button class="btn btn-primary" type="button" data-fcl-credentials-save="PRODUCCION"><i class="bi bi-shield-lock"></i> Guardar credenciales</button><button class="btn btn-light" type="button" data-fcl-login-test="PRODUCCION"><i class="bi bi-plug"></i> Probar login</button><button class="btn btn-light fcl-delete-credentials" type="button" data-fcl-credentials-delete="PRODUCCION" title="Eliminar credenciales de producción"><i class="bi bi-trash3"></i></button></div>
-              <small class="fcl-credential-result" id="fclProduccionResult">Déjalas vacías hasta que Facturacion.cl habilite producción.</small>
+
+            <article class="fcl-credential-card fcl-demo-card hidden" id="fclPruebaCard" data-fcl-env-card="PRUEBA">
+              <div class="fcl-credential-card-head">
+                <div><span>Ambiente actual</span><strong>PRUEBA · DEMO</strong><small>Datos oficiales del ejemplo de integración</small></div>
+                <span class="fcl-credential-status" id="fclPruebaStatus">Verificando…</span>
+              </div>
+              <div class="fcl-demo-notice"><i class="bi bi-info-circle"></i><span>Estas credenciales son solo para pruebas. No reemplazan ni modifican las credenciales guardadas de Producción.</span></div>
+              <div class="fcl-credential-fields">
+                <label class="field-group"><span>RUT Empresa</span><input id="fclPruebaRut" autocomplete="off" spellcheck="false" placeholder="RUT DEMO"></label>
+                <label class="field-group"><span>Login proveedor</span><input id="fclPruebaUsuario" autocomplete="off" spellcheck="false" placeholder="Login DEMO"></label>
+                <label class="field-group"><span>Clave del servicio</span><span class="fcl-password-shell"><input id="fclPruebaClave" type="password" autocomplete="new-password" spellcheck="false" placeholder="Clave DEMO"><button type="button" class="fcl-secret-eye" data-fcl-secret-eye="fclPruebaClave" aria-label="Mostrar u ocultar clave"><i class="bi bi-eye"></i></button></span></label>
+              </div>
+              <div class="fcl-credential-actions fcl-main-actions">
+                <button class="btn btn-primary fcl-connect-main" type="button" data-fcl-credentials-save="PRUEBA"><i class="bi bi-flask-fill"></i> Conectar DEMO</button>
+                <button class="btn btn-light fcl-delete-credentials" type="button" data-fcl-credentials-delete="PRUEBA" title="Eliminar credenciales de prueba guardadas"><i class="bi bi-trash3"></i></button>
+              </div>
+              <small class="fcl-credential-result" id="fclPruebaResult">Pulsa “Conectar DEMO” para validar el acceso contra la API REST de Facturacion.cl.</small>
             </article>
           </div>
-          <div class="fcl-security-note"><i class="bi bi-shield-check"></i><span>El token que entrega <code>/login</code> se administra únicamente en <strong>facturacion-cl-gateway</strong> y nunca se devuelve al cPanel. ALE ATENCIÓN lo renueva automáticamente cuando corresponde.</span></div>
+          <div class="fcl-security-note"><i class="bi bi-shield-check"></i><span>La clave se guarda protegida en el servidor y no se vuelve a mostrar. El token REST se renueva cuando corresponde.</span></div>
         </section>
 
         <div class="editor-actions"><button class="btn btn-primary" id="billingProviderSave" type="button"><i class="bi bi-floppy"></i> Guardar proveedor</button><button class="btn btn-light" type="button" data-billing-provider-close>Cancelar</button></div>
@@ -8667,6 +8700,17 @@ Torta chocolate | 1 | 25000"></textarea></label>
       <div class="editor-actions sii-caf-footer-actions"><button class="btn btn-light" type="button" data-sii-close><i class="bi bi-x-lg"></i> Cerrar</button></div>
     </div>
 
+    <div class="editor hidden sii-modal" id="fclReviewModal" role="dialog" aria-modal="true" aria-labelledby="fclReviewTitle">
+      <div class="editor-modal-head"><div><span class="eyebrow">Facturacion.cl</span><h3 id="fclReviewTitle">Revisar emisión pendiente</h3></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <p id="fclReviewContext"></p>
+      <p>Busca el documento en Facturacion.cl y consulta su PDF. Comprueba el tipo de DTE, receptor, monto y detalle del pedido antes de asociar el folio.</p>
+      <input type="hidden" id="fclReviewDocumentId">
+      <label class="field-group"><span>Folio encontrado en Facturacion.cl</span><input id="fclReviewFolio" type="number" min="1" step="1"></label>
+      <button class="btn btn-light" id="fclReviewPdf" type="button"><i class="bi bi-file-earmark-pdf"></i> Consultar PDF</button>
+      <label class="field-group"><span><input id="fclReviewConfirmed" type="checkbox"> Revisé el documento y corresponde a este pedido.</span></label>
+      <div class="editor-actions"><button class="btn btn-primary" id="fclReviewSave" type="button">Confirmar folio revisado</button><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
+    </div>
+
     <div class="editor hidden sii-modal sii-emit-modal" id="siiEmitModal" role="dialog" aria-modal="true" aria-labelledby="siiEmitModalTitle">
       <div class="editor-modal-head"><div><span class="eyebrow">Emisión SII</span><h3 id="siiEmitModalTitle">Emitir documento tributario</h3></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
       <div class="form-grid sii-emit-grid">
@@ -8687,9 +8731,18 @@ Torta chocolate | 1 | 25000"></textarea></label>
         <label class="field-group sii-reference-field hidden"><span>Fecha referencia</span><input id="siiRefFecha" type="date"></label>
         <label class="field-group sii-reference-field hidden"><span>Código referencia</span><select id="siiRefCodigo"><option value="1">1 · Anula documento</option><option value="2">2 · Corrige texto</option><option value="3">3 · Corrige montos</option></select></label>
         <label class="field-group span-2 sii-reference-field hidden"><span>Razón referencia</span><input id="siiRefRazon" placeholder="Motivo de la nota"></label>
+        <label class="field-group fcl-note-field hidden"><span>Monto de la nota (CLP)</span><input id="fclMontoNota" type="number" min="1" step="1" placeholder="Monto para corregir valores"><small>Código 3: ingresa el monto del ajuste. Código 1 usa el total del pedido; código 2 emite una corrección sin monto.</small></label>
+        <label class="field-group fcl-guide-field hidden"><span>Tipo de despacho</span><select id="fclTipoDespacho"><option value="2">Emisor a instalaciones del cliente</option><option value="1">Por cuenta del receptor</option><option value="3">Emisor a otras instalaciones</option></select></label>
+        <label class="field-group fcl-guide-field hidden"><span>Motivo del traslado</span><select id="fclIndTraslado"><option value="1">Venta</option><option value="2">Venta por efectuar</option><option value="3">Consignación</option><option value="4">Entrega gratuita</option><option value="5">Traslado interno</option><option value="6">Otro traslado</option><option value="7">Devolución</option></select></label>
+        <label class="field-group fcl-guide-field hidden"><span>Patente transporte</span><input id="fclPatente" maxlength="8" placeholder="ABCD12"></label>
+        <label class="field-group fcl-guide-field hidden"><span>RUT transportista</span><input id="fclRutTrans" placeholder="RUT del transportista"></label>
       </div>
+
+      <label class="sii-cedible-option span-2 hidden" id="siiCedibleField" for="siiIncludeCedible">
+        <span class="sii-cedible-check"><input id="siiIncludeCedible" type="checkbox"><span><strong>Incluir copia cedible</strong><small>Al emitir, se abrirá el PDF original y también la copia cedible. Disponible para Facturas 33/34 y Guía 52 cuando corresponda.</small></span></span>
+      </label>
       
-      <div class="editor-actions"><button class="btn btn-primary" id="siiEmitDte" type="button"><i class="bi bi-receipt"></i> Generar documento</button><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
+      <div class="editor-actions"><button class="btn btn-primary" id="siiEmitDte" type="button"><i class="bi bi-receipt"></i> Emitir DTE</button><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
     </div>
 
 
@@ -8745,7 +8798,7 @@ Torta chocolate | 1 | 25000"></textarea></label>
           <label class="field-group"><span>Facebook</span><input id="sFacebook" placeholder="https://facebook.com/..."></label>
           <label class="field-group"><span>TikTok</span><input id="sTiktok" placeholder="https://tiktok.com/@..."></label>
           <label class="field-group"><span>Valor despacho · CLP</span><input id="sDelivery" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej: 5.000"></label>
-          <label class="field-group"><span>IVA cotizaciones (%)</span><input id="sIva" type="number" min="0" max="100" step="0.01" placeholder="19"></label>
+          <label class="field-group"><span>IVA general del sistema (%)</span><input id="sIva" type="number" min="0" max="100" step="0.01" placeholder="19"><small>Este mismo porcentaje se usa en Cotizaciones, Pedidos y Facturación.</small></label>
           <label class="field-group"><span>Validez cotización (días)</span><input id="sQuoteValidity" type="number" min="1" max="365" placeholder="15"></label>
           <label class="field-group"><span>Formato de documentos</span><select id="sDocumentFormat"><option value="A4">A4</option><option value="TICKET_80">Ticket térmico · 80 mm de ancho</option><option value="TICKET_100">Ticket térmico · 100 mm de ancho</option></select><small>80/100 mm usan ancho fijo y largo automático según el contenido.</small></label>
           <label class="stock-visibility-setting span-2" for="sShowStockClients"><span class="stock-visibility-copy"><strong>Mostrar stock a clientes</strong><small id="sShowStockClientsHint">FALSE: el stock queda oculto en la Web; el cliente ve producto, tamaño y precio.</small></span><span class="stock-policy-switch stock-visibility-switch"><input id="sShowStockClients" type="checkbox" aria-describedby="sShowStockClientsHint"><span class="stock-policy-slider" aria-hidden="true"></span></span><span class="stock-visibility-value is-false" id="sShowStockClientsValue">FALSE</span></label>
@@ -8857,5 +8910,5 @@ Torta chocolate | 1 | 25000"></textarea></label>
 </div>
 <div class="notification-toast-stack" id="notificationToastStack" aria-live="polite"></div>
 <div class="toast" id="adminToast"></div>
-<script src="./config.js?v=R9.18.178"></script><script src="./api.js?v=R9.18.184"></script><script src="./sii-api.js?v=R9.18.178"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./facturacion-api.js?v=R9.18.184"></script><script src="./cpanel.js?v=R9.18.184"></script><script src="./mantenedor-sistema.js?v=R9.18.182"></script>
+<script src="./config.js?v=R9.18.178"></script><script src="./api.js?v=R9.18.184"></script><script src="./sii-api.js?v=R9.18.178"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script><script src="./facturacion-api.js?v=R9.18.188"></script><script src="./cpanel.js?v=R9.18.195"></script><script src="./mantenedor-sistema.js?v=R9.18.182"></script>
 </body></html>

@@ -148,6 +148,7 @@ function orderState(value){return String(value||"").trim().toUpperCase()}
 function isFinalOrder(orderOrState){return FINAL_ORDER_STATES.has(orderState(typeof orderOrState==="object"?orderOrState?.estado:orderOrState))}
 function orderFinalMessage(state){return orderState(state)==="CANCELADO"?"Pedido cancelado · estado final e irreversible":"Pedido entregado · estado final e irreversible"}
 let token=localStorage.getItem("aleAdminToken")||sessionStorage.getItem("aleAdminToken")||"", data={products:[],categories:[],banners:[],orders:[],requests:[],quotes:[],clients:[],users:[],suppliers:[],supplies:[],purchases:[],purchaseItems:[],gallery:[],config:{},currentUser:null};
+window.addEventListener("ale:billing-iva-changed",e=>{const pct=Number(e.detail?.iva_porcentaje);if(!Number.isFinite(pct))return;data.config={...(data.config||{}),iva_porcentaje:pct};const qIva=$("#qIva"),editor=$("#quoteEditor"),editing=Boolean($("#qId")?.value);if(qIva&&(!editor||editor.classList.contains("hidden")||!editing)){qIva.value=String(pct);try{updateQuoteTotals()}catch(_){}}});
 
 // R9.15.1 · Sesión estable: una falla temporal de red nunca borra una sesión válida.
 const sleepMs=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -1440,7 +1441,7 @@ function orderDteBadges(order,full=false){
   if(!docs.length)return '<span class="muted-text order-dte-none">Sin DTE</span>';
   const limit=full?20:3,shown=docs.slice(0,limit);
   const badges=shown.map(doc=>{
-    const tone=orderDteTone(doc),folio=Number(doc.folio||0).toLocaleString("es-CL"),state=String(doc.estado||doc.estado_sii||"REGISTRADO").toUpperCase(),mode=doc.es_prueba_local?"PRUEBA LOCAL":String(doc.ambiente||"").toUpperCase()==="PRODUCCION"?"PROD":"CERT";
+    const tone=orderDteTone(doc),folio=Number(doc.folio||0).toLocaleString("es-CL"),state=String(doc.estado||doc.estado_sii||"REGISTRADO").toUpperCase(),mode=doc.external_provider?`FACTURACION.CL ${doc.ambiente||""}`:doc.es_prueba_local?"PRUEBA LOCAL":String(doc.ambiente||"").toUpperCase()==="PRODUCCION"?"PROD":"CERT";
     const title=`${orderDteName(doc.tipo_dte)} · Folio ${folio} · ${mode} · ${state}${doc.track_id?` · TrackID ${doc.track_id}`:""}`;
     return `<span class="order-dte-chip ${tone}" title="${esc(title)}"><i class="bi bi-receipt"></i>${esc(orderDteName(doc.tipo_dte))}<b>F${esc(folio)}</b>${doc.es_prueba_local?'<em>PRUEBA</em>':state.includes("ACEPT")?'<em>ACEPTADO</em>':state.includes("RECHAZ")?'<em>RECHAZADO</em>':""}</span>`;
   }).join("");
@@ -1510,6 +1511,17 @@ window.changeStatus=async(kind,id,status)=>{
 let currentOrderDetailId="";
 function canonicalOrderPaymentMethod(v){const s=String(v||"").trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");if(!s)return"";if(s.includes("TRANSFER"))return"TRANSFERENCIA";if(s.includes("TRANSBANK")||s.includes("TARJETA")||s.includes("WEBPAY")||s.includes("CARD"))return"TRANSBANK";if(s.includes("EFECTIVO")||s.includes("CASH"))return"EFECTIVO";return s}
 function orderPaymentMethodLabel(v){const m=canonicalOrderPaymentMethod(v);return m==="TRANSFERENCIA"?"Transferencia":m==="TRANSBANK"?"Tarjeta · Transbank":m==="EFECTIVO"?"Efectivo":(m||"Por definir")}
+function orderTaxBreakdown(order={}){
+  const subtotal=Math.max(0,Number(order.subtotal||0)||0),despacho=Math.max(0,Number(order.despacho||0)||0),total=Math.max(0,Number(order.total||0)||0);
+  const recargoCredito=Math.max(0,Number(order.credito_recargo_monto||0)||0);
+  const recargoPct=Math.max(0,Number(order.credito_recargo_pct||0)||0);
+  const explicitIva=Number(order.iva);
+  const derived=Math.max(0,total-subtotal-despacho-recargoCredito);
+  const iva=Number.isFinite(explicitIva)&&explicitIva>0?explicitIva:derived;
+  const explicitPct=Number(order.iva_porcentaje);
+  const pct=Number.isFinite(explicitPct)&&explicitPct>0?explicitPct:(subtotal>0&&iva>0?Math.round((iva/subtotal)*10000)/100:0);
+  return{subtotal,despacho,total,iva,pct,recargoCredito,recargoPct};
+}
 function closeOrderDetail(){currentOrderDetailId="";$("#orderDetailEditor")?.classList.add("hidden");document.body.classList.remove("order-detail-open")}
 function renderOrderDetail(order,items,history=[],dtes=[]){
   currentOrderDetailId=String(order.id||"");
@@ -1525,7 +1537,8 @@ function renderOrderDetail(order,items,history=[],dtes=[]){
   if(cashBtn){cashBtn.classList.toggle("hidden",final||paymentMethod!=="EFECTIVO"||paymentPaid);cashBtn.disabled=final||paymentPaid;cashBtn.title=paymentPaid?"Este pedido ya está pagado":"Registrar cobro manual en efectivo";}
   if(payWa)payWa.classList.toggle("hidden",final||paymentMethod!=="TRANSBANK"||paymentPaid);if(cancelBtn)cancelBtn.classList.toggle("hidden",final);if(regenBtn){regenBtn.disabled=false;regenBtn.title=final?"El estado comercial permanece bloqueado; el PDF sí puede reimprimirse/actualizarse.":"";}
   $("#orderDetailItems").innerHTML=(items||[]).length?(items||[]).map(i=>`<div class="order-detail-line"><span><strong>${esc(i.producto_nombre||i.nombre||"Producto")}</strong><small>${i.tamano_nombre?`Tamaño: ${esc(i.tamano_nombre)} · `:""}${esc(i.producto_id||i.id||"")}</small></span><span>${Number(i.cantidad||1)}</span><span>${money(i.precio_unitario??i.precio)}</span><span><strong>${money(i.subtotal??(Number(i.cantidad||1)*Number(i.precio_unitario??i.precio??0)))}</strong></span></div>`).join(""):'<div class="empty-card">Este pedido histórico no tiene líneas de producto recuperables.</div>';
-  $("#orderDetailTotals").innerHTML=`<div><span>Subtotal</span><strong>${money(order.subtotal)}</strong></div><div><span>Despacho</span><strong>${money(order.despacho)}</strong></div><div class="grand"><span>Total</span><strong>${money(order.total)}</strong></div>${order.observaciones?`<p><b>Observaciones:</b> ${esc(order.observaciones)}</p>`:""}`;
+  const tax=orderTaxBreakdown(order);
+  $("#orderDetailTotals").innerHTML=`<div><span>${tax.iva>0?"Subtotal neto":"Subtotal"}</span><strong>${money(tax.subtotal)}</strong></div>${tax.iva>0?`<div class="order-detail-iva"><span>IVA ${Number.isInteger(tax.pct)?tax.pct:tax.pct.toFixed(2)}%</span><strong>${money(tax.iva)}</strong></div>`:""}${tax.recargoCredito>0?`<div class="order-detail-credit-surcharge"><span>Recargo crédito${tax.recargoPct>0?` ${Number.isInteger(tax.recargoPct)?tax.recargoPct:tax.recargoPct.toFixed(2)}%`:""}</span><strong>${money(tax.recargoCredito)}</strong></div>`:""}<div><span>Despacho</span><strong>${money(tax.despacho)}</strong></div><div class="grand"><span>Total</span><strong>${money(tax.total)}</strong></div>${order.observaciones?`<p><b>Observaciones:</b> ${esc(order.observaciones)}</p>`:""}`;
   const hh=$("#orderDetailHistory");if(hh)hh.innerHTML=(history||[]).length?(history||[]).map(h=>{const isDte=String(h.evento||"").toUpperCase().startsWith("DTE_");return `<div class="order-history-row ${isDte?"is-dte":""}"><span class="order-history-dot"></span><div><strong>${isDte?'<i class="bi bi-receipt"></i> ':''}${esc(h.descripcion||h.evento||"Actualización")}</strong><small>${esc(formatDate(h.creado_en||h.fecha))}${h.estado_pago?` · Pago: ${esc(h.estado_pago)}`:""}${h.estado_pedido?` · Pedido: ${esc(h.estado_pedido)}`:""}</small></div></div>`}).join(""):'<div class="muted-text">La trazabilidad se registrará desde esta versión.</div>';
   const link=$("#orderDetailPdfLink"),reprint=$("#reprintOrderPdf"),hasPdf=!!(order.pdf_url||order.pdf_path);if(hasPdf){link.href="#";link.dataset.orderPdfId=String(order.id||"");link.classList.remove("hidden")}else{link.href="#";delete link.dataset.orderPdfId;link.classList.add("hidden")}if(reprint){reprint.disabled=!hasPdf;reprint.title=hasPdf?`Abrir PDF guardado para reimprimir · ${documentFormatLabel()}`:"Genera primero el PDF del pedido"}
 }
@@ -1747,7 +1760,7 @@ $("#openTransbankManualLink")?.addEventListener("click",()=>{try{const raw=$("#p
 
 function syncStockVisibilitySetting(){const input=$("#sShowStockClients"),value=$("#sShowStockClientsValue"),hint=$("#sShowStockClientsHint");if(!input)return;const on=!!input.checked;if(value){value.textContent=on?"TRUE":"FALSE";value.classList.toggle("is-true",on);value.classList.toggle("is-false",!on)}if(hint)hint.textContent=on?"TRUE: la Web muestra el stock general disponible de cada producto.":"FALSE: el stock queda oculto en la Web; el cliente ve producto, tamaño y precio."}
 function syncAllowNoStockSalesSetting(){const input=$("#sAllowNoStockSales"),value=$("#sAllowNoStockSalesValue"),hint=$("#sAllowNoStockSalesHint");if(!input)return;const on=!!input.checked;if(value){value.textContent=on?"TRUE":"FALSE";value.classList.toggle("is-true",on);value.classList.toggle("is-false",!on)}if(hint)hint.textContent=on?"TRUE: Web y Mayorista podrán comprar aunque el stock sea 0 o negativo. No se mostrará ningún aviso de stock insuficiente al cliente.":"FALSE: Web y Mayorista respetarán el stock disponible y bloquearán cantidades superiores a la existencia."}
-function renderSettings(){const c=data.config||{};resetFilePicker("#sLogo");$("#sLogoId").value=c.logo_drive_file_id||"";$("#sBusiness").value=c.empresa||"";if($("#sBusinessRut"))$("#sBusinessRut").value=c.empresa_rut?formatRutChile(c.empresa_rut):"";if($("#sPublicWebUrl"))$("#sPublicWebUrl").value=c.web_public_url||c.transbank_checkout_url||window.ALE_ATENCIO_CONFIG?.PUBLIC_BASE_URL||"";if($("#sDocumentsPublicUrl"))$("#sDocumentsPublicUrl").value=c.documentos_public_url||new URL("documentos.html",c.web_public_url||window.ALE_ATENCIO_CONFIG?.PUBLIC_BASE_URL||location.origin+"/").toString();if($("#sEventsUrl"))$("#sEventsUrl").value=c.eventos_url||"https://franciscoferraris.cl/";$("#sWhatsapp").value=c.whatsapp||"";$("#sEmail").value=c.email||"";$("#sAddress").value=c.direccion||"";$("#sInstagram").value=c.instagram||"";$("#sFacebook").value=c.facebook||"";$("#sTiktok").value=c.tiktok||"";$("#sDelivery").value=c.valor_despacho||0;$("#sIva").value=c.iva_porcentaje||19;$("#sQuoteValidity").value=c.cotizacion_validez_dias||15;if($("#sDocumentFormat"))$("#sDocumentFormat").value=["A4","TICKET_80","TICKET_100"].includes(String(c.document_format||"").toUpperCase())?String(c.document_format).toUpperCase():"A4";if($("#sShowStockClients"))$("#sShowStockClients").checked=yesNo(c.mostrar_stock_clientes)==="SI";syncStockVisibilitySetting();if($("#sAllowNoStockSales"))$("#sAllowNoStockSales").checked=yesNo(c.permitir_venta_sin_stock)==="SI";syncAllowNoStockSalesSetting()}
+function renderSettings(){const c=data.config||{};resetFilePicker("#sLogo");$("#sLogoId").value=c.logo_drive_file_id||"";$("#sBusiness").value=c.empresa||"";if($("#sBusinessRut"))$("#sBusinessRut").value=c.empresa_rut?formatRutChile(c.empresa_rut):"";if($("#sPublicWebUrl"))$("#sPublicWebUrl").value=c.web_public_url||c.transbank_checkout_url||window.ALE_ATENCIO_CONFIG?.PUBLIC_BASE_URL||"";if($("#sDocumentsPublicUrl"))$("#sDocumentsPublicUrl").value=c.documentos_public_url||new URL("documentos.html",c.web_public_url||window.ALE_ATENCIO_CONFIG?.PUBLIC_BASE_URL||location.origin+"/").toString();if($("#sEventsUrl"))$("#sEventsUrl").value=c.eventos_url||"https://franciscoferraris.cl/";$("#sWhatsapp").value=c.whatsapp||"";$("#sEmail").value=c.email||"";$("#sAddress").value=c.direccion||"";$("#sInstagram").value=c.instagram||"";$("#sFacebook").value=c.facebook||"";$("#sTiktok").value=c.tiktok||"";$("#sDelivery").value=c.valor_despacho||0;$("#sIva").value=c.iva_porcentaje||19;if($("#billingIva"))$("#billingIva").value=c.iva_porcentaje||19;if($("#billingIvaQuick"))$("#billingIvaQuick").value=c.iva_porcentaje||19;if($("#billingIvaStatus"))$("#billingIvaStatus").textContent=`${Number(c.iva_porcentaje||19)}%`;$("#sQuoteValidity").value=c.cotizacion_validez_dias||15;if($("#sDocumentFormat"))$("#sDocumentFormat").value=["A4","TICKET_80","TICKET_100"].includes(String(c.document_format||"").toUpperCase())?String(c.document_format).toUpperCase():"A4";if($("#sShowStockClients"))$("#sShowStockClients").checked=yesNo(c.mostrar_stock_clientes)==="SI";syncStockVisibilitySetting();if($("#sAllowNoStockSales"))$("#sAllowNoStockSales").checked=yesNo(c.permitir_venta_sin_stock)==="SI";syncAllowNoStockSalesSetting()}
 const WEB_CONTENT_DEFAULTS={
   web_policy_privacy_title:"Privacidad",web_policy_privacy_text:"Los datos entregados se utilizan para gestionar solicitudes, pedidos y coordinación de entrega.",
   web_policy_custom_title:"Pedidos personalizados",web_policy_custom_text:"Valores, disponibilidad y tiempos pueden variar según diseño, tamaño, ingredientes y fecha solicitada.",
@@ -3120,7 +3133,7 @@ installStaticClpFields();
 const siiState={config:null,certificados:[],caf:[],documentos:[],intercambios:[],intercambioRespuestas:[],intercambioDetalles:[],certificacion:[],certMetricas:{},inboundEmailWebhook:false,loaded:false};
 let siiLoadedOrderDocs=[];let siiLoadedOrderId=null;let siiLoadedOrderItems=[];
 const SII_DTE_NAMES={33:"Factura Electrónica",34:"Factura No Afecta o Exenta Electrónica",39:"Boleta Electrónica",41:"Boleta No Afecta o Exenta Electrónica",43:"Liquidación Factura Electrónica",52:"Guía de Despacho Electrónica",56:"Nota de Débito Electrónica",61:"Nota de Crédito Electrónica"};
-function siiStatusClass(value){const x=String(value||"").toUpperCase();if(["ACEPTADO","ENVIADO","FIRMADO","0"].includes(x))return"ok";if(x.includes("PRUEBA_LOCAL"))return"local";if(["ERROR","ERROR_ENVIO","RECHAZADO"].some(v=>x.includes(v)))return"error";return"warn"}
+function siiStatusClass(value){const x=String(value||"").toUpperCase();if(["ACEPTADO","ENVIADO","FIRMADO","EMITIDO","0"].includes(x))return"ok";if(x.includes("PRUEBA_LOCAL"))return"local";if(["ERROR","ERROR_ENVIO","RECHAZADO"].some(v=>x.includes(v)))return"error";return"warn"}
 function siiFormatDate(value){if(!value)return"—";const d=new Date(value);return Number.isNaN(d.getTime())?String(value):d.toLocaleDateString("es-CL")}
 function fileAsBase64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(r.error||new Error("LECTURA_ARCHIVO_FALLIDA"));r.onload=()=>resolve(String(r.result||"").split(",").pop()||"");r.readAsDataURL(file)})}
 function fileAsText(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(r.error||new Error("LECTURA_ARCHIVO_FALLIDA"));r.onload=()=>resolve(String(r.result||""));r.readAsText(file,"UTF-8")})}
@@ -3136,8 +3149,10 @@ function renderSiiDocuments(){
     const isExternal=Boolean(x.external_provider)||providerCode==="FACTURACION_CL";
     if(isExternal){
       const order=(data.orders||[]).find(o=>String(o.id)===String(x.pedido_id));
-      const folio=Number(x.folio||0),tipo=Number(x.tipo_dte||0);
-      return `<tr><td>${esc(siiFormatDate(x.fecha_emision||x.creado_en))}</td><td><strong>${tipo}</strong><small>${esc(SII_DTE_NAMES[tipo]||`DTE ${tipo}`)}</small></td><td class="folio-cell"><strong>${folio?folio.toLocaleString('es-CL'):'—'}</strong></td><td class="sii-order-number"><strong>${esc(order?.numero_pedido||x.pedido_numero||x.pedido_id||'—')}</strong></td><td class="sii-doc-name"><strong>${esc(x.receptor_razon||x.razon_social_receptor||'')}</strong><small>${esc(x.receptor_rut||x.rut_receptor||'')}</small></td><td class="money-cell">${money(x.total||0)}</td><td><span class="sii-status-pill ${siiStatusClass(x.estado)}">${esc(x.estado||'—')}</span><small>${esc(providerName)}</small></td><td class="sii-track">—</td><td><div class="sii-action-row">${folio?`<button class="btn btn-light btn-compact" type="button" data-billing-pdf="${folio}" data-billing-pdf-tipo="${tipo}" data-billing-pdf-provider="${esc(providerCode)}"><i class="bi bi-file-earmark-pdf"></i> PDF</button>`:'—'}</div></td></tr>`;
+      const folio=Number(x.folio||0),tipo=Number(x.tipo_dte||0),issued=x.estado==='EMITIDO',pending=['INICIADO','INDETERMINADO','PROCESADO'].includes(x.estado);
+      const pdfAttrs=`data-billing-pdf="${folio}" data-billing-pdf-tipo="${tipo}" data-billing-pdf-provider="${esc(providerCode)}" data-billing-document-id="${esc(x.id)}"`;
+      const buttons=issued&&folio?`${[33,34,52].includes(tipo)?`<label class="sii-history-cedible" title="Marca para abrir la copia cedible"><input type="checkbox" data-billing-cedible-toggle> Cedible</label>`:''}<button class="btn btn-light btn-compact" type="button" ${pdfAttrs}><i class="bi bi-file-earmark-pdf"></i> PDF</button>${[33,34,39,41].includes(tipo)?`<button class="btn btn-light btn-compact" type="button" data-billing-ticket="${esc(x.id)}" data-billing-ticket-tipo="${tipo}" data-billing-ticket-folio="${folio}"><i class="bi bi-printer"></i> Ticket 80 mm</button>`:''}`:pending?`<button class="btn btn-light btn-compact" type="button" data-billing-review="${esc(x.id)}">Revisar emisión</button>`:'';
+      return `<tr><td>${esc(siiFormatDate(x.fecha_emision||x.creado_en))}<small>${esc(x.ambiente==='PRODUCCION'?'PRODUCCIÓN':'PRUEBA')}</small></td><td><strong>${tipo}</strong><small>${esc(SII_DTE_NAMES[tipo]||`DTE ${tipo}`)}</small></td><td class="folio-cell"><strong>${folio?folio.toLocaleString('es-CL'):'—'}</strong></td><td class="sii-order-number"><strong>${esc(order?.numero_pedido||x.pedido_numero||x.pedido_id||'—')}</strong></td><td class="sii-doc-name"><strong>${esc(x.receptor_razon||x.razon_social_receptor||'')}</strong><small>${esc(x.receptor_rut||x.rut_receptor||'')}</small></td><td class="money-cell">${money(x.total||0)}</td><td><span class="sii-status-pill ${siiStatusClass(x.estado)}">${esc(x.estado||'—')}</span><small>${esc(providerName)}</small>${x.error_detalle?`<small title="${esc(x.error_detalle)}">${esc(x.error_detalle.slice(0,150))}</small>`:''}</td><td class="sii-track">—</td><td><div class="sii-action-row">${buttons}<button class="btn btn-light btn-compact" type="button" data-billing-xml="${esc(x.id)}">XML enviado</button></div></td></tr>`;
     }
     const local=Boolean(x.es_prueba_local);return `<tr class="${local?'sii-local-row':''}"><td>${esc(siiFormatDate(x.fecha_emision||x.creado_en))}</td><td><strong>${Number(x.tipo_dte)}</strong><small>${esc(SII_DTE_NAMES[x.tipo_dte]||'DTE')}</small>${local?'<small class="sii-local-label">PRUEBA LOCAL</small>':''}</td><td class="folio-cell"><strong>${Number(x.folio||0).toLocaleString('es-CL')}</strong></td><td class="sii-order-number"><strong>${esc(x.pedido_numero||((data.orders||[]).find(o=>String(o.id)===String(x.pedido_id))?.numero_pedido)||x.pedido_id||'—')}</strong></td><td class="sii-doc-name"><strong>${esc(x.razon_social_receptor||'')}</strong><small>${esc(x.rut_receptor||'')}</small></td><td class="money-cell">${money(x.total||0)}</td><td><span class="sii-status-pill ${siiStatusClass(x.estado)}">${esc(x.estado||'—')}</span>${x.estado_sii?`<small>SII: ${esc(x.estado_sii)}</small>`:''}<small>${esc(providerName)}</small></td><td class="sii-track">${local?'NO ENVIADO':esc(x.track_id||'—')}</td><td><div class="sii-action-row">${x.track_id?`<button class="btn btn-light btn-compact" type="button" data-sii-query="${esc(x.id)}">Consultar SII</button>`:''}<button class="btn btn-light btn-compact" type="button" data-sii-pdf="${esc(x.id)}"><i class="bi bi-file-earmark-pdf"></i> PDF</button><button class="btn btn-light btn-compact" type="button" data-sii-detail="${esc(x.id)}">Ver XML</button></div></td></tr>`
   }).join(""):'<tr><td colspan="9" class="sii-document-empty">No hay documentos tributarios emitidos.</td></tr>'
@@ -3180,6 +3195,7 @@ window.openOrderSiiIssue=async(orderId,tipoDte=33)=>{
   try{if(window.FacturacionAPI)await FacturacionAPI.load(false,token)}catch(err){console.warn('load billing provider from order',err)}
   try{await loadSiiBilling(false)}catch(err){console.warn('load sii from order',err)}
   $('#siiTipoDte').value=String(tipoDte);
+  if($('#siiIncludeCedible'))$('#siiIncludeCedible').checked=false;
   $('#siiPedidoId').value=String(o.numero_pedido||o.id||'');
   $('#siiRutReceptor').value=o.rut||'';
   $('#siiRazonReceptor').value=o.razon_social||o.nombre||'';
@@ -3239,9 +3255,21 @@ function updateSiiIssueModeUi(){
   btn.disabled=false;
 
   const activeBillingProvider=window.FacturacionAPI?.activeCodeCached?.();
+  const external=Boolean(activeBillingProvider&&activeBillingProvider!=='SII_PROPIO');
+  const cedibleEligible=activeBillingProvider==='FACTURACION_CL'&&[33,34,52].includes(tipo);
+  const cedibleField=$('#siiCedibleField'),cedibleCheck=$('#siiIncludeCedible');
+  if(cedibleField)cedibleField.classList.toggle('hidden',!cedibleEligible);
+  if(!cedibleEligible&&cedibleCheck)cedibleCheck.checked=false;
+  if(sel){sel.closest('label')?.classList.toggle('hidden',external);if(external)sel.value='AUTO'}
+  document.querySelectorAll('.sii-boleta-format-field').forEach(el=>el.classList.toggle('hidden',external||![39,41].includes(tipo)));
+  document.querySelectorAll('.fcl-guide-field').forEach(el=>el.classList.toggle('hidden',!external||tipo!==52));
+  document.querySelectorAll('.fcl-note-field').forEach(el=>el.classList.toggle('hidden',!external||![56,61].includes(tipo)));
   if(activeBillingProvider&&activeBillingProvider!=="SII_PROPIO") {
-    btn.innerHTML='<i class="bi bi-receipt"></i> Generar documento';
-    showStatus(`Proveedor activo: ${window.FacturacionAPI?.label?.(activeBillingProvider)||activeBillingProvider}`,"ok");
+    const env=FacturacionAPI.state.ambiente==='PRODUCCION'?'PRODUCCION':'PRUEBA';
+    const prior=SINGLE_SII_ORDER_TYPES.has(tipo)?siiLoadedOrderDocs.find(x=>Number(x.tipo_dte)===tipo&&x.ambiente===env&&['EMITIDO','INICIADO','INDETERMINADO','PROCESADO'].includes(x.estado)):null;
+    btn.innerHTML=prior?.estado==='EMITIDO'?'<i class="bi bi-eye"></i> Ver documento':'<i class="bi bi-receipt"></i> Emitir DTE';
+    btn.disabled=Boolean(prior&&prior.estado!=='EMITIDO');
+    showStatus(prior&&prior.estado!=='EMITIDO'?'Emisión pendiente de revisión. Abre el historial antes de volver a emitir.':`Proveedor activo: ${window.FacturacionAPI?.label?.(activeBillingProvider)||activeBillingProvider} · ${env}`,prior&&prior.estado!=='EMITIDO'?'warn':'ok');
     return;
   }
 
@@ -3402,30 +3430,93 @@ async function loadSiiOrderData(){
   }
   const ctx=$("#siiEmitContext");if(ctx)ctx.textContent=`Pedido ${o.numero_pedido||o.id} cargado · ${SII_DTE_NAMES[Number($("#siiTipoDte").value)]||"Documento tributario"}`;updateSiiIssueModeUi();toast(`✓ Pedido ${o.numero_pedido||o.id} cargado · ${Number(out.items_count||0)} ítem(s)`)
 }
-async function openExternalBillingPdf(tipo,folio,targetWindow=null,providerCode="FACTURACION_CL"){
-  if(!window.FacturacionAPI||!folio)return false;
-  const out=FacturacionAPI.pdfForProvider?await FacturacionAPI.pdfForProvider(providerCode,tipo,folio,token):await FacturacionAPI.pdf(tipo,folio,token);
-  if(!out?.pdf_base64)return false;
-  const bin=atob(out.pdf_base64),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
-  const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
-  if(targetWindow&&!targetWindow.closed)targetWindow.location.replace(url);else window.open(url,'_blank','noopener');
-  setTimeout(()=>URL.revokeObjectURL(url),120000);return true;
+function externalPdfBlobUrl(out){
+  if(!out?.pdf_base64)throw new Error('PDF_NO_DISPONIBLE');
+  const clean64=String(out.pdf_base64).replace(/^data:application\/pdf;base64,/i,'').replace(/\s/g,'');
+  const bin=atob(clean64),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  return URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+}
+async function fetchExternalBillingPdfUrl(tipo,folio,providerCode="FACTURACION_CL",options={}){
+  if(!window.FacturacionAPI||!folio)throw new Error('PDF_NO_DISPONIBLE');
+  const out=FacturacionAPI.pdfForProvider?await FacturacionAPI.pdfForProvider(providerCode,tipo,folio,token,options):await FacturacionAPI.pdf(tipo,folio,token);
+  return {url:externalPdfBlobUrl(out),out};
+}
+function documentLogoAbsoluteUrl(){
+  const raw=String(data.config?.logo_url||'logo-ale-atencio.png').trim()||'logo-ale-atencio.png';
+  try{return new URL(raw,window.location.href).href}catch(_){return new URL('logo-ale-atencio.png',window.location.href).href}
+}
+function externalViewerHtml(title,tabs){
+  const buttons=tabs.map((x,i)=>`<button type="button" class="tab ${i===0?'active':''}" data-tab="${i}">${esc(x.label)}</button>`).join('');
+  const frames=tabs.map((x,i)=>`<iframe class="frame ${i===0?'active':''}" data-frame="${i}" src="${x.url}" title="${esc(x.label)}"></iframe>`).join('');
+  const logo=esc(documentLogoAbsoluteUrl());
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,Arial,sans-serif;background:#f5f2f0;color:#46362f}.bar{height:64px;display:flex;align-items:center;gap:8px;padding:9px 14px;background:#fff;border-bottom:1px solid #e6d8d1;position:sticky;top:0;z-index:3}.brand{display:flex;align-items:center;gap:10px;font-weight:900;margin-right:auto;min-width:0}.brand img{width:82px;height:42px;object-fit:contain}.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tab,.print{border:1px solid #dfd0c9;background:#fff;border-radius:10px;padding:9px 13px;font-weight:800;color:#644d43;cursor:pointer}.tab.active{background:#5c463e;color:#fff;border-color:#5c463e}.print{background:#8b6556;color:#fff;border-color:#8b6556}.stage{height:calc(100vh - 64px)}.frame{display:none;width:100%;height:100%;border:0;background:#fff}.frame.active{display:block}@media(max-width:600px){.bar{height:auto;flex-wrap:wrap}.brand{width:100%}.brand img{width:70px;height:36px}.stage{height:calc(100vh - 108px)}}
+  </style></head><body><div class="bar"><span class="brand"><img src="${logo}" alt="Ale Atencio"><span>${esc(title)}</span></span>${buttons}<button class="print" type="button" id="printBtn">Imprimir</button></div><div class="stage">${frames}</div><script>
+  const tabs=[...document.querySelectorAll('.tab')],frames=[...document.querySelectorAll('.frame')];let active=0;function show(i){active=i;tabs.forEach((b,n)=>b.classList.toggle('active',n===i));frames.forEach((f,n)=>f.classList.toggle('active',n===i))}tabs.forEach((b,i)=>b.onclick=()=>show(i));document.getElementById('printBtn').onclick=()=>{try{frames[active].contentWindow.print()}catch(e){window.print()}};
+  <\/script></body></html>`;
+}
+function openExternalPdfBundle(targetWindow,title,tabs){
+  if(!targetWindow||targetWindow.closed)targetWindow=window.open('about:blank','_blank');
+  if(!targetWindow)throw new Error('VENTANA_EMERGENTE_BLOQUEADA');
+  targetWindow.document.open();targetWindow.document.write(externalViewerHtml(title,tabs));targetWindow.document.close();return targetWindow;
+}
+function billingDocumentOrderId(row={}){
+  const direct=String(row?.pedido_id||'').trim();if(direct)return direct;
+  const number=String(row?.pedido_numero||row?.numero_pedido||'').trim();
+  if(!number)return '';
+  const order=(data.orders||[]).find(o=>String(o.id)===number||String(o.numero_pedido||'')===number);
+  return String(order?.id||'').trim();
+}
+async function regenerateSystemTicket80(orderId){
+  const id=String(orderId||'').trim();if(!id)throw new Error('PEDIDO_ASOCIADO_NO_DISPONIBLE');
+  await AleAPI.post('generateorderpdf',{id},token);
+  return await secureOrderPdfUrl(id);
+}
+
+async function openExternalBillingPdf(tipo,folio,targetWindow=null,providerCode="FACTURACION_CL",options={}){
+  const {url}=await fetchExternalBillingPdfUrl(tipo,folio,providerCode,options);
+  const title=`DTE ${Number(tipo)||tipo} · Folio ${Number(folio||0).toLocaleString('es-CL')}`;
+  openExternalPdfBundle(targetWindow,title,[{label:options?.cedible?'Cedible':'Original',url}]);
+  setTimeout(()=>URL.revokeObjectURL(url),10*60*1000);return true;
 }
 async function emitActiveExternalDte(tipo,pedido_id){
-  const payload={tipo_dte:tipo,pedido_id};
+  const includeCedible=Boolean($('#siiIncludeCedible')?.checked)&&[33,34,52].includes(Number(tipo));
+  const payload={tipo_dte:tipo,pedido_id:siiLoadedOrderId||pedido_id,rut_receptor:$("#siiRutReceptor").value.trim(),razon_social_receptor:$("#siiRazonReceptor").value.trim(),giro_receptor:$("#siiGiroReceptor").value.trim(),direccion_receptor:$("#siiDireccionReceptor").value.trim(),comuna_receptor:$("#siiComunaReceptor").value.trim(),ciudad_receptor:$("#siiCiudadReceptor").value.trim(),incluir_cedible:includeCedible};
+  if(tipo===52){payload.tipo_despacho=Number($("#fclTipoDespacho").value);payload.ind_traslado=Number($("#fclIndTraslado").value);payload.transporte={patente:$("#fclPatente").value.trim(),rut_transportista:$("#fclRutTrans").value.trim()}}
   if([56,61].includes(tipo)){
     if(!$("#siiRefFolio").value.trim())return toast("La Nota requiere el folio del documento de referencia");
+    payload.monto_nota=Number($("#fclMontoNota")?.value||0);
     payload.referencia={tipo_dte:Number($("#siiRefTipo").value||33),folio:Number($("#siiRefFolio").value||0),fecha:$("#siiRefFecha").value,codigo:Number($("#siiRefCodigo").value||1),razon:$("#siiRefRazon").value.trim()||"Referencia tributaria"};
   }
-  let pdfWindow=null;
+  const printFormat=configuredDocumentFormat(),ticketMode=printFormat==='TICKET_80'&&[33,34,39,41].includes(Number(tipo));
+  let documentWindow=null;
   try{
-    pdfWindow=window.open('about:blank','_blank');if(pdfWindow)pdfWindow.document.write('<title>Generando documento</title><body style="font-family:Arial,sans-serif;padding:30px">Generando documento tributario…</body>');
+    documentWindow=window.open('about:blank','_blank');
+    if(documentWindow)documentWindow.document.write(`<title>Generando documento</title><body style="font-family:Arial,sans-serif;padding:30px">${ticketMode?'Preparando ticket 80 mm':'Generando representación'}…</body>`);
     const out=await FacturacionAPI.issue(payload,token),doc=out?.document||{},folio=Number(doc.folio||out?.provider?.folio||out?.folio||0);
-    if(folio){try{const opened=await openExternalBillingPdf(tipo,folio,pdfWindow);if(!opened&&pdfWindow&&!pdfWindow.closed)pdfWindow.close()}catch(err){console.warn('external billing pdf',err);if(pdfWindow&&!pdfWindow.closed)pdfWindow.close()}}else if(pdfWindow&&!pdfWindow.closed)pdfWindow.close();
-    toast(`✓ ${out.provider_name||'Proveedor'} · DTE ${tipo}${folio?` · folio ${folio.toLocaleString('es-CL')}`:''}`);
+    if(!folio){documentWindow?.close();throw new Error('FOLIO_NO_DISPONIBLE')}
+    let cedibleUrl=null;
+    if(includeCedible){try{cedibleUrl=(await fetchExternalBillingPdfUrl(tipo,folio,'FACTURACION_CL',{document_id:doc.id,ambiente:doc.ambiente,cedible:true})).url}catch(err){console.warn('external billing cedible',err);toast(`⚠ Documento emitido, pero la copia cedible no pudo abrirse: ${err.message||err}`)}}
+    if(ticketMode){
+      const orderId=String(siiLoadedOrderId||pedido_id||doc.pedido_id||'').trim();
+      try{
+        const ticketUrl=await regenerateSystemTicket80(orderId);
+        documentWindow.location.replace(ticketUrl);
+      }catch(err){
+        console.warn('ticket 80 interno',err);
+        const original=(await fetchExternalBillingPdfUrl(tipo,folio,'FACTURACION_CL',{document_id:doc.id,ambiente:doc.ambiente,cedible:false})).url;
+        openExternalPdfBundle(documentWindow,`DTE ${tipo} · Folio ${folio}`,[{label:'PDF oficial',url:original},...(cedibleUrl?[{label:'Cedible',url:cedibleUrl}]:[])]);
+        toast(`⚠ El DTE fue emitido correctamente, pero no se pudo regenerar el Ticket 80 mm interno. Se abrió el PDF oficial en su tamaño original.`);
+      }
+    }else{
+      const original=(await fetchExternalBillingPdfUrl(tipo,folio,'FACTURACION_CL',{document_id:doc.id,ambiente:doc.ambiente,cedible:false})).url;
+      openExternalPdfBundle(documentWindow,`DTE ${tipo} · Folio ${folio}`,[{label:'Original',url:original},...(cedibleUrl?[{label:'Cedible',url:cedibleUrl}]:[])]);
+    }
+    toast(`✓ ${out.reutilizado?'Documento existente':out.provider_name||'Proveedor'} · DTE ${tipo} · folio ${folio.toLocaleString('es-CL')}${includeCedible&&cedibleUrl?' · cedible disponible':''}${ticketMode?' · Ticket 80 mm interno':''}`);
     try{if(typeof loadAdminModules==='function')await loadAdminModules({modules:['clients','orders'],retry:false})}catch(e){console.warn('refresh orders after external DTE',e)}
+    siiState.loaded=false;await loadSiiBilling(true).catch(()=>{});await loadSiiOrderData().catch(()=>{});
     return out;
-  }catch(err){try{if(pdfWindow&&!pdfWindow.closed)pdfWindow.close()}catch(_){}throw err}
+  }catch(err){try{if(documentWindow&&!documentWindow.closed)documentWindow.close()}catch(_){}if(err.payload?.document_id){siiState.loaded=false;await loadSiiBilling(true).catch(()=>{})}throw err}
 }
 async function emitSiiDte(){
   const tipo=Number($("#siiTipoDte").value),pedido_id=$("#siiPedidoId").value.trim();if(!pedido_id)return toast("Ingresa el ID, N.º de pedido o solo el número; por ejemplo 24");
@@ -3508,7 +3599,28 @@ $("#siiRegistryApply")?.addEventListener("click",e=>busy(e.currentTarget,async()
 $("#siiCertificationRefresh")?.addEventListener("click",e=>busy(e.currentTarget,()=>loadSiiCertification()));
 $("#siiOpenCertificationPortal")?.addEventListener("click",()=>window.open('https://www.sii.cl/servicios_online/1039-menu_certificacion-1184.html','_blank','noopener,noreferrer'));
 $("#siiCertificationTable")?.addEventListener("click",async e=>{const b=e.target.closest('[data-sii-cert-save]');if(!b)return;await busy(b,async()=>{try{const code=b.dataset.siiCertSave,state=$("#siiCertificationTable")?.querySelector(`.sii-cert-state[data-code="${CSS.escape(code)}"]`)?.value||'PENDIENTE',detalle=$("#siiCertificationTable")?.querySelector(`.sii-cert-detail[data-code="${CSS.escape(code)}"]`)?.value||'',evidencia=$("#siiCertificationTable")?.querySelector(`.sii-cert-evidence[data-code="${CSS.escape(code)}"]`)?.value||'';await SiiAPI.certificationUpdate({codigo:code,estado:state,detalle,evidencia},token);await loadSiiCertification();toast(`✓ Etapa ${code} actualizada`)}catch(err){toast(`✕ ${err.message||err}`)}})});
-$("#siiDocumentsTable")?.addEventListener("click",async e=>{const externalPdf=e.target.closest('[data-billing-pdf]'),query=e.target.closest('[data-sii-query]'),detail=e.target.closest('[data-sii-detail]'),pdf=e.target.closest('[data-sii-pdf]');if(externalPdf){await busy(externalPdf,async()=>{try{const tipo=Number(externalPdf.dataset.billingPdfTipo||0),folio=Number(externalPdf.dataset.billingPdf||0);if(!tipo||!folio)throw new Error('DOCUMENTO_INVALIDO');await openExternalBillingPdf(tipo,folio,null,externalPdf.dataset.billingPdfProvider||'FACTURACION_CL')}catch(err){toast(`✕ ${err.message||err}`)}})}else if(query){await busy(query,async()=>{try{const out=await SiiAPI.queryTrack(query.dataset.siiQuery,token);siiState.loaded=false;await loadSiiBilling(true);toast(`SII: ${out.estado||'consultado'}${out.glosa?` · ${out.glosa}`:''}`)}catch(err){toast(`✕ ${err.message||err}`)}})}else if(pdf){await busy(pdf,async()=>{let tab=null;try{tab=window.open('about:blank','_blank');const out=await SiiAPI.detail(pdf.dataset.siiPdf,token);if(out.representacion){const generated=await generateSiiRepresentationPdf(out.representacion,tab);await persistSiiPdf(pdf.dataset.siiPdf,generated)}else throw new Error('REPRESENTACION_PDF_NO_DISPONIBLE')}catch(err){try{tab?.close()}catch(_){}toast(`✕ ${err.message||err}`)}})}else if(detail){await busy(detail,async()=>{try{const out=await SiiAPI.detail(detail.dataset.siiDetail,token),d=out.documento||{};const blob=new Blob([d.xml_envio||d.xml_dte||""],{type:"text/xml;charset=ISO-8859-1"}),url=URL.createObjectURL(blob);window.open(url,"_blank","noopener");setTimeout(()=>URL.revokeObjectURL(url),60000)}catch(err){toast(`✕ ${err.message||err}`)}})}});
+function billingDownload(filename,blob){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}
+$("#siiDocumentsTable")?.addEventListener('click',async e=>{
+  const ticket=e.target.closest('[data-billing-ticket]'),xml=e.target.closest('[data-billing-xml]'),review=e.target.closest('[data-billing-review]');
+  const button=ticket||xml||review;if(!button)return;
+  await busy(button,async()=>{try{
+    if(ticket){let tab=null;try{
+      tab=window.open('about:blank','_blank');
+      const documentId=ticket.dataset.billingTicket,row=siiState.documentos.find(x=>String(x.id)===String(documentId))||{};
+      const orderId=billingDocumentOrderId(row);
+      if(!orderId)throw new Error('Este DTE no tiene un pedido asociado para regenerar el Ticket 80 mm');
+      const ticketUrl=await regenerateSystemTicket80(orderId);
+      tab.location.replace(ticketUrl);
+      toast('✓ Ticket 80 mm interno preparado para impresión · el DTE de Facturacion.cl permanece sin cambios');
+    }catch(err){try{tab?.close()}catch(_){}throw err}}
+    else if(xml){const out=await FacturacionAPI.documentDetail(xml.dataset.billingXml,token);if(!out.xml)throw new Error('Este documento histórico no conserva el XML enviado');const bytes=Uint8Array.from(out.xml,c=>c.charCodeAt(0));billingDownload(`Integracion_${out.document.tipo_dte}_${out.document.folio||out.document.id}.xml`,new Blob([bytes],{type:'application/xml'}))}
+    else {const row=siiState.documentos.find(x=>String(x.id)===review.dataset.billingReview);if(!row)throw new Error('DOCUMENTO_NO_ENCONTRADO');$('#fclReviewDocumentId').value=row.id;$('#fclReviewFolio').value=row.folio||'';$('#fclReviewConfirmed').checked=false;$('#fclReviewContext').textContent=`DTE ${row.tipo_dte} · ${row.ambiente} · ${row.receptor_razon||row.receptor_rut||''} · ${money(row.total||0)}`;openSiiModal('fclReviewModal')}
+  }catch(err){toast(`✕ ${err.message||err}`)}})
+});
+$('#fclReviewPdf')?.addEventListener('click',e=>busy(e.currentTarget,async()=>{let tab=null;try{const id=$('#fclReviewDocumentId').value,row=siiState.documentos.find(x=>String(x.id)===id),folio=Number($('#fclReviewFolio').value);if(!row||!Number.isSafeInteger(folio)||folio<=0)throw new Error('Ingresa un folio válido encontrado en Facturacion.cl');tab=window.open('about:blank','_blank');await openExternalBillingPdf(row.tipo_dte,folio,tab,'FACTURACION_CL',{document_id:id})}catch(err){tab?.close();toast(`✕ ${err.message||err}`)}}));
+$('#fclReviewFolio')?.addEventListener('input',()=>{$('#fclReviewConfirmed').checked=false});
+$('#fclReviewSave')?.addEventListener('click',e=>busy(e.currentTarget,async()=>{try{if(!$('#fclReviewConfirmed').checked)throw new Error('Revisa el PDF y confirma que corresponde al pedido');await FacturacionAPI.reconcileDocument($('#fclReviewDocumentId').value,Number($('#fclReviewFolio').value),token);closeSiiModals();siiState.loaded=false;await loadSiiBilling(true);toast('✓ Folio confirmado y registrado sin emitir otro documento')}catch(err){toast(`✕ ${err.message||err}`)}}));
+$("#siiDocumentsTable")?.addEventListener("click",async e=>{const externalPdf=e.target.closest('[data-billing-pdf]'),query=e.target.closest('[data-sii-query]'),detail=e.target.closest('[data-sii-detail]'),pdf=e.target.closest('[data-sii-pdf]');if(externalPdf){await busy(externalPdf,async()=>{let tab=null;try{tab=window.open('about:blank','_blank');const tipo=Number(externalPdf.dataset.billingPdfTipo||0),folio=Number(externalPdf.dataset.billingPdf||0);if(!tipo||!folio)throw new Error('DOCUMENTO_INVALIDO');const cedible=Boolean(externalPdf.closest('tr')?.querySelector('[data-billing-cedible-toggle]')?.checked)||externalPdf.dataset.billingCedible==='true';await openExternalBillingPdf(tipo,folio,tab,externalPdf.dataset.billingPdfProvider||'FACTURACION_CL',{document_id:externalPdf.dataset.billingDocumentId,cedible})}catch(err){tab?.close();toast(`✕ ${err.message||err}`)}})}else if(query){await busy(query,async()=>{try{const out=await SiiAPI.queryTrack(query.dataset.siiQuery,token);siiState.loaded=false;await loadSiiBilling(true);toast(`SII: ${out.estado||'consultado'}${out.glosa?` · ${out.glosa}`:''}`)}catch(err){toast(`✕ ${err.message||err}`)}})}else if(pdf){await busy(pdf,async()=>{let tab=null;try{tab=window.open('about:blank','_blank');const out=await SiiAPI.detail(pdf.dataset.siiPdf,token);if(out.representacion){const generated=await generateSiiRepresentationPdf(out.representacion,tab);await persistSiiPdf(pdf.dataset.siiPdf,generated)}else throw new Error('REPRESENTACION_PDF_NO_DISPONIBLE')}catch(err){try{tab?.close()}catch(_){}toast(`✕ ${err.message||err}`)}})}else if(detail){await busy(detail,async()=>{try{const out=await SiiAPI.detail(detail.dataset.siiDetail,token),d=out.documento||{};const blob=new Blob([d.xml_envio||d.xml_dte||""],{type:"text/xml;charset=ISO-8859-1"}),url=URL.createObjectURL(blob);window.open(url,"_blank","noopener");setTimeout(()=>URL.revokeObjectURL(url),60000)}catch(err){toast(`✕ ${err.message||err}`)}})}});
 document.addEventListener("keydown",e=>{
   if(e.key!=="Escape")return;
   const ids=["ledgerHistoryEditor","inventoryPartEditor","inventoryImportEditor","warehouseChannelEditor","warehouseEditor"];
