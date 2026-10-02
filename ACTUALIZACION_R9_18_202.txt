@@ -1,0 +1,20 @@
+ACTUALIZACIÓN R9.18.202
+
+Esta versión sí requiere actualización de base de datos y Edge Functions.
+
+1. Ejecutar:
+   INSTALACION_SUPABASE/41_ALE_ATENCIO_SQL_R9_18_202_VENTA_DIRECTA_DTE_UNICO.sql
+
+2. Volver a desplegar:
+   - INSTALACION_SUPABASE_EDGE_FUNCTIONS/facturacion-cl-gateway/index.ts
+   - INSTALACION_SUPABASE_EDGE_FUNCTIONS/dynamic-processor/index.ts
+   - INSTALACION_SUPABASE_EDGE_FUNCTIONS/facturacion-sii/index.ts
+
+3. Publicar los archivos web actualizados.
+
+IMPORTANTE
+- Los pedidos normales continúan descontando stock en su flujo habitual.
+- Una factura emitida desde un pedido NO vuelve a descontar inventario.
+- El checkbox "Descontar stock de bodega" aparece solo en la venta manual directa.
+- Si la emisión externa falla, no se descuenta stock.
+- Las Notas de Crédito/Débito no quedan bloqueadas por la regla de un DTE principal por pedido.

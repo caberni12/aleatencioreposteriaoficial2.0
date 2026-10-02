@@ -5004,3 +5004,902 @@ body > #requestClientEditor:not(.hidden) .editor-actions{
   .billing-tax-icon{width:42px;height:42px;border-radius:13px}
   .billing-tax-field,.billing-tax-save{grid-column:1/-1}
 }
+
+/* =========================================================
+   R9.18.196 · UI PROFESIONAL GLOBAL
+   Normalización visual de módulos y modales sin tocar lógica.
+   ========================================================= */
+
+/* Base visual más sobria */
+.admin-body{
+  background:#f4f6f8 !important;
+  color:#1f2937 !important;
+}
+.admin-main{padding:24px !important}
+.admin-top{margin-bottom:18px !important;align-items:center !important}
+.admin-top h1{
+  margin:0 !important;
+  font-family:"Manrope",Arial,sans-serif !important;
+  font-size:30px !important;
+  line-height:1.15 !important;
+  font-weight:800 !important;
+  letter-spacing:-.025em !important;
+  color:#26313d !important;
+}
+.admin-titlebar>.eyebrow{display:none !important}
+
+/* Módulos: una misma jerarquía, menos decoración */
+.admin-view .admin-card{
+  background:#fff !important;
+  border:1px solid #e2e7ec !important;
+  border-radius:16px !important;
+  padding:20px !important;
+  box-shadow:0 4px 16px rgba(15,23,42,.035) !important;
+}
+.admin-view .card-head{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:14px !important;
+  margin-bottom:16px !important;
+  padding-bottom:14px !important;
+  border-bottom:1px solid #edf0f2 !important;
+}
+.admin-view .card-head>div:first-child{min-width:0 !important}
+.admin-view .card-head h2,
+.admin-view .card-head h3,
+.admin-view .admin-card h2,
+.admin-view .admin-card h3{
+  margin:0 !important;
+  font-family:"Manrope",Arial,sans-serif !important;
+  color:#26313d !important;
+  line-height:1.25 !important;
+  letter-spacing:-.015em !important;
+}
+.admin-view .card-head h2{font-size:19px !important;font-weight:800 !important}
+.admin-view .card-head h3{font-size:17px !important;font-weight:800 !important}
+.admin-view .card-head .eyebrow{display:none !important}
+.admin-view .module-help,
+.admin-view .card-head p,
+.admin-view .report-subtitle,
+.admin-view .price-list-help,
+.admin-view .cost-filter-copy,
+.admin-view .cost-history-note,
+.admin-view .receipt-folio-note,
+.admin-view .inventory-keyboard-hint,
+.admin-view .integration-note:not([id]){
+  display:none !important;
+}
+
+/* KPI compactos y consistentes */
+.admin-view .kpi-grid{gap:12px !important;margin-bottom:16px !important}
+.admin-view .kpi-card{
+  border:1px solid #e2e7ec !important;
+  border-radius:14px !important;
+  padding:16px !important;
+  box-shadow:none !important;
+  background:#fff !important;
+}
+.admin-view .kpi-card span{font-size:11px !important;font-weight:700 !important;color:#718096 !important}
+.admin-view .kpi-card strong{font-size:25px !important;color:#26313d !important}
+
+/* Formularios de módulos */
+.admin-body .form-grid{gap:14px !important}
+.admin-body .field-group,
+.admin-body .form-grid>label{
+  gap:6px !important;
+  margin:0 !important;
+  min-width:0 !important;
+}
+.admin-body .field-group>span,
+.admin-body .field-label,
+.admin-body .form-grid>label{
+  color:#465462 !important;
+  font-size:11px !important;
+  line-height:1.2 !important;
+  font-weight:800 !important;
+  letter-spacing:.025em !important;
+}
+.admin-body .form-grid input,
+.admin-body .form-grid select,
+.admin-body .form-grid textarea,
+.admin-body .password-row input,
+.admin-body .admin-toolbar input,
+.admin-body .admin-toolbar select{
+  min-height:44px !important;
+  padding:10px 12px !important;
+  border:1px solid #d7dde3 !important;
+  border-radius:10px !important;
+  background:#fff !important;
+  color:#1f2937 !important;
+  box-shadow:none !important;
+  font-size:13px !important;
+}
+.admin-body .form-grid textarea{min-height:96px !important}
+.admin-body .form-grid input:focus,
+.admin-body .form-grid select:focus,
+.admin-body .form-grid textarea:focus,
+.admin-body .password-row input:focus,
+.admin-body .admin-toolbar input:focus,
+.admin-body .admin-toolbar select:focus{
+  border-color:#8d7065 !important;
+  box-shadow:0 0 0 3px rgba(111,82,72,.08) !important;
+}
+
+/* Textos de ayuda permanentes: se eliminan visualmente.
+   Mensajes dinámicos de error/estado permanecen visibles. */
+.admin-body .field-hint,
+.admin-body .form-help,
+.admin-body .import-help,
+.admin-body .payment-expiry-help,
+.admin-body .request-combobox-help,
+.admin-body .geo-field-help,
+.admin-body .product-preview-heading small,
+.admin-body .product-size-editor-head small,
+.admin-body .product-inventory-card-head small,
+.admin-body .product-recipe-people-note,
+.admin-body .ingredient-recipe-toolbar small,
+.admin-body .product-stock-visibility-copy small,
+.admin-body .web-content-block-head small,
+.admin-body .billing-tax-copy small,
+.admin-body .billing-active-summary small,
+.admin-body .billing-history-summary small,
+.admin-body .stored-secrets-title small,
+.admin-body .fcl-credentials-head p,
+.admin-body .fcl-security-note,
+.admin-body .system-maintenance-info{
+  display:none !important;
+}
+
+/* Tablas: apariencia administrativa compacta */
+.admin-table{
+  border-collapse:separate !important;
+  border-spacing:0 !important;
+  font-size:12px !important;
+}
+.admin-table th{
+  padding:10px 12px !important;
+  background:#f7f8fa !important;
+  color:#667585 !important;
+  border-top:1px solid #e5e9ed !important;
+  border-bottom:1px solid #e5e9ed !important;
+  font-size:10px !important;
+  font-weight:900 !important;
+  letter-spacing:.055em !important;
+}
+.admin-table td{
+  padding:11px 12px !important;
+  color:#334155 !important;
+  border-bottom:1px solid #edf0f2 !important;
+}
+.admin-table tbody tr:hover td{background:#fafbfc !important}
+
+/* Botones: un solo lenguaje visual */
+.admin-body .btn{
+  min-height:40px !important;
+  border-radius:9px !important;
+  padding:9px 14px !important;
+  font-family:"Manrope",Arial,sans-serif !important;
+  font-size:12px !important;
+  font-weight:800 !important;
+  letter-spacing:0 !important;
+  box-shadow:none !important;
+}
+.admin-body .btn-primary{
+  background:#5d463e !important;
+  border-color:#5d463e !important;
+  color:#fff !important;
+}
+.admin-body .btn-primary:hover{background:#4f3b34 !important;border-color:#4f3b34 !important}
+.admin-body .btn-light{
+  background:#fff !important;
+  border:1px solid #d9dfe5 !important;
+  color:#435160 !important;
+}
+.admin-body .btn-light:hover{background:#f7f8fa !important;border-color:#cbd3da !important}
+
+/* =========================================================
+   MODALES - PATRÓN ÚNICO Y PROFESIONAL
+   ========================================================= */
+.admin-body [role="dialog"]{
+  font-family:"Manrope",Arial,sans-serif !important;
+  color:#26313d !important;
+}
+.admin-body .editor[role="dialog"]{
+  background:#fff !important;
+  border:1px solid #dfe4e8 !important;
+  border-radius:16px !important;
+  box-shadow:0 28px 80px rgba(15,23,42,.20) !important;
+}
+.admin-body [role="dialog"] .editor-modal-head{
+  position:sticky !important;
+  top:-20px !important;
+  z-index:20 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:14px !important;
+  margin:-20px -20px 18px !important;
+  padding:16px 20px !important;
+  background:#fff !important;
+  border-bottom:1px solid #e7ebee !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+.admin-body [role="dialog"] .editor-modal-head>div{min-width:0 !important}
+.admin-body [role="dialog"] .editor-modal-head .eyebrow,
+.admin-body [role="dialog"] .editor-modal-head small,
+.admin-body [role="dialog"] .editor-modal-head p{
+  display:none !important;
+}
+.admin-body [role="dialog"] .editor-modal-head h3{
+  margin:0 !important;
+  font-family:"Manrope",Arial,sans-serif !important;
+  font-size:18px !important;
+  line-height:1.25 !important;
+  font-weight:850 !important;
+  letter-spacing:-.01em !important;
+  color:#26313d !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.admin-body [role="dialog"] .editor-close-x{
+  position:static !important;
+  flex:0 0 36px !important;
+  width:36px !important;
+  height:36px !important;
+  border:1px solid #e1e6ea !important;
+  border-radius:9px !important;
+  background:#fff !important;
+  color:#647180 !important;
+  box-shadow:none !important;
+  font-size:22px !important;
+  line-height:1 !important;
+}
+.admin-body [role="dialog"] .editor-close-x:hover{
+  background:#f4f6f8 !important;
+  color:#26313d !important;
+}
+
+/* Formularios dentro de modal */
+.admin-body [role="dialog"] .form-grid{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:14px !important;
+  align-items:start !important;
+}
+.admin-body [role="dialog"] .form-grid>label,
+.admin-body [role="dialog"] .field-group{
+  display:grid !important;
+  gap:6px !important;
+  align-content:start !important;
+  min-width:0 !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  color:#465462 !important;
+}
+.admin-body [role="dialog"] .form-grid>label>small:not(.file-name):not(.client-rut-lookup-state):not([id]),
+.admin-body [role="dialog"] .field-group>small:not(.file-name):not(.client-rut-lookup-state):not([id]){
+  display:none !important;
+}
+.admin-body [role="dialog"] input,
+.admin-body [role="dialog"] select,
+.admin-body [role="dialog"] textarea{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  min-height:44px !important;
+  padding:10px 12px !important;
+  border:1px solid #d7dde3 !important;
+  border-radius:10px !important;
+  background:#fff !important;
+  color:#1f2937 !important;
+  box-shadow:none !important;
+  font-size:13px !important;
+  outline:none !important;
+}
+.admin-body [role="dialog"] textarea{min-height:90px !important;resize:vertical !important}
+.admin-body [role="dialog"] input:focus,
+.admin-body [role="dialog"] select:focus,
+.admin-body [role="dialog"] textarea:focus{
+  border-color:#8d7065 !important;
+  box-shadow:0 0 0 3px rgba(111,82,72,.08) !important;
+}
+.admin-body [role="dialog"] input::placeholder,
+.admin-body [role="dialog"] textarea::placeholder{color:#a1aab4 !important}
+
+/* Footer de acciones uniforme */
+.admin-body [role="dialog"] .editor-actions{
+  position:sticky !important;
+  bottom:-20px !important;
+  z-index:18 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  flex-wrap:wrap !important;
+  gap:8px !important;
+  margin:18px -20px -20px !important;
+  padding:14px 20px 18px !important;
+  background:#fff !important;
+  border-top:1px solid #e7ebee !important;
+}
+.admin-body [role="dialog"] .editor-actions .btn{min-width:112px !important;justify-content:center !important}
+
+/* Notas operativas importantes, compactas; sin tarjetas explicativas voluminosas */
+.admin-body [role="dialog"] .integration-note,
+.admin-body [role="dialog"] .fcl-demo-notice,
+.admin-body [role="dialog"] .sii-local-note{
+  margin:12px 0 !important;
+  padding:9px 11px !important;
+  border:1px solid #e4e8eb !important;
+  border-radius:9px !important;
+  background:#f8f9fa !important;
+  color:#607080 !important;
+  font-size:10.5px !important;
+  line-height:1.4 !important;
+}
+
+/* Facturacion.cl: quitar texto decorativo sin ocultar estados */
+#billingFacturacionClCredentials .fcl-credentials-head{
+  padding:0 0 14px !important;
+  margin-bottom:16px !important;
+  border:0 !important;
+  border-bottom:1px solid #e7ebee !important;
+  border-radius:0 !important;
+  background:#fff !important;
+  box-shadow:none !important;
+}
+#billingFacturacionClCredentials .fcl-credentials-head h4{
+  margin:0 !important;
+  font-family:"Manrope",Arial,sans-serif !important;
+  font-size:18px !important;
+  font-weight:850 !important;
+  color:#26313d !important;
+}
+#billingFacturacionClCredentials .fcl-credential-card{
+  padding:18px !important;
+  border:1px solid #dfe4e8 !important;
+  border-radius:12px !important;
+  background:#fff !important;
+  box-shadow:none !important;
+}
+#billingFacturacionClCredentials .fcl-credential-card::before{display:none !important}
+#billingFacturacionClCredentials .fcl-credential-card-head strong{font-size:20px !important}
+#billingFacturacionClCredentials .fcl-credential-card-head>div small{display:none !important}
+#billingFacturacionClCredentials .fcl-connect-main{
+  background:#5d463e !important;
+  border-radius:9px !important;
+  box-shadow:none !important;
+  letter-spacing:0 !important;
+  text-transform:none !important;
+}
+#billingFacturacionClCredentials .fcl-demo-card .fcl-connect-main{background:#6b5b45 !important;box-shadow:none !important}
+
+/* Responsive uniforme */
+@media(max-width:760px){
+  .admin-main{padding:14px 12px 26px !important}
+  .admin-top h1{font-size:24px !important}
+  .admin-view .admin-card{padding:16px !important;border-radius:14px !important}
+  .admin-view .card-head{align-items:flex-start !important;flex-direction:column !important}
+  .admin-view .card-head-actions{width:100% !important;display:flex !important;gap:8px !important;flex-wrap:wrap !important}
+  .admin-view .card-head-actions .btn{flex:1 1 140px !important}
+  .admin-body [role="dialog"] .editor-modal-head{
+    top:-16px !important;
+    margin:-16px -16px 16px !important;
+    padding:14px 16px !important;
+  }
+  .admin-body [role="dialog"] .form-grid{grid-template-columns:1fr !important;gap:12px !important}
+  .admin-body [role="dialog"] .span-2{grid-column:auto !important}
+  .admin-body [role="dialog"] .editor-actions{
+    bottom:-16px !important;
+    margin:16px -16px -16px !important;
+    padding:12px 16px 16px !important;
+  }
+  .admin-body [role="dialog"] .editor-actions .btn{flex:1 1 130px !important}
+}
+
+
+/* =========================================================
+   R9.18.197 · MODALES RESPONSIVOS + LOGOS SIN DEFORMACIÓN
+   ========================================================= */
+
+/* Todos los modales reales deben respetar el viewport. */
+.admin-body [role="dialog"],
+.admin-body .sii-modal,
+.admin-body .operational-modal,
+.admin-body .wholesale-credit-modal,
+.admin-body .order-detail-editor,
+.admin-body .order-cancel-editor,
+.admin-body .payment-link-editor,
+.admin-body .import-editor,
+.admin-body #productEditor,
+.admin-body #quoteEditor,
+.admin-body #clientEditor,
+.admin-body #productStockEditor,
+body > #requestClientEditor{
+  box-sizing:border-box !important;
+  max-width:calc(100vw - 24px) !important;
+  max-height:calc(100dvh - 24px) !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  overscroll-behavior:contain !important;
+}
+
+/* Ningún hijo puede ensanchar el modal completo. */
+.admin-body [role="dialog"] *,
+.admin-body .sii-modal *,
+.admin-body .operational-modal *{
+  box-sizing:border-box;
+  min-width:0;
+}
+
+.admin-body [role="dialog"] .table-wrap,
+.admin-body .sii-modal .table-wrap,
+.admin-body .operational-modal .table-wrap{
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:auto !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* La tabla puede desplazarse, el modal no. */
+#billingProvidersModal .billing-provider-table-wrap{
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:auto !important;
+  border-radius:12px !important;
+}
+#billingProvidersModal .billing-provider-table{
+  width:100% !important;
+  min-width:760px !important;
+}
+#billingProvidersModal .billing-maintainer-toolbar{
+  width:100% !important;
+  max-width:100% !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+}
+#billingProvidersModal .billing-active-summary,
+#billingProvidersModal .billing-history-summary,
+#billingProvidersModal .field-group{
+  min-width:0 !important;
+  max-width:100% !important;
+}
+#billingProvidersModal .billing-modal-tools{
+  width:100% !important;
+  display:flex !important;
+  justify-content:flex-end !important;
+}
+
+/* Grillas y bloques internos fluidos. */
+.admin-body [role="dialog"] .form-grid,
+.admin-body [role="dialog"] .compact-form-grid,
+.admin-body [role="dialog"] .user-editor-grid,
+.admin-body [role="dialog"] .order-detail-summary,
+.admin-body [role="dialog"] .warehouse-channel-grid,
+.admin-body [role="dialog"] .ledger-document-summary{
+  width:100% !important;
+  max-width:100% !important;
+}
+
+/* Encabezados nunca fuerzan scroll horizontal. */
+.admin-body [role="dialog"] .editor-modal-head,
+.admin-body .sii-modal .editor-modal-head,
+.admin-body .operational-modal .editor-modal-head{
+  max-width:calc(100% + 40px) !important;
+  overflow:hidden !important;
+}
+.admin-body [role="dialog"] .editor-modal-head h3{
+  min-width:0 !important;
+  max-width:100% !important;
+}
+
+/* Logos de marca: conservar siempre la proporción original. */
+.admin-brand img,
+.admin-brand-single img,
+.cpanel-brand img,
+.cpanel-brand-logo-only img,
+.login-card img{
+  width:auto !important;
+  height:auto !important;
+  max-width:100% !important;
+  object-fit:contain !important;
+  object-position:left center !important;
+  aspect-ratio:auto !important;
+}
+.admin-brand img{max-width:170px !important;max-height:72px !important}
+.admin-brand-single img{max-width:205px !important;max-height:76px !important}
+.login-card img{max-width:190px !important;max-height:92px !important;object-position:center !important}
+
+@media(max-width:980px){
+  #billingProvidersModal .billing-maintainer-toolbar{
+    grid-template-columns:1fr 1fr !important;
+  }
+}
+
+@media(max-width:760px){
+  .admin-body [role="dialog"],
+  .admin-body .sii-modal,
+  .admin-body .operational-modal,
+  .admin-body .wholesale-credit-modal,
+  .admin-body .order-detail-editor,
+  .admin-body .order-cancel-editor,
+  .admin-body .payment-link-editor,
+  .admin-body .import-editor,
+  .admin-body #productEditor,
+  .admin-body #quoteEditor,
+  .admin-body #clientEditor,
+  .admin-body #productStockEditor,
+  body > #requestClientEditor{
+    width:calc(100vw - 12px) !important;
+    max-width:calc(100vw - 12px) !important;
+    max-height:calc(100dvh - 12px) !important;
+    border-radius:14px !important;
+  }
+  #billingProvidersModal .billing-maintainer-toolbar{
+    grid-template-columns:1fr !important;
+  }
+  #billingProvidersModal .billing-provider-table{min-width:680px !important}
+  #billingProvidersModal .billing-modal-tools .btn{width:100% !important;justify-content:center !important}
+}
+
+@media(max-width:480px){
+  .admin-body [role="dialog"],
+  .admin-body .sii-modal,
+  .admin-body .operational-modal,
+  .admin-body .wholesale-credit-modal,
+  .admin-body .order-detail-editor,
+  .admin-body .order-cancel-editor,
+  .admin-body .payment-link-editor,
+  .admin-body .import-editor,
+  .admin-body #productEditor,
+  .admin-body #quoteEditor,
+  .admin-body #clientEditor,
+  .admin-body #productStockEditor,
+  body > #requestClientEditor{
+    width:calc(100vw - 8px) !important;
+    max-width:calc(100vw - 8px) !important;
+    max-height:calc(100dvh - 8px) !important;
+    padding:14px !important;
+    border-radius:12px !important;
+  }
+  .admin-body [role="dialog"] .editor-modal-head{
+    margin:-14px -14px 14px !important;
+    padding:13px 14px !important;
+  }
+  .admin-body [role="dialog"] .editor-actions{
+    margin:14px -14px -14px !important;
+    padding:12px 14px 14px !important;
+  }
+}
+
+/* =========================================================
+   R9.18.198 · Configuración de facturación centralizada
+   ========================================================= */
+.billing-config-section{
+  display:grid;
+  gap:14px;
+  width:100%;
+  margin-bottom:18px;
+  padding:16px;
+  border:1px solid #e2e7ec;
+  border-radius:14px;
+  background:#f8fafb;
+}
+.billing-config-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:24px;
+}
+.billing-config-section-head strong{
+  color:#26313d;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.01em;
+}
+.billing-config-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  width:100%;
+}
+.billing-config-grid .field-group{
+  margin:0 !important;
+  min-width:0;
+}
+.billing-config-summary{
+  display:grid;
+  align-content:center;
+  gap:5px;
+  min-height:52px;
+  padding:10px 12px;
+  border:1px solid #e0e5ea;
+  border-radius:12px;
+  background:#fff;
+}
+.billing-config-summary>span,
+.billing-config-summary>div>span{
+  color:#77818d;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.billing-config-summary strong{
+  color:#26313d;
+  font-size:13px;
+  line-height:1.25;
+}
+.billing-config-history{
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+}
+.billing-config-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.billing-config-actions .btn{
+  min-height:40px !important;
+  border-radius:10px !important;
+}
+.billing-config-divider{
+  height:1px;
+  margin:2px 0 16px;
+  background:#e5e9ed;
+}
+.billing-provider-list-tools{
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:12px;
+  margin-bottom:10px;
+}
+.billing-provider-list-tools>span{
+  color:#26313d;
+  font-size:12px;
+  font-weight:800;
+}
+#billingProvidersModal .editor-modal-head small{display:none !important}
+#view-billing-sii .billing-command-title>p{display:none !important}
+#view-billing-sii .billing-command-bar{
+  margin-top:12px !important;
+}
+#view-billing-sii .billing-status-strip{
+  margin-top:12px !important;
+}
+
+@media(max-width:760px){
+  .billing-config-grid{grid-template-columns:1fr}
+  .billing-config-actions{display:grid;grid-template-columns:1fr}
+  .billing-config-actions .btn{width:100%;justify-content:center}
+}
+
+/* =========================================================
+   R9.18.199 · FILTROS DOCUMENTOS + ICONO ADMIN CORREGIDO
+   ========================================================= */
+.sii-doc-filterbar{
+  display:grid;
+  grid-template-columns:minmax(260px,2fr) minmax(150px,.8fr) minmax(170px,.9fr) auto;
+  gap:10px;
+  align-items:end;
+  margin:0 0 8px;
+  padding:12px;
+  border:1px solid #eaded6;
+  border-radius:14px;
+  background:#fff;
+}
+.sii-doc-search{position:relative;display:block;min-width:0}
+.sii-doc-search>i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#90786d;font-size:14px;pointer-events:none}
+.sii-doc-search input,
+.sii-doc-filter input,
+.sii-doc-filter select{
+  width:100%;min-width:0;min-height:42px;border:1px solid #dfd3cd;border-radius:11px;background:#fff;color:#473832;outline:0;font:650 12px/1.2 Manrope,sans-serif;transition:border-color .16s ease,box-shadow .16s ease;
+}
+.sii-doc-search input{padding:10px 12px 10px 38px}
+.sii-doc-filter{display:grid;gap:5px;min-width:0}
+.sii-doc-filter>span{font:800 9px/1.1 Manrope,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:#927b70}
+.sii-doc-filter input,.sii-doc-filter select{padding:9px 11px}
+.sii-doc-search input:focus,.sii-doc-filter input:focus,.sii-doc-filter select:focus{border-color:#a97969;box-shadow:0 0 0 3px rgba(169,121,105,.10)}
+.sii-doc-clear{min-height:42px!important;white-space:nowrap!important;justify-content:center!important}
+.sii-doc-filter-meta{display:flex;justify-content:flex-end;min-height:18px;margin:0 2px 8px;color:#8b746a;font-size:10px;font-weight:750}
+
+/* El icono de marca del administrador nunca se recorta ni se expande. */
+.admin-userbox>img.brand-fallback,
+#currentUserAvatar.brand-fallback{
+  object-fit:contain!important;
+  object-position:center!important;
+  padding:1px!important;
+  background:#fff!important;
+  aspect-ratio:1/1!important;
+}
+
+@media(max-width:920px){
+  .sii-doc-filterbar{grid-template-columns:minmax(0,1.5fr) minmax(145px,1fr) minmax(155px,1fr)}
+  .sii-doc-clear{grid-column:1/-1;width:100%}
+}
+@media(max-width:640px){
+  .sii-doc-filterbar{grid-template-columns:1fr;padding:10px}
+  .sii-doc-clear{grid-column:auto}
+  .sii-doc-filter-meta{justify-content:flex-start}
+}
+
+/* =========================================================
+   R9.18.200 · FACTURACIÓN COMPACTA + EMISOR PROFESIONAL
+   ========================================================= */
+#view-billing-sii .billing-command-bar-clean{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:10px!important;
+  max-width:880px;
+}
+#view-billing-sii .billing-command-bar-clean .billing-command-btn{
+  min-width:0!important;
+}
+.sii-local-hub-modal:not(.hidden){width:min(820px,calc(100vw - 28px))!important}
+.sii-local-hub-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.sii-local-hub-btn{appearance:none;display:grid;grid-template-columns:42px minmax(0,1fr) 18px;align-items:center;gap:11px;min-width:0;padding:13px 14px;border:1px solid #e2d8d3;border-radius:14px;background:#fff;color:#443631;text-align:left;cursor:pointer;transition:.16s ease}
+.sii-local-hub-btn:hover{border-color:#cdb9af;background:#fffaf7;transform:translateY(-1px)}
+.sii-local-hub-btn>i:first-child{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#f4ece8;color:#7d5649;font-size:18px}
+.sii-local-hub-btn>span{display:grid;gap:2px;min-width:0}
+.sii-local-hub-btn strong{font-size:12px;color:#3e312c}
+.sii-local-hub-btn small{font-size:10px;color:#8b776e}
+.sii-local-hub-btn>.bi-chevron-right{color:#aa958b}
+.sii-local-hub-status{margin-top:0!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+
+#siiEmitModal.sii-emit-modal:not(.hidden){
+  width:min(920px,calc(100vw - 28px))!important;
+  max-height:min(94dvh,920px)!important;
+  padding:20px!important;
+}
+#siiEmitModal .editor-modal-head{
+  top:-20px!important;
+  margin:-20px -20px 16px!important;
+  padding:18px 20px 14px!important;
+}
+#siiEmitModal .editor-modal-head h3{font-size:21px!important;margin:2px 0 0!important}
+#siiEmitModal .sii-emit-grid{
+  display:grid!important;
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:12px!important;
+  align-items:end!important;
+}
+#siiEmitModal .sii-emit-grid>.field-group{grid-column:span 6;min-width:0!important}
+#siiEmitModal .sii-emit-grid>.emit-full{grid-column:1/-1!important}
+#siiEmitModal .sii-emit-grid>.emit-type{grid-column:span 6!important}
+#siiEmitModal .sii-emit-grid>.emit-mode{grid-column:span 3!important}
+#siiEmitModal .sii-emit-grid>.emit-format{grid-column:span 3!important}
+#siiEmitModal .sii-emit-grid>.emit-order{grid-column:span 8!important}
+#siiEmitModal .sii-emit-grid>.emit-order-action{grid-column:span 4!important}
+#siiEmitModal .sii-emit-grid>.emit-rut{grid-column:span 4!important}
+#siiEmitModal .sii-emit-grid>.emit-name{grid-column:span 8!important}
+#siiEmitModal .sii-emit-grid>.emit-giro{grid-column:span 6!important}
+#siiEmitModal .sii-emit-grid>.emit-address{grid-column:span 6!important}
+#siiEmitModal .sii-emit-grid>.emit-comuna{grid-column:span 6!important}
+#siiEmitModal .sii-emit-grid>.emit-city{grid-column:span 6!important}
+#siiEmitModal .sii-emit-grid>.emit-quarter{grid-column:span 3!important}
+#siiEmitModal .sii-emit-grid>.emit-half{grid-column:span 6!important}
+#siiEmitModal .field-group{gap:6px!important}
+#siiEmitModal .field-group>span{font-size:10px!important;font-weight:850!important;letter-spacing:.035em!important;color:#66524a!important}
+#siiEmitModal .field-group input,
+#siiEmitModal .field-group select{
+  width:100%!important;
+  min-width:0!important;
+  min-height:44px!important;
+  padding:10px 12px!important;
+  border:1px solid #ddd2cc!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  color:#3e322e!important;
+  font-size:12px!important;
+  box-shadow:none!important;
+}
+#siiEmitModal .field-group input:focus,
+#siiEmitModal .field-group select:focus{outline:0!important;border-color:#a97969!important;box-shadow:0 0 0 3px rgba(169,121,105,.10)!important}
+#siiEmitModal #siiLoadOrder{min-height:44px!important;width:100%!important;justify-content:center!important;border-radius:11px!important}
+#siiEmitModal .sii-order-preview{margin:2px 0 0!important;padding:12px!important;border-radius:12px!important}
+#siiEmitModal .sii-issue-status{margin:0!important;padding:10px 12px!important;border-radius:11px!important}
+#siiEmitModal .sii-cedible-option{margin:12px 0 0!important}
+#siiEmitModal .sii-cedible-check{align-items:center!important;padding:10px 12px!important;border-radius:11px!important;background:#fbfcfd!important}
+#siiEmitModal .sii-cedible-check strong{font-size:12px!important}
+#siiEmitModal .sii-emit-actions{margin-top:16px!important;gap:8px!important}
+#siiEmitModal .sii-emit-actions .btn{min-height:44px!important;padding-inline:18px!important}
+
+@media(max-width:900px){
+  #view-billing-sii .billing-command-bar-clean{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:none}
+  .sii-local-hub-status{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #siiEmitModal .sii-emit-grid>.emit-type,
+  #siiEmitModal .sii-emit-grid>.emit-mode,
+  #siiEmitModal .sii-emit-grid>.emit-format,
+  #siiEmitModal .sii-emit-grid>.emit-order,
+  #siiEmitModal .sii-emit-grid>.emit-order-action,
+  #siiEmitModal .sii-emit-grid>.emit-rut,
+  #siiEmitModal .sii-emit-grid>.emit-name,
+  #siiEmitModal .sii-emit-grid>.emit-giro,
+  #siiEmitModal .sii-emit-grid>.emit-address,
+  #siiEmitModal .sii-emit-grid>.emit-comuna,
+  #siiEmitModal .sii-emit-grid>.emit-city,
+  #siiEmitModal .sii-emit-grid>.emit-half{grid-column:span 6!important}
+  #siiEmitModal .sii-emit-grid>.emit-quarter{grid-column:span 6!important}
+}
+@media(max-width:640px){
+  #view-billing-sii .billing-command-bar-clean{grid-template-columns:1fr!important}
+  .sii-local-hub-actions,.sii-local-hub-status{grid-template-columns:1fr!important}
+  #siiEmitModal.sii-emit-modal:not(.hidden){width:calc(100vw - 12px)!important;padding:14px!important;border-radius:18px!important}
+  #siiEmitModal .editor-modal-head{top:-14px!important;margin:-14px -14px 12px!important;padding:14px!important}
+  #siiEmitModal .sii-emit-grid{grid-template-columns:1fr!important;gap:10px!important}
+  #siiEmitModal .sii-emit-grid>*{grid-column:1/-1!important}
+  #siiEmitModal .sii-emit-actions{bottom:-14px!important;margin:14px -14px -14px!important;padding:12px 14px 14px!important;display:grid!important;grid-template-columns:1fr!important}
+  #siiEmitModal .sii-emit-actions .btn{width:100%!important;justify-content:center!important}
+}
+
+/* R9.18.201 · El estado SII local no ocupa espacio en la cabecera principal */
+#siiEnvironmentBadge, #siiEnvironmentBadge[hidden]{display:none!important;}
+
+/* =====================================================================
+   R9.18.202 · CATÁLOGO RÁPIDO + VENTA DIRECTA + ACCIONES DTE COMPACTAS
+   ===================================================================== */
+.catalog-quick-picker{position:relative;min-width:0;width:100%}
+.catalog-quick-search{display:flex;align-items:center;gap:9px;width:100%;min-width:0;border:1px solid #d8dde3;background:#fff;border-radius:12px;padding:0 12px;box-sizing:border-box}
+.catalog-quick-search i{flex:0 0 auto;color:#6b7280;font-size:15px}
+.catalog-quick-search input[type="search"]{width:100%!important;min-width:0!important;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;padding:11px 0!important;margin:0!important}
+.catalog-quick-results{position:absolute;z-index:80;left:0;right:0;top:calc(100% + 6px);max-height:320px;overflow:auto;background:#fff;border:1px solid #d8dde3;border-radius:12px;box-shadow:0 16px 38px rgba(15,23,42,.14);padding:6px}
+.catalog-quick-option{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;text-align:left;border:0;background:#fff;border-radius:9px;padding:10px 11px;cursor:pointer;color:#1f2937}
+.catalog-quick-option:hover,.catalog-quick-option:focus{background:#f5f6f8;outline:0}
+.catalog-quick-option strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.catalog-quick-option .catalog-price{font-weight:800;white-space:nowrap}
+.catalog-quick-option small{grid-column:1/-1;color:#6b7280;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.catalog-quick-option .catalog-meta{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;color:#6b7280;font-size:11px}
+.catalog-stock-ok{color:#28704a!important}.catalog-stock-low{color:#a06f16!important}.catalog-stock-out{color:#a33!important}
+.quote-catalog-add{grid-template-columns:minmax(260px,1fr) auto!important;align-items:start!important}
+.order-catalog-block{min-width:0}
+.order-draft-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0}
+.order-draft-toolbar small{color:#6b7280;line-height:1.35}
+.order-draft-items,.sii-manual-items{display:grid;gap:8px;margin-top:9px}
+.order-draft-row,.sii-manual-item{display:grid;grid-template-columns:minmax(180px,1fr) 90px 130px 100px 38px;gap:8px;align-items:center;padding:8px;border:1px solid #e2e5e9;border-radius:11px;background:#fff;min-width:0}
+.order-draft-row input,.sii-manual-item input{min-width:0!important;width:100%!important;margin:0!important}
+.order-draft-row .line-stock,.sii-manual-item .line-stock{font-size:11px;color:#6b7280;white-space:nowrap;text-align:right}
+.order-line-remove,.sii-manual-remove{width:34px!important;min-width:34px!important;height:34px!important;padding:0!important;border-radius:9px!important}
+.sii-manual-sale-panel{border:1px solid #dfe3e8;background:#f8f9fa;border-radius:13px;padding:13px;min-width:0}
+.sii-manual-stock-row{display:grid;grid-template-columns:minmax(220px,1fr) minmax(260px,1fr);gap:12px;align-items:end;margin-bottom:10px}
+.sii-manual-stock-check{display:flex!important;align-items:center!important;gap:10px!important;min-width:0!important;border:1px solid #d9dee4;border-radius:11px;background:#fff;padding:10px 12px!important;margin:0!important;cursor:pointer}
+#siiEmitModal #siiManualMoveStock[type="checkbox"],#siiEmitModal #siiIncludeCedible[type="checkbox"]{appearance:auto!important;-webkit-appearance:checkbox!important;width:18px!important;min-width:18px!important;max-width:18px!important;height:18px!important;min-height:18px!important;max-height:18px!important;flex:0 0 18px!important;margin:0!important;padding:0!important;border:initial!important;box-shadow:none!important}
+.sii-manual-stock-check>span,.sii-cedible-check>span{display:block!important;min-width:0!important;flex:1 1 auto!important}
+.sii-manual-stock-check strong,.sii-cedible-check strong{display:block;white-space:normal!important;word-break:normal!important}
+.sii-manual-stock-check small{display:block;color:#6b7280;margin-top:2px}
+#siiEmitModal .sii-cedible-option{min-width:0!important;overflow:hidden!important}
+#siiEmitModal .sii-cedible-check{display:flex!important;align-items:center!important;gap:10px!important;min-width:0!important;width:auto!important;max-width:100%!important;white-space:normal!important}
+.sii-manual-total{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-top:10px;padding-top:10px;border-top:1px solid #e0e3e7}
+.sii-manual-total span{color:#6b7280;font-size:12px}.sii-manual-total strong{font-size:18px}
+.billing-actions-menu{position:relative;display:inline-block}
+.billing-actions-menu>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;border:1px solid #d7dce1;background:#fff;border-radius:9px;padding:7px 11px;font-weight:700;font-size:12px;white-space:nowrap;user-select:none}
+.billing-actions-menu>summary::-webkit-details-marker{display:none}
+.billing-actions-menu[open]>summary{background:#f4f5f6}
+.billing-actions-popover{position:absolute;right:0;top:calc(100% + 5px);z-index:95;display:grid;gap:5px;min-width:190px;background:#fff;border:1px solid #d8dde3;border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.16);padding:7px}
+.billing-actions-popover .btn{justify-content:flex-start;width:100%;white-space:nowrap}
+.billing-actions-popover .sii-history-cedible{display:flex;align-items:center;gap:8px;width:100%;padding:7px 9px;border-radius:8px;background:#f7f8f9;font-size:12px;white-space:nowrap}
+.billing-actions-popover .sii-history-cedible input[type="checkbox"]{width:16px!important;min-width:16px!important;height:16px!important;margin:0!important}
+@media(max-width:820px){
+  .quote-catalog-add{grid-template-columns:1fr!important}
+  .order-draft-row,.sii-manual-item{grid-template-columns:minmax(0,1fr) 76px 110px 34px}
+  .order-draft-row .line-stock,.sii-manual-item .line-stock{grid-column:1/-1;text-align:left}
+  .sii-manual-stock-row{grid-template-columns:1fr}
+  .catalog-quick-results{position:relative;top:auto;margin-top:5px;max-height:240px}
+}
+@media(max-width:520px){
+  .order-draft-toolbar{align-items:flex-start;flex-direction:column}
+  .order-draft-row,.sii-manual-item{grid-template-columns:minmax(0,1fr) 64px 34px}
+  .order-draft-row .line-price,.sii-manual-item .line-price{grid-column:1/3}
+  .billing-actions-popover{right:auto;left:0;max-width:calc(100vw - 34px)}
+}
+
+/* R9.18.202 · Acciones DTE compactas sin recorte dentro de la tabla */
+.billing-actions-menu[open] .billing-actions-popover{
+  position:relative;
+  inset:auto;
+  margin-top:6px;
+  min-width:190px;
+  max-width:min(230px,calc(100vw - 40px));
+  box-shadow:0 8px 22px rgba(15,23,42,.12);
+}

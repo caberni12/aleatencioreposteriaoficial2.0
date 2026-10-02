@@ -853,9 +853,13 @@ async function reload(){
   })();
   return adminReloadPromise;
 }
+function setCurrentUserAvatar(me={}){
+  const avatar=$("#currentUserAvatar");if(!avatar)return;const custom=String(me?.profile_url||"").trim();
+  avatar.src=custom||"favicon-192.png";avatar.classList.toggle("brand-fallback",!custom);
+}
 function renderSessionHeader(user){
   const me=user||data.currentUser||{};
-  if($("#currentUserAvatar")) $("#currentUserAvatar").src=me.profile_url||"favicon.png";
+  setCurrentUserAvatar(me);
   if($("#currentUserName")) $("#currentUserName").textContent=me.nombre||me.usuario||"Usuario";
   if($("#currentUserRole")){const rm={ADMIN:"Administrador",GERENCIA:"Gerencia",OPERADOR:"Operador",EDITOR:"Editor",LECTURA:"Lectura",MAYORISTA:"Mayorista"};$("#currentUserRole").textContent=rm[String(me.rol||"EDITOR").toUpperCase()]||String(me.rol||"Editor");}
 }
@@ -975,7 +979,7 @@ function renderAll(){
   data=normalizePanelData(data);
   $("#adminLogo").src=(data.config&&data.config.logo_url)||"logo-ale-atencio.png";
   const me=data.currentUser||{};
-  $("#currentUserAvatar").src=me.profile_url||"favicon.png";
+  setCurrentUserAvatar(me);
   $("#currentUserName").textContent=me.nombre||me.usuario||"Usuario";
   $("#currentUserRole").textContent=String(me.rol||"EDITOR").toUpperCase()==="ADMIN"?"Administrador":"Editor";
   const isAdmin=String(me.rol||"").toUpperCase()==="ADMIN";
@@ -1340,7 +1344,34 @@ window.editBanner=id=>{const b=data.banners.find(x=>x.id===id);if(!b)return;rese
 $("#saveBanner").addEventListener("click",e=>busy(e.currentTarget,async()=>{try{let imageId=$("#bImageId").value,imageUrl=$("#bImageUrl").value;const file=$("#bImage").files[0];if(file){const u=await upload(file,"BANNERS");imageId=u.fileId;imageUrl=u.imageUrl||imageUrl}await AleAPI.post("saveBanner",{id:$("#bId").value,titulo:$("#bTitle").value.trim(),subtitulo:$("#bSubtitle").value.trim(),cta_texto:$("#bCta").value.trim(),enlace:$("#bLink").value.trim(),drive_file_id:imageId,image_url:imageUrl,activo:"SI",orden:Number($("#bOrder").value||0)},token);toast("Banner guardado");$("#bannerEditor").classList.add("hidden");await reload()}catch(err){console.warn(err);toast("No fue posible guardar")}}));
 
 
-function parseOrderLines(text){return String(text||"").split(/\n+/).map(line=>{const p=line.split("|").map(x=>x.trim());if(p.length<3)return null;const nombre=p[0],cantidad=Math.max(1,Number(p[1])||1),precio=parseClpAmount(p[2]);return nombre?{nombre,producto_nombre:nombre,cantidad,precio_unitario:precio,precio}:null}).filter(Boolean)}
+// R9.18.202 · catálogo común para Cotización, Pedido y Facturación directa.
+function catalogSearchText(p){return normalizeText([p?.id,p?.sku,p?.codigo,p?.nombre,p?.descripcion,p?.categoria_nombre,p?.ocasion].filter(Boolean).join(" "))}
+function catalogProductActive(p){return String(p?.activo??"SI").toUpperCase()!=="NO"}
+function catalogAvailable(productId,sizeId="",warehouseId=""){
+  const rows=(data.warehouseStock||[]).filter(x=>String(x.producto_id)===String(productId)&&String(x.tamano_id||"")===String(sizeId||"")&&(!warehouseId||String(x.bodega_id)===String(warehouseId)));
+  if(rows.length)return rows.reduce((sum,x)=>sum+Math.max(0,Number(x.stock||0)-Number(x.reservado||0)-Number(x.stock_seguridad||0)),0);
+  const p=(data.products||[]).find(x=>String(x.id)===String(productId)),z=(p?.tamanos||[]).find(x=>String(x.id)===String(sizeId));
+  return Math.max(0,Number(z?.stock??p?.stock??0));
+}
+function catalogCandidates(term="",warehouseId=""){
+  const q=normalizeText(term),out=[];
+  for(const p of (data.products||[]).filter(catalogProductActive).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"))){
+    if(q&&!catalogSearchText(p).includes(q))continue;
+    const sizes=(Array.isArray(p.tamanos)?p.tamanos:[]).filter(z=>String(z.activo??"SI").toUpperCase()!=="NO");
+    if(sizes.length){for(const z of sizes)out.push({product:p,size:z,price:Number(z.precio??p.precio??0),stock:catalogAvailable(p.id,z.id,warehouseId)})}
+    else out.push({product:p,size:null,price:Number(p.precio||0),stock:catalogAvailable(p.id,"",warehouseId)});
+    if(out.length>=40)break;
+  }
+  return out.slice(0,40);
+}
+function catalogLineFromCandidate(c){const p=c.product,z=c.size;return{producto_id:String(p.id||""),producto_nombre:String(p.nombre||""),tamano_id:String(z?.id||""),tamano_nombre:String(z?.nombre||""),descripcion:[p.nombre,z?.nombre].filter(Boolean).join(" · "),cantidad:1,precio_unitario:Number(c.price||0),precio:Number(c.price||0)}}
+function catalogResultsHtml(rows){return rows.length?rows.map((c,i)=>{const p=c.product,z=c.size,stock=Number(c.stock||0),stockCls=stock<=0?'catalog-stock-out':stock<=3?'catalog-stock-low':'catalog-stock-ok';return `<button type="button" class="catalog-quick-option" data-catalog-index="${i}"><strong>${esc(p.nombre||'Producto')}${z?.nombre?` · ${esc(z.nombre)}`:''}</strong><span class="catalog-price">${money(c.price||0)}</span><small>${esc(p.descripcion||p.categoria_nombre||'Sin descripción')}</small><span class="catalog-meta"><b>${esc(p.sku||p.codigo||p.id||'')}</b><span class="${stockCls}">Disponible ${stock.toLocaleString('es-CL',{maximumFractionDigits:3})}</span></span></button>`}).join(''):'<div class="request-option-empty">No hay productos que coincidan con la búsqueda.</div>'}
+function parseOrderLines(text){return String(text||"").split(/\n+/).map(line=>{const p=line.split("|").map(x=>x.trim());if(p.length<3)return null;const nombre=p[0],cantidad=Math.max(1,Number(p[1])||1),precio=parseClpAmount(p[2]);return nombre?{nombre,producto_nombre:nombre,descripcion:nombre,cantidad,precio_unitario:precio,precio}:null}).filter(Boolean)}
+let orderDraftItems=[];
+function normalizeOrderDraftItem(item={}){return{key:item.key||(crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random())),producto_id:String(item.producto_id||""),producto_nombre:String(item.producto_nombre||item.nombre||""),tamano_id:String(item.tamano_id||""),tamano_nombre:String(item.tamano_nombre||""),descripcion:String(item.descripcion||item.producto_nombre||item.nombre||""),cantidad:Math.max(.001,Number(item.cantidad||1)||1),precio_unitario:parseClpAmount(item.precio_unitario??item.precio??0)}}
+function renderOrderDraftItems(){const host=$("#ocProductLines");if(!host)return;host.innerHTML=orderDraftItems.length?orderDraftItems.map((x,i)=>{const stock=x.producto_id?catalogAvailable(x.producto_id,x.tamano_id,$("#ocWarehouse")?.value||""):null;return `<div class="order-draft-row" data-order-line="${i}"><input data-oc-field="descripcion" data-oc-index="${i}" value="${esc(x.descripcion)}" placeholder="Producto / descripción"><input data-oc-field="cantidad" data-oc-index="${i}" type="number" min="0.001" step="0.001" value="${Number(x.cantidad||1)}"><input class="line-price" data-oc-field="precio_unitario" data-oc-index="${i}" type="text" inputmode="numeric" value="${new Intl.NumberFormat('es-CL',{maximumFractionDigits:0}).format(Number(x.precio_unitario||0))}">${stock===null?'<span class="line-stock">Línea libre</span>':`<span class="line-stock">Stock ${Number(stock).toLocaleString('es-CL',{maximumFractionDigits:3})}</span>`}<button type="button" class="btn btn-light order-line-remove" data-oc-remove="${i}" aria-label="Quitar"><i class="bi bi-trash3"></i></button></div>`}).join(''):'<div class="request-option-empty">Busca un producto arriba o agrega una línea libre.</div>';if($("#ocItems"))$("#ocItems").value=orderDraftItems.map(x=>`${x.descripcion} | ${x.cantidad} | ${x.precio_unitario}`).join("\n")}
+function renderOrderCatalogResults(){const host=$("#ocProductResults"),input=$("#ocProductSearch");if(!host||!input)return;const rows=catalogCandidates(input.value,$("#ocWarehouse")?.value||"");host.dataset.catalogRows=JSON.stringify(rows.map(c=>({product_id:c.product.id,size_id:c.size?.id||""})));host.innerHTML=catalogResultsHtml(rows);host.classList.toggle("hidden",!input.value.trim()&&rows.length>14)}
+
 function quoteIsConsumed(q){
   if(!q)return false;
   if(q._consumida||q.pedido_id)return true;
@@ -1366,7 +1397,8 @@ function ensureOrderCreateBackdrop(){
 }
 function openOrderCreate(){
   fillOrderQuoteSelect();
-  ["#ocName","#ocRut","#ocPhone","#ocEmail","#ocAddress","#ocCommune","#ocItems","#ocNotes"].forEach(x=>{if($(x))$(x).value=""});
+  ["#ocName","#ocRut","#ocPhone","#ocEmail","#ocAddress","#ocCommune","#ocItems","#ocNotes","#ocProductSearch"].forEach(x=>{if($(x))$(x).value=""});
+  orderDraftItems=[];renderOrderDraftItems();$("#ocProductResults")?.classList.add("hidden");
   if($("#ocDispatch"))$("#ocDispatch").value=0;
   if($("#ocPayment"))$("#ocPayment").value="EFECTIVO";
   if($("#ocDelivery"))$("#ocDelivery").value="Retiro";
@@ -1388,9 +1420,16 @@ $("#newOrder")?.addEventListener("click",openOrderCreate);
 $("#closeOrderCreateX")?.addEventListener("click",closeOrderCreate);
 $("#cancelOrderCreate")?.addEventListener("click",closeOrderCreate);
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#orderCreateEditor")?.classList.contains("hidden"))closeOrderCreate()});
-$("#ocQuote")?.addEventListener("change",async e=>{const q=data.quotes.find(x=>String(x.id)===String(e.target.value));if(!q)return;$("#ocName").value=q.cliente_nombre||"";$("#ocRut").value=q.rut?formatRutChile(q.rut):"";$("#ocPhone").value=q.telefono||"";$("#ocEmail").value=q.email||"";$("#ocNotes").value=q.observaciones||"";$("#ocItems").value=(Array.isArray(q.items)?q.items:[]).map(i=>`${i.descripcion||i.nombre||"Producto"} | ${i.cantidad||1} | ${i.precio_unitario||i.precio||0}`).join("\n");const request=data.requests.find(r=>String(r.id)===String(q.solicitud_id||""));const pref=String(q.medio_pago_preferido||request?.medio_pago_preferido||"").trim().toUpperCase();const pay=$("#ocPayment");if(pay){if(pref.includes("TRANSFER"))pay.value="TRANSFERENCIA";else if(pref.includes("TRANSBANK")||pref.includes("TARJETA")||pref.includes("WEBPAY"))pay.value="TRANSBANK";else if(pref.includes("EFECTIVO"))pay.value="EFECTIVO";}if(q.rut)await hydrateClientByRut({rutSelector:"#ocRut",statusSelector:"#ocClientLookupState",fields:{name:"#ocName",phone:"#ocPhone",email:"#ocEmail",address:"#ocAddress",commune:"#ocCommune",delivery:"#ocDelivery"},mode:"overwrite"});});
+$("#ocQuote")?.addEventListener("change",async e=>{const q=data.quotes.find(x=>String(x.id)===String(e.target.value));if(!q)return;$("#ocName").value=q.cliente_nombre||"";$("#ocRut").value=q.rut?formatRutChile(q.rut):"";$("#ocPhone").value=q.telefono||"";$("#ocEmail").value=q.email||"";$("#ocNotes").value=q.observaciones||"";orderDraftItems=(Array.isArray(q.items)?q.items:[]).map(normalizeOrderDraftItem);renderOrderDraftItems();const request=data.requests.find(r=>String(r.id)===String(q.solicitud_id||""));const pref=String(q.medio_pago_preferido||request?.medio_pago_preferido||"").trim().toUpperCase();const pay=$("#ocPayment");if(pay){if(pref.includes("TRANSFER"))pay.value="TRANSFERENCIA";else if(pref.includes("TRANSBANK")||pref.includes("TARJETA")||pref.includes("WEBPAY"))pay.value="TRANSBANK";else if(pref.includes("EFECTIVO"))pay.value="EFECTIVO";}if(q.rut)await hydrateClientByRut({rutSelector:"#ocRut",statusSelector:"#ocClientLookupState",fields:{name:"#ocName",phone:"#ocPhone",email:"#ocEmail",address:"#ocAddress",commune:"#ocCommune",delivery:"#ocDelivery"},mode:"overwrite"});});
 wireClientRutLookup({rutSelector:"#ocRut",statusSelector:"#ocClientLookupState",fields:{name:"#ocName",phone:"#ocPhone",email:"#ocEmail",address:"#ocAddress",commune:"#ocCommune",delivery:"#ocDelivery"}});
-$("#saveOrderFromCpanel")?.addEventListener("click",e=>busy(e.currentTarget,async()=>{try{const detalle=parseOrderLines($("#ocItems").value);if(!detalle.length){toast("✕ Agrega al menos un producto");return}const delivery=$("#ocDelivery").value,commune=$("#ocCommune").value.trim();if(String(delivery).toUpperCase()==="DESPACHO"&&!commune){toast("✕ Ingresa la comuna para el despacho");$("#ocCommune").focus();return}const payload={cotizacion_id:$("#ocQuote").value||null,nombre:$("#ocName").value.trim(),rut:requireRutChile($("#ocRut").value),telefono:$("#ocPhone").value.trim(),email:$("#ocEmail").value.trim(),metodo_entrega:delivery,direccion:$("#ocAddress").value.trim(),comuna:commune,medio_pago:$("#ocPayment").value,bodega_id:$("#ocWarehouse")?.value||"",despacho:parseClpAmount($("#ocDispatch").value),detalle,total:(data.quotes.find(x=>String(x.id)===String($("#ocQuote").value))?.total||0),observaciones:$("#ocNotes").value.trim()};const out=await AleAPI.post("admincreateorder",payload,token);const consumedQuoteId=String(payload.cotizacion_id||"");if(consumedQuoteId){const qix=data.quotes.findIndex(x=>String(x.id)===consumedQuoteId);if(qix>=0)data.quotes[qix]={...data.quotes[qix],estado:"UTILIZADA",pedido_id:out.order?.id||"CONSUMIDA",pedido_numero:out.order?.numero_pedido||"",_consumida:true};if(out.order?.id&&!data.orders.some(x=>String(x.id)===String(out.order.id)))data.orders.unshift({...out.order,cotizacion_id:consumedQuoteId});fillOrderQuoteSelect();renderQuotes()}toast(`✓ Pedido ${out.order?.numero_pedido||out.order?.id||""} creado`);closeOrderCreate();await loadAdminModules({modules:["orders","quotes"],retry:true});if(out.order?.id){window.openOrderDetail(out.order.id);const o=data.orders.find(x=>String(x.id)===String(out.order.id));if(o&&out.payment_link_required)o._payment_link_required=true}}catch(err){console.warn(err);const code=String(err?.message||err||"").toUpperCase();toast(code.includes("COTIZACION_YA_CONVERTIDA")?"✕ Esta cotización ya fue utilizada en un pedido y no puede reutilizarse.":code.includes("COTIZACION_NO_VIGENTE")?"✕ La cotización ya no está vigente para crear pedidos.":code.includes("TELEFONO_YA_ASOCIADO")?"✕ Ese teléfono ya está asociado a otro RUT en Clientes.":code.includes("EMAIL_YA_ASOCIADO")?"✕ Ese correo ya está asociado a otro RUT en Clientes.":"✕ No fue posible crear el pedido")}}));
+$("#ocProductSearch")?.addEventListener("focus",renderOrderCatalogResults);
+$("#ocProductSearch")?.addEventListener("input",renderOrderCatalogResults);
+$("#ocWarehouse")?.addEventListener("change",()=>{renderOrderDraftItems();if($("#ocProductSearch")?.value)renderOrderCatalogResults()});
+$("#ocProductResults")?.addEventListener("click",e=>{const b=e.target.closest("[data-catalog-index]");if(!b)return;const rows=catalogCandidates($("#ocProductSearch")?.value||"",$("#ocWarehouse")?.value||"");const c=rows[Number(b.dataset.catalogIndex)];if(!c)return;orderDraftItems.push(normalizeOrderDraftItem(catalogLineFromCandidate(c)));renderOrderDraftItems();$("#ocProductSearch").value="";$("#ocProductResults").classList.add("hidden");$("#ocProductSearch").focus()});
+$("#ocAddFreeLine")?.addEventListener("click",()=>{orderDraftItems.push(normalizeOrderDraftItem({descripcion:"",cantidad:1,precio_unitario:0}));renderOrderDraftItems()});
+$("#ocProductLines")?.addEventListener("input",e=>{const el=e.target.closest("[data-oc-index]");if(!el)return;const i=Number(el.dataset.ocIndex),field=el.dataset.ocField;if(!orderDraftItems[i])return;orderDraftItems[i][field]=field==="descripcion"?el.value:field==="precio_unitario"?parseClpAmount(el.value):Math.max(.001,Number(el.value||0));if($("#ocItems"))$("#ocItems").value=orderDraftItems.map(x=>`${x.descripcion} | ${x.cantidad} | ${x.precio_unitario}`).join("\n")});
+$("#ocProductLines")?.addEventListener("click",e=>{const b=e.target.closest("[data-oc-remove]");if(!b)return;orderDraftItems.splice(Number(b.dataset.ocRemove),1);renderOrderDraftItems()});
+$("#saveOrderFromCpanel")?.addEventListener("click",e=>busy(e.currentTarget,async()=>{try{const detalle=orderDraftItems.map(x=>({...x,nombre:x.producto_nombre||x.descripcion,precio:x.precio_unitario})).filter(x=>x.descripcion&&Number(x.cantidad)>0);if(!detalle.length){toast("✕ Agrega al menos un producto");return}const delivery=$("#ocDelivery").value,commune=$("#ocCommune").value.trim();if(String(delivery).toUpperCase()==="DESPACHO"&&!commune){toast("✕ Ingresa la comuna para el despacho");$("#ocCommune").focus();return}const payload={cotizacion_id:$("#ocQuote").value||null,nombre:$("#ocName").value.trim(),rut:requireRutChile($("#ocRut").value),telefono:$("#ocPhone").value.trim(),email:$("#ocEmail").value.trim(),metodo_entrega:delivery,direccion:$("#ocAddress").value.trim(),comuna:commune,medio_pago:$("#ocPayment").value,bodega_id:$("#ocWarehouse")?.value||"",despacho:parseClpAmount($("#ocDispatch").value),detalle,total:(data.quotes.find(x=>String(x.id)===String($("#ocQuote").value))?.total||0),observaciones:$("#ocNotes").value.trim()};const out=await AleAPI.post("admincreateorder",payload,token);const consumedQuoteId=String(payload.cotizacion_id||"");if(consumedQuoteId){const qix=data.quotes.findIndex(x=>String(x.id)===consumedQuoteId);if(qix>=0)data.quotes[qix]={...data.quotes[qix],estado:"UTILIZADA",pedido_id:out.order?.id||"CONSUMIDA",pedido_numero:out.order?.numero_pedido||"",_consumida:true};if(out.order?.id&&!data.orders.some(x=>String(x.id)===String(out.order.id)))data.orders.unshift({...out.order,cotizacion_id:consumedQuoteId});fillOrderQuoteSelect();renderQuotes()}toast(`✓ Pedido ${out.order?.numero_pedido||out.order?.id||""} creado`);closeOrderCreate();await loadAdminModules({modules:["orders","quotes"],retry:true});if(out.order?.id){window.openOrderDetail(out.order.id);const o=data.orders.find(x=>String(x.id)===String(out.order.id));if(o&&out.payment_link_required)o._payment_link_required=true}}catch(err){console.warn(err);const code=String(err?.message||err||"").toUpperCase();toast(code.includes("COTIZACION_YA_CONVERTIDA")?"✕ Esta cotización ya fue utilizada en un pedido y no puede reutilizarse.":code.includes("COTIZACION_NO_VIGENTE")?"✕ La cotización ya no está vigente para crear pedidos.":code.includes("TELEFONO_YA_ASOCIADO")?"✕ Ese teléfono ya está asociado a otro RUT en Clientes.":code.includes("EMAIL_YA_ASOCIADO")?"✕ Ese correo ya está asociado a otro RUT en Clientes.":"✕ No fue posible crear el pedido")}}));
 
 window.changeCashPaymentState=async(id,next,control)=>{
   const o=data.orders.find(x=>String(x.id)===String(id));
@@ -1823,7 +1862,9 @@ function fillQuoteProductPicker(){
 function newQuoteItem(item={}){
   return {
     key:(crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random())),
-    descripcion:String(item.descripcion||item.nombre||""),
+    producto_id:String(item.producto_id||""),producto_nombre:String(item.producto_nombre||item.nombre||""),
+    tamano_id:String(item.tamano_id||""),tamano_nombre:String(item.tamano_nombre||""),
+    descripcion:String(item.descripcion||item.producto_nombre||item.nombre||""),
     cantidad:Math.max(0,Number(item.cantidad||1)||1),
     precio_unitario:parseClpAmount(item.precio_unitario??item.precio??0)
   };
@@ -2028,7 +2069,7 @@ function quotePayload(){
     iva_porcentaje:toNumber($("#qIva").value),
     estado:$("#qStatus").value,
     observaciones:$("#qObservations").value.trim(),
-    items:quoteDraftItems.map(x=>({descripcion:String(x.descripcion||"").trim(),cantidad:Number(x.cantidad||0),precio_unitario:Number(x.precio_unitario||0)}))
+    items:quoteDraftItems.map(x=>({producto_id:x.producto_id||null,producto_nombre:x.producto_nombre||null,tamano_id:x.tamano_id||null,tamano_nombre:x.tamano_nombre||null,descripcion:String(x.descripcion||"").trim(),cantidad:Number(x.cantidad||0),precio_unitario:Number(x.precio_unitario||0)}))
       .filter(x=>x.descripcion&&x.cantidad>0)
   };
 }
@@ -2088,12 +2129,10 @@ window.deleteQuote=async(id,btn)=>{
 };
 window.changeQuoteStatus=async(id,status)=>{try{const out=await AleAPI.post("updatequotestatus",{id,status},token);const ix=data.quotes.findIndex(x=>String(x.id)===String(id));if(ix>=0&&out.quote)data.quotes[ix]=out.quote;toast("Estado de cotización actualizado");renderQuotes()}catch(e){console.warn(e);const code=String(e?.message||e||"").toUpperCase();toast(code.includes("COTIZACION_UTILIZADA_BLOQUEADA")?"Esta cotización ya fue utilizada en un pedido y su estado queda en UTILIZADA":"No fue posible actualizar el estado");await loadAdminModules({modules:["quotes"],retry:true})}};
 
-function addCatalogProductToQuote(){
-  const id=$("#quoteProductPicker").value;if(!id)return toast("Selecciona un producto");
-  const p=data.products.find(x=>String(x.id)===String(id));if(!p)return;
-  quoteDraftItems.push(newQuoteItem({descripcion:p.nombre,cantidad:1,precio_unitario:p.precio}));renderQuoteItems();
-}
-$("#addQuoteProduct")?.addEventListener("click",addCatalogProductToQuote);
+function renderQuoteCatalogResults(){const host=$("#quoteProductResults"),input=$("#quoteProductSearch");if(!host||!input)return;const rows=catalogCandidates(input.value,"");host.innerHTML=catalogResultsHtml(rows);host.classList.toggle("hidden",!input.value.trim()&&rows.length>14)}
+$("#quoteProductSearch")?.addEventListener("focus",renderQuoteCatalogResults);
+$("#quoteProductSearch")?.addEventListener("input",renderQuoteCatalogResults);
+$("#quoteProductResults")?.addEventListener("click",e=>{const b=e.target.closest("[data-catalog-index]");if(!b)return;const rows=catalogCandidates($("#quoteProductSearch")?.value||"","");const c=rows[Number(b.dataset.catalogIndex)];if(!c)return;quoteDraftItems.push(newQuoteItem(catalogLineFromCandidate(c)));renderQuoteItems();$("#quoteProductSearch").value="";$("#quoteProductResults").classList.add("hidden");$("#quoteProductSearch").focus()});
 $("#addQuoteLine")?.addEventListener("click",()=>{quoteDraftItems.push(newQuoteItem());renderQuoteItems()});
 $("#newQuote")?.addEventListener("click",()=>openQuoteEditor());
 $("#closeQuoteEditorX")?.addEventListener("click",closeQuoteEditor);
@@ -3131,19 +3170,46 @@ installStaticClpFields();
 
 // R9.18.104 · Facturación SII · PRUEBA LOCAL firmada + PDF representación SII
 const siiState={config:null,certificados:[],caf:[],documentos:[],intercambios:[],intercambioRespuestas:[],intercambioDetalles:[],certificacion:[],certMetricas:{},inboundEmailWebhook:false,loaded:false};
+const siiDocumentFilters={q:"",date:"",status:""};
 let siiLoadedOrderDocs=[];let siiLoadedOrderId=null;let siiLoadedOrderItems=[];
 const SII_DTE_NAMES={33:"Factura Electrónica",34:"Factura No Afecta o Exenta Electrónica",39:"Boleta Electrónica",41:"Boleta No Afecta o Exenta Electrónica",43:"Liquidación Factura Electrónica",52:"Guía de Despacho Electrónica",56:"Nota de Débito Electrónica",61:"Nota de Crédito Electrónica"};
 function siiStatusClass(value){const x=String(value||"").toUpperCase();if(["ACEPTADO","ENVIADO","FIRMADO","EMITIDO","0"].includes(x))return"ok";if(x.includes("PRUEBA_LOCAL"))return"local";if(["ERROR","ERROR_ENVIO","RECHAZADO"].some(v=>x.includes(v)))return"error";return"warn"}
 function siiFormatDate(value){if(!value)return"—";const d=new Date(value);return Number.isNaN(d.getTime())?String(value):d.toLocaleDateString("es-CL")}
 function fileAsBase64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(r.error||new Error("LECTURA_ARCHIVO_FALLIDA"));r.onload=()=>resolve(String(r.result||"").split(",").pop()||"");r.readAsDataURL(file)})}
 function fileAsText(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(r.error||new Error("LECTURA_ARCHIVO_FALLIDA"));r.onload=()=>resolve(String(r.result||""));r.readAsText(file,"UTF-8")})}
-function setSiiEnvBadge(env){const el=$("#siiEnvironmentBadge");if(!el)return;const prod=String(env||"").toUpperCase()==="PRODUCCION";el.textContent=prod?"SII PRODUCCIÓN":"SII CERTIFICACIÓN";el.classList.toggle("production",prod);el.classList.toggle("certification",!prod)}
+function setSiiEnvBadge(env){const el=$("#siiEnvironmentBadge");if(!el)return;el.hidden=true;el.style.display="none";const prod=String(env||"").toUpperCase()==="PRODUCCION";el.textContent=prod?"SII PRODUCCIÓN":"SII CERTIFICACIÓN";el.classList.toggle("production",prod);el.classList.toggle("certification",!prod)}
 function renderSiiConfig(){const c=siiState.config||{};$("#siiEnvironment").value=c.ambiente||"CERTIFICACION";$("#siiEnabled").value=c.habilitado?"SI":"NO";$("#siiRutEmisor").value=c.rut_emisor||"";$("#siiRazonSocial").value=c.razon_social||"";$("#siiGiro").value=c.giro||"";$("#siiActeco").value=c.acteco||"";$("#siiDireccion").value=c.direccion_origen||"";$("#siiComuna").value=c.comuna_origen||"";$("#siiCiudad").value=c.ciudad_origen||"";if($("#siiDireccionRegional"))$("#siiDireccionRegional").value=c.direccion_regional_sii||"";if($("#siiBoletaApiEnabled"))$("#siiBoletaApiEnabled").value=c.boleta_api_habilitada?"SI":"NO";if($("#siiBoletaEmissionModel"))$("#siiBoletaEmissionModel").value=c.boleta_modelo_emision||"POR_DEFINIR";if($("#siiBoletaFormat"))$("#siiBoletaFormat").value=c.boleta_formato||"TICKET_80";if($("#siiBoletaPrintFormat"))$("#siiBoletaPrintFormat").value=c.boleta_formato||"TICKET_80";$("#siiEmail").value=c.email_emisor||"";$("#siiResolucionNumero").value=c.numero_resolucion??"";$("#siiResolucionFecha").value=c.fecha_resolucion?String(c.fecha_resolucion).slice(0,10):"";setSiiEnvBadge(c.ambiente)}
 function renderSiiCertificates(){const host=$("#siiCertificateList"),active=String(siiState.config?.certificado_activo_id||"");if(!host)return;host.innerHTML=siiState.certificados.length?siiState.certificados.map(x=>{const isActive=String(x.id)===active;return `<div class="sii-list-item ${isActive?'is-active':''}"><div><strong>${esc(x.alias||'Certificado SII')}</strong><small>${esc(x.rut_firmante||'')} · vence ${esc(siiFormatDate(x.valido_hasta))}</small></div><div class="sii-list-actions">${isActive?'<span class="sii-status-pill ok">Activo</span>':`<button class="btn btn-light btn-compact" type="button" data-sii-cert-activate="${esc(x.id)}">Usar</button>`}</div></div>`}).join(""):'<div class="muted">No hay certificado digital cargado.</div>'}
 function renderSiiCaf(){const tbody=$("#siiCafTable");if(!tbody)return;const rows=siiState.caf||[];tbody.innerHTML=rows.length?rows.map(x=>{const total=Math.max(1,Number(x.folio_hasta||0)-Number(x.folio_desde||0)+1),available=Math.max(0,Number(x.folio_hasta||0)-Number(x.proximo_folio||0)+1),pct=Math.round(available*100/total),local=Boolean(x.es_prueba_local),state=x.agotado?"Agotado":local?"PRUEBA LOCAL":x.activo?"CAF SII ACTIVO":"Inactivo",stateClass=x.agotado?"error":local?"local":"ok",expiry=local&&x.vence_prueba?`<small class="sii-local-expiry">Vence ${siiFormatDate(x.vence_prueba)}</small>`:"",low=!x.agotado&&x.activo&&(available<=5||pct<=20),lowBadge=low?`<small class="sii-folio-low">⚠ ${available<=5?'QUEDAN '+available:pct+'% DISPONIBLE'}</small>`:"";return `<tr class="${local?'sii-local-row':''} ${low?'sii-low-row':''}"><td><strong>${Number(x.tipo_dte)}</strong><small>${esc(SII_DTE_NAMES[x.tipo_dte]||'DTE')}</small>${local?'<small class="sii-local-label">NO AUTORIZADO SII</small>':''}</td><td class="folio-cell">${Number(x.folio_desde).toLocaleString('es-CL')} – ${Number(x.folio_hasta).toLocaleString('es-CL')}</td><td class="folio-cell">${Number(x.proximo_folio||0).toLocaleString('es-CL')}</td><td class="folio-cell"><strong>${available.toLocaleString('es-CL')}</strong><small>${pct}% del rango</small>${lowBadge}${expiry}</td><td><span class="sii-status-pill ${stateClass}">${state}</span></td></tr>`}).join(""):'<tr><td colspan="5" class="sii-document-empty">Aún no hay CAF ni rangos de prueba cargados para este ambiente.</td></tr>';const alert=$("#siiFolioAlert"),low=rows.filter(x=>x.activo&&!x.agotado&&Math.max(0,Number(x.folio_hasta||0)-Number(x.proximo_folio||0)+1)<=Math.max(5,Math.ceil((Number(x.folio_hasta||0)-Number(x.folio_desde||0)+1)*.2)));if(alert){alert.classList.toggle("hidden",!low.length);alert.innerHTML=low.length?`<i class="bi bi-exclamation-triangle"></i><span><strong>Folios por agotarse:</strong> ${low.map(x=>`DTE ${Number(x.tipo_dte)} · ${Math.max(0,Number(x.folio_hasta||0)-Number(x.proximo_folio||0)+1)} disponibles`).join(' · ')}</span>`:""}}
+function siiDocumentSearchText(x){
+  const order=(data.orders||[]).find(o=>String(o.id)===String(x?.pedido_id));
+  const providerCode=String(x?.provider_code||(x?.external_provider?"FACTURACION_CL":"SII_PROPIO"));
+  const providerName=x?.provider_name||window.FacturacionAPI?.label?.(providerCode)||providerCode;
+  const tipo=Number(x?.tipo_dte||0);
+  return [x?.folio,x?.pedido_numero,x?.pedido_id,order?.numero_pedido,x?.receptor_razon,x?.razon_social_receptor,x?.receptor_rut,x?.rut_receptor,x?.estado,x?.estado_sii,x?.track_id,providerName,providerCode,SII_DTE_NAMES[tipo],tipo,x?.ambiente].filter(v=>v!==undefined&&v!==null).join(" ").toLowerCase();
+}
+function siiDocumentDateKey(x){
+  const raw=x?.fecha_emision||x?.creado_en;if(!raw)return"";
+  const text=String(raw),iso=text.match(/^(\d{4}-\d{2}-\d{2})/);if(iso)return iso[1];
+  const d=new Date(raw);if(Number.isNaN(d.getTime()))return text.slice(0,10);
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`;
+}
+function filteredSiiDocuments(){
+  const q=String(siiDocumentFilters.q||"").trim().toLowerCase(),date=String(siiDocumentFilters.date||""),status=String(siiDocumentFilters.status||"").toUpperCase();
+  return (siiState.documentos||[]).filter(x=>(!q||siiDocumentSearchText(x).includes(q))&&(!date||siiDocumentDateKey(x)===date)&&(!status||String(x?.estado||"").toUpperCase()===status));
+}
+function syncSiiDocumentStatusOptions(){
+  const el=$("#siiDocumentsStatusFilter");if(!el)return;const selected=String(siiDocumentFilters.status||"");
+  const states=[...new Set((siiState.documentos||[]).map(x=>String(x?.estado||"").trim().toUpperCase()).filter(Boolean))].sort();
+  el.innerHTML='<option value="">Todos</option>'+states.map(st=>`<option value="${esc(st)}">${esc(st.replaceAll("_"," "))}</option>`).join("");
+  el.value=states.includes(selected)?selected:"";if(selected&&!states.includes(selected))siiDocumentFilters.status="";
+}
 function renderSiiDocuments(){
   const tbody=$("#siiDocumentsTable");if(!tbody)return;
-  tbody.innerHTML=siiState.documentos.length?siiState.documentos.map(x=>{
+  syncSiiDocumentStatusOptions();
+  const rows=filteredSiiDocuments(),counter=$("#siiDocumentsFilterCount");if(counter)counter.textContent=`${rows.length.toLocaleString("es-CL")} de ${(siiState.documentos||[]).length.toLocaleString("es-CL")} documentos`;
+  const actionMenu=(content)=>`<details class="billing-actions-menu"><summary><i class="bi bi-three-dots-vertical"></i> Acciones</summary><div class="billing-actions-popover">${content}</div></details>`;
+  tbody.innerHTML=rows.length?rows.map(x=>{
     const providerCode=String(x.provider_code||(x.external_provider?"FACTURACION_CL":"SII_PROPIO"));
     const providerName=x.provider_name||window.FacturacionAPI?.label?.(providerCode)||(providerCode==="SII_PROPIO"?"Facturación Propia":"Proveedor");
     const isExternal=Boolean(x.external_provider)||providerCode==="FACTURACION_CL";
@@ -3151,11 +3217,21 @@ function renderSiiDocuments(){
       const order=(data.orders||[]).find(o=>String(o.id)===String(x.pedido_id));
       const folio=Number(x.folio||0),tipo=Number(x.tipo_dte||0),issued=x.estado==='EMITIDO',pending=['INICIADO','INDETERMINADO','PROCESADO'].includes(x.estado);
       const pdfAttrs=`data-billing-pdf="${folio}" data-billing-pdf-tipo="${tipo}" data-billing-pdf-provider="${esc(providerCode)}" data-billing-document-id="${esc(x.id)}"`;
-      const buttons=issued&&folio?`${[33,34,52].includes(tipo)?`<label class="sii-history-cedible" title="Marca para abrir la copia cedible"><input type="checkbox" data-billing-cedible-toggle> Cedible</label>`:''}<button class="btn btn-light btn-compact" type="button" ${pdfAttrs}><i class="bi bi-file-earmark-pdf"></i> PDF</button>${[33,34,39,41].includes(tipo)?`<button class="btn btn-light btn-compact" type="button" data-billing-ticket="${esc(x.id)}" data-billing-ticket-tipo="${tipo}" data-billing-ticket-folio="${folio}"><i class="bi bi-printer"></i> Ticket 80 mm</button>`:''}`:pending?`<button class="btn btn-light btn-compact" type="button" data-billing-review="${esc(x.id)}">Revisar emisión</button>`:'';
-      return `<tr><td>${esc(siiFormatDate(x.fecha_emision||x.creado_en))}<small>${esc(x.ambiente==='PRODUCCION'?'PRODUCCIÓN':'PRUEBA')}</small></td><td><strong>${tipo}</strong><small>${esc(SII_DTE_NAMES[tipo]||`DTE ${tipo}`)}</small></td><td class="folio-cell"><strong>${folio?folio.toLocaleString('es-CL'):'—'}</strong></td><td class="sii-order-number"><strong>${esc(order?.numero_pedido||x.pedido_numero||x.pedido_id||'—')}</strong></td><td class="sii-doc-name"><strong>${esc(x.receptor_razon||x.razon_social_receptor||'')}</strong><small>${esc(x.receptor_rut||x.rut_receptor||'')}</small></td><td class="money-cell">${money(x.total||0)}</td><td><span class="sii-status-pill ${siiStatusClass(x.estado)}">${esc(x.estado||'—')}</span><small>${esc(providerName)}</small>${x.error_detalle?`<small title="${esc(x.error_detalle)}">${esc(x.error_detalle.slice(0,150))}</small>`:''}</td><td class="sii-track">—</td><td><div class="sii-action-row">${buttons}<button class="btn btn-light btn-compact" type="button" data-billing-xml="${esc(x.id)}">XML enviado</button></div></td></tr>`;
+      const actions=[];
+      if(issued&&folio){
+        if([33,34,52].includes(tipo))actions.push(`<label class="sii-history-cedible" title="Marca para abrir la copia cedible"><input type="checkbox" data-billing-cedible-toggle> Copia cedible</label>`);
+        actions.push(`<button class="btn btn-light btn-compact" type="button" ${pdfAttrs}><i class="bi bi-file-earmark-pdf"></i> PDF oficial</button>`);
+        if([33,34,39,41].includes(tipo)&&x.pedido_id)actions.push(`<button class="btn btn-light btn-compact" type="button" data-billing-ticket="${esc(x.id)}" data-billing-ticket-tipo="${tipo}" data-billing-ticket-folio="${folio}"><i class="bi bi-printer"></i> Ticket 80 mm</button>`);
+      }else if(pending)actions.push(`<button class="btn btn-light btn-compact" type="button" data-billing-review="${esc(x.id)}"><i class="bi bi-arrow-repeat"></i> Revisar emisión</button>`);
+      actions.push(`<button class="btn btn-light btn-compact" type="button" data-billing-xml="${esc(x.id)}"><i class="bi bi-code-square"></i> XML enviado</button>`);
+      return `<tr><td>${esc(siiFormatDate(x.fecha_emision||x.creado_en))}<small>${esc(x.ambiente==='PRODUCCION'?'PRODUCCIÓN':'PRUEBA')}</small></td><td><strong>${tipo}</strong><small>${esc(SII_DTE_NAMES[tipo]||`DTE ${tipo}`)}</small></td><td class="folio-cell"><strong>${folio?folio.toLocaleString('es-CL'):'—'}</strong></td><td class="sii-order-number"><strong>${esc(x.venta_manual?'VENTA DIRECTA':(order?.numero_pedido||x.pedido_numero||x.pedido_id||'—'))}</strong></td><td class="sii-doc-name"><strong>${esc(x.receptor_razon||x.razon_social_receptor||'')}</strong><small>${esc(x.receptor_rut||x.rut_receptor||'')}</small></td><td class="money-cell">${money(x.total||0)}</td><td><span class="sii-status-pill ${siiStatusClass(x.estado)}">${esc(x.estado||'—')}</span><small>${esc(providerName)}</small>${x.error_detalle?`<small title="${esc(x.error_detalle)}">${esc(x.error_detalle.slice(0,150))}</small>`:''}</td><td class="sii-track">—</td><td>${actionMenu(actions.join(''))}</td></tr>`;
     }
-    const local=Boolean(x.es_prueba_local);return `<tr class="${local?'sii-local-row':''}"><td>${esc(siiFormatDate(x.fecha_emision||x.creado_en))}</td><td><strong>${Number(x.tipo_dte)}</strong><small>${esc(SII_DTE_NAMES[x.tipo_dte]||'DTE')}</small>${local?'<small class="sii-local-label">PRUEBA LOCAL</small>':''}</td><td class="folio-cell"><strong>${Number(x.folio||0).toLocaleString('es-CL')}</strong></td><td class="sii-order-number"><strong>${esc(x.pedido_numero||((data.orders||[]).find(o=>String(o.id)===String(x.pedido_id))?.numero_pedido)||x.pedido_id||'—')}</strong></td><td class="sii-doc-name"><strong>${esc(x.razon_social_receptor||'')}</strong><small>${esc(x.rut_receptor||'')}</small></td><td class="money-cell">${money(x.total||0)}</td><td><span class="sii-status-pill ${siiStatusClass(x.estado)}">${esc(x.estado||'—')}</span>${x.estado_sii?`<small>SII: ${esc(x.estado_sii)}</small>`:''}<small>${esc(providerName)}</small></td><td class="sii-track">${local?'NO ENVIADO':esc(x.track_id||'—')}</td><td><div class="sii-action-row">${x.track_id?`<button class="btn btn-light btn-compact" type="button" data-sii-query="${esc(x.id)}">Consultar SII</button>`:''}<button class="btn btn-light btn-compact" type="button" data-sii-pdf="${esc(x.id)}"><i class="bi bi-file-earmark-pdf"></i> PDF</button><button class="btn btn-light btn-compact" type="button" data-sii-detail="${esc(x.id)}">Ver XML</button></div></td></tr>`
-  }).join(""):'<tr><td colspan="9" class="sii-document-empty">No hay documentos tributarios emitidos.</td></tr>'
+    const local=Boolean(x.es_prueba_local),actions=[];
+    if(x.track_id)actions.push(`<button class="btn btn-light btn-compact" type="button" data-sii-query="${esc(x.id)}">Consultar SII</button>`);
+    actions.push(`<button class="btn btn-light btn-compact" type="button" data-sii-pdf="${esc(x.id)}"><i class="bi bi-file-earmark-pdf"></i> PDF</button>`);
+    actions.push(`<button class="btn btn-light btn-compact" type="button" data-sii-detail="${esc(x.id)}">Ver XML</button>`);
+    return `<tr class="${local?'sii-local-row':''}"><td>${esc(siiFormatDate(x.fecha_emision||x.creado_en))}</td><td><strong>${Number(x.tipo_dte)}</strong><small>${esc(SII_DTE_NAMES[x.tipo_dte]||'DTE')}</small>${local?'<small class="sii-local-label">PRUEBA LOCAL</small>':''}</td><td class="folio-cell"><strong>${Number(x.folio||0).toLocaleString('es-CL')}</strong></td><td class="sii-order-number"><strong>${esc(x.pedido_numero||((data.orders||[]).find(o=>String(o.id)===String(x.pedido_id))?.numero_pedido)||x.pedido_id||'—')}</strong></td><td class="sii-doc-name"><strong>${esc(x.razon_social_receptor||'')}</strong><small>${esc(x.rut_receptor||'')}</small></td><td class="money-cell">${money(x.total||0)}</td><td><span class="sii-status-pill ${siiStatusClass(x.estado)}">${esc(x.estado||'—')}</span>${x.estado_sii?`<small>SII: ${esc(x.estado_sii)}</small>`:''}<small>${esc(providerName)}</small></td><td class="sii-track">${local?'NO ENVIADO':esc(x.track_id||'—')}</td><td>${actionMenu(actions.join(''))}</td></tr>`
+  }).join(""):`<tr><td colspan="9" class="sii-document-empty">${(siiState.documentos||[]).length?'No hay documentos que coincidan con los filtros.':'No hay documentos tributarios emitidos.'}</td></tr>`
 }
 function renderSiiRuntime(){
   const c=siiState.config||{},active=window.FacturacionAPI?.activeCodeCached?.()||"SII_PROPIO",external=active!=="SII_PROPIO",last=siiState.documentos[0];
@@ -3194,7 +3270,7 @@ window.openOrderSiiIssue=async(orderId,tipoDte=33)=>{
   if(orderState(o.estado)==='CANCELADO')return toast('✕ Un pedido CANCELADO no puede emitir documentos tributarios.');
   try{if(window.FacturacionAPI)await FacturacionAPI.load(false,token)}catch(err){console.warn('load billing provider from order',err)}
   try{await loadSiiBilling(false)}catch(err){console.warn('load sii from order',err)}
-  $('#siiTipoDte').value=String(tipoDte);
+  $('#siiTipoDte').value=String(tipoDte);if($('#siiSourceMode'))$('#siiSourceMode').value='PEDIDO';syncSiiSourceModeUi();
   if($('#siiIncludeCedible'))$('#siiIncludeCedible').checked=false;
   $('#siiPedidoId').value=String(o.numero_pedido||o.id||'');
   $('#siiRutReceptor').value=o.rut||'';
@@ -3239,12 +3315,35 @@ function siiAvailableCaf(tipo,local){const now=Date.now();return siiState.caf.fi
 function resolveSiiIssueMode(){const tipo=Number($("#siiTipoDte")?.value||0),requested=$("#siiIssueMode")?.value||"AUTO",prod=String(siiState.config?.ambiente||"").toUpperCase()==="PRODUCCION",official=siiAvailableCaf(tipo,false),local=siiAvailableCaf(tipo,true),boleta=[39,41].includes(tipo);if(prod)return{mode:"SII",official,local:null};if(requested==="PRUEBA_LOCAL")return{mode:local?"PRUEBA_LOCAL":"PRUEBA_LOCAL_SIN_FOLIOS",official,local};if(requested==="SII")return{mode:"SII",official,local};if(boleta&&local)return{mode:"PRUEBA_LOCAL",official,local};if(official)return{mode:"SII",official,local};if(local)return{mode:"PRUEBA_LOCAL",official,local};return{mode:"SII",official:null,local:null}}
 function siiExistingForIssue(tipo=null,mode=null){
   const t=Number((tipo??$("#siiTipoDte")?.value)||0),m=mode||resolveSiiIssueMode();if(!siiLoadedOrderId||!SINGLE_SII_ORDER_TYPES.has(t))return null;
-  const local=m.mode==="PRUEBA_LOCAL",env=local?'CERTIFICACION':String(siiState.config?.ambiente||'CERTIFICACION').toUpperCase();return (siiLoadedOrderDocs||[]).find(x=>Number(x.tipo_dte)===t&&Boolean(x.es_prueba_local)===local&&String(x.ambiente||'CERTIFICACION').toUpperCase()===env)||null
+  const local=m.mode==="PRUEBA_LOCAL",env=local?'CERTIFICACION':String(siiState.config?.ambiente||'CERTIFICACION').toUpperCase();
+  return (siiLoadedOrderDocs||[]).find(x=>SINGLE_SII_ORDER_TYPES.has(Number(x.tipo_dte))&&Boolean(x.es_prueba_local)===local&&String(x.ambiente||'CERTIFICACION').toUpperCase()===env&&['INICIADO','FIRMADO','ENVIADO','ACEPTADO','PROCESADO','EMITIDO','INDETERMINADO'].includes(String(x.estado||'').toUpperCase()))||null
 }
 const SINGLE_SII_ORDER_TYPES=new Set([33,34,39,41]);
+let siiManualItems=[];let siiManualRequestId="";
+function isDirectSiiSale(){return String($("#siiSourceMode")?.value||'PEDIDO').toUpperCase()==='DIRECTO'}
+function manualDteTotal(){return siiManualItems.reduce((sum,x)=>sum+(Number(x.cantidad||0)*Number(x.precio_unitario||0)),0)}
+function renderSiiManualItems(){const host=$("#siiManualItems");if(!host)return;const wh=$("#siiManualWarehouse")?.value||'';host.innerHTML=siiManualItems.length?siiManualItems.map((x,i)=>{const stock=x.producto_id?catalogAvailable(x.producto_id,x.tamano_id,wh):null;return `<div class="sii-manual-item"><input data-sii-manual-field="descripcion" data-sii-manual-index="${i}" value="${esc(x.descripcion||'')}" placeholder="Descripción"><input data-sii-manual-field="cantidad" data-sii-manual-index="${i}" type="number" min="0.001" step="0.001" value="${Number(x.cantidad||1)}"><input class="line-price" data-sii-manual-field="precio_unitario" data-sii-manual-index="${i}" type="text" inputmode="numeric" value="${new Intl.NumberFormat('es-CL',{maximumFractionDigits:0}).format(Number(x.precio_unitario||0))}">${stock===null?'<span class="line-stock">Sin stock asociado</span>':`<span class="line-stock">Stock ${Number(stock).toLocaleString('es-CL',{maximumFractionDigits:3})}</span>`}<button type="button" class="btn btn-light sii-manual-remove" data-sii-manual-remove="${i}"><i class="bi bi-trash3"></i></button></div>`}).join(''):'<div class="request-option-empty">Busca y selecciona productos del catálogo.</div>';if($("#siiManualTotal"))$("#siiManualTotal").textContent=money(manualDteTotal())}
+function renderSiiManualCatalogResults(){const host=$("#siiManualProductResults"),input=$("#siiManualProductSearch");if(!host||!input)return;const rows=catalogCandidates(input.value,$("#siiManualWarehouse")?.value||'');host.innerHTML=catalogResultsHtml(rows);host.classList.toggle('hidden',!input.value.trim()&&rows.length>14)}
+function syncSiiSourceModeUi(){
+  const source=$("#siiSourceMode"),active=window.FacturacionAPI?.activeCodeCached?.()||"",canDirect=Boolean(active&&active!=="SII_PROPIO");
+  if(source){const directOption=source.querySelector('option[value="DIRECTO"]');if(directOption)directOption.disabled=!canDirect;if(source.value==='DIRECTO'&&!canDirect)source.value='PEDIDO';}
+  const direct=isDirectSiiSale(),tipo=Number($("#siiTipoDte")?.value||33);
+  if(direct&&![33,34].includes(tipo)){if($("#siiTipoDte"))$("#siiTipoDte").value='33';}
+  $$('.sii-order-source-field').forEach(el=>el.classList.toggle('hidden',direct));
+  $("#siiOrderPreview")?.classList.toggle('hidden',direct||!siiLoadedOrderId);
+  $("#siiManualSalePanel")?.classList.toggle('hidden',!direct);
+  if(direct){if(!siiManualRequestId)siiManualRequestId=crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random());fillWarehouseSelect('#siiManualWarehouse',{channel:'CPANEL'});if(!siiManualItems.length)renderSiiManualItems();}
+  updateSiiIssueModeUi();
+}
+$("#siiSourceMode")?.addEventListener('change',()=>{if(isDirectSiiSale()){siiLoadedOrderId='';siiLoadedOrderItems=[];siiLoadedOrderDocs=[];if($("#siiPedidoId"))$("#siiPedidoId").value='';}syncSiiSourceModeUi()});
+$("#siiManualProductSearch")?.addEventListener('focus',renderSiiManualCatalogResults);$("#siiManualProductSearch")?.addEventListener('input',renderSiiManualCatalogResults);
+$("#siiManualWarehouse")?.addEventListener('change',()=>{renderSiiManualItems();renderSiiManualCatalogResults()});
+$("#siiManualProductResults")?.addEventListener('click',e=>{const b=e.target.closest('[data-catalog-index]');if(!b)return;const rows=catalogCandidates($("#siiManualProductSearch")?.value||'',$("#siiManualWarehouse")?.value||''),c=rows[Number(b.dataset.catalogIndex)];if(!c)return;siiManualItems.push(normalizeOrderDraftItem(catalogLineFromCandidate(c)));renderSiiManualItems();$("#siiManualProductSearch").value='';$("#siiManualProductResults").classList.add('hidden');$("#siiManualProductSearch").focus()});
+$("#siiManualItems")?.addEventListener('input',e=>{const el=e.target.closest('[data-sii-manual-index]');if(!el)return;const i=Number(el.dataset.siiManualIndex),field=el.dataset.siiManualField;if(!siiManualItems[i])return;siiManualItems[i][field]=field==='descripcion'?el.value:field==='precio_unitario'?parseClpAmount(el.value):Math.max(.001,Number(el.value||0));if($("#siiManualTotal"))$("#siiManualTotal").textContent=money(manualDteTotal())});
+$("#siiManualItems")?.addEventListener('click',e=>{const b=e.target.closest('[data-sii-manual-remove]');if(!b)return;siiManualItems.splice(Number(b.dataset.siiManualRemove),1);renderSiiManualItems()});
 function updateSiiIssueModeUi(){
   const btn=$("#siiEmitDte"),note=$("#siiIssueModeNotice"),sel=$("#siiIssueMode");if(!btn)return;
-  const tipo=Number($("#siiTipoDte")?.value||0),m=resolveSiiIssueMode(),prod=String(siiState.config?.ambiente||"").toUpperCase()==="PRODUCCION",existing=siiExistingForIssue(tipo,m);
+  const tipo=Number($("#siiTipoDte")?.value||0),m=resolveSiiIssueMode(),prod=String(siiState.config?.ambiente||"").toUpperCase()==="PRODUCCION",direct=isDirectSiiSale(),existing=direct?null:siiExistingForIssue(tipo,m);
   if(sel){
     sel.querySelector('option[value="PRUEBA_LOCAL"]')?.toggleAttribute('disabled',prod||!siiAvailableCaf(tipo,true));
     if(prod&&sel.value==="PRUEBA_LOCAL")sel.value="SII";
@@ -3266,10 +3365,12 @@ function updateSiiIssueModeUi(){
   document.querySelectorAll('.fcl-note-field').forEach(el=>el.classList.toggle('hidden',!external||![56,61].includes(tipo)));
   if(activeBillingProvider&&activeBillingProvider!=="SII_PROPIO") {
     const env=FacturacionAPI.state.ambiente==='PRODUCCION'?'PRODUCCION':'PRUEBA';
-    const prior=SINGLE_SII_ORDER_TYPES.has(tipo)?siiLoadedOrderDocs.find(x=>Number(x.tipo_dte)===tipo&&x.ambiente===env&&['EMITIDO','INICIADO','INDETERMINADO','PROCESADO'].includes(x.estado)):null;
-    btn.innerHTML=prior?.estado==='EMITIDO'?'<i class="bi bi-eye"></i> Ver documento':'<i class="bi bi-receipt"></i> Emitir DTE';
-    btn.disabled=Boolean(prior&&prior.estado!=='EMITIDO');
-    showStatus(prior&&prior.estado!=='EMITIDO'?'Emisión pendiente de revisión. Abre el historial antes de volver a emitir.':`Proveedor activo: ${window.FacturacionAPI?.label?.(activeBillingProvider)||activeBillingProvider} · ${env}`,prior&&prior.estado!=='EMITIDO'?'warn':'ok');
+    const prior=!direct&&SINGLE_SII_ORDER_TYPES.has(tipo)?siiLoadedOrderDocs.find(x=>SINGLE_SII_ORDER_TYPES.has(Number(x.tipo_dte))&&x.ambiente===env&&['EMITIDO','INICIADO','INDETERMINADO','PROCESADO'].includes(x.estado)):null;
+    const different=prior&&Number(prior.tipo_dte)!==tipo;
+    btn.innerHTML=prior?.estado==='EMITIDO'&&!different?'<i class="bi bi-eye"></i> Ver documento':'<i class="bi bi-receipt"></i> Emitir DTE';
+    btn.disabled=Boolean(prior&&(different||prior.estado!=='EMITIDO'));
+    if(prior&&different)showStatus(`Este pedido ya tiene ${SII_DTE_NAMES[Number(prior.tipo_dte)]||`DTE ${prior.tipo_dte}`} folio ${Number(prior.folio||0).toLocaleString('es-CL')}. Para corregirlo usa Nota de Crédito/Débito.`,'error');
+    else showStatus(prior&&prior.estado!=='EMITIDO'?'Emisión pendiente de revisión. Abre el historial antes de volver a emitir.':direct?`Venta manual directa · ${window.FacturacionAPI?.label?.(activeBillingProvider)||activeBillingProvider} · ${env}`:`Proveedor activo: ${window.FacturacionAPI?.label?.(activeBillingProvider)||activeBillingProvider} · ${env}`,prior&&prior.estado!=='EMITIDO'?'warn':'ok');
     return;
   }
 
@@ -3302,7 +3403,7 @@ function updateSiiIssueModeUi(){
   if(!m.official){btn.disabled=true;showStatus("CAF no disponible","error")}
 }
 window.updateSiiIssueModeUi=updateSiiIssueModeUi;
-function toggleSiiReferenceFields(){const tipo=Number($("#siiTipoDte")?.value||0),show=[56,61].includes(tipo),boleta=[39,41].includes(tipo);$$('.sii-reference-field').forEach(x=>x.classList.toggle('hidden',!show));$$('.sii-boleta-format-field').forEach(x=>x.classList.toggle('hidden',!boleta));if(boleta&&$("#siiBoletaPrintFormat")&&!$("#siiBoletaPrintFormat").value)$("#siiBoletaPrintFormat").value=siiState.config?.boleta_formato||"TICKET_80";updateSiiIssueModeUi()}
+function toggleSiiReferenceFields(){let tipo=Number($("#siiTipoDte")?.value||0);if(isDirectSiiSale()&&![33,34].includes(tipo)){tipo=33;$("#siiTipoDte").value='33'}const show=[56,61].includes(tipo),boleta=[39,41].includes(tipo);$$('.sii-reference-field').forEach(x=>x.classList.toggle('hidden',!show));$$('.sii-boleta-format-field').forEach(x=>x.classList.toggle('hidden',!boleta));if(boleta&&$("#siiBoletaPrintFormat")&&!$("#siiBoletaPrintFormat").value)$("#siiBoletaPrintFormat").value=siiState.config?.boleta_formato||"TICKET_80";syncSiiSourceModeUi()}
 function siiPdfMoney(v){return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(Number(v||0))}
 function siiPdfText(v){return String(v??'').replace(/[\r\n]+/g,' ').trim()}
 function siiPdfDate(v){if(!v)return'';const s=String(v).slice(0,10),m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}-${m[2]}-${m[1]}`:s}
@@ -3479,16 +3580,16 @@ async function openExternalBillingPdf(tipo,folio,targetWindow=null,providerCode=
   openExternalPdfBundle(targetWindow,title,[{label:options?.cedible?'Cedible':'Original',url}]);
   setTimeout(()=>URL.revokeObjectURL(url),10*60*1000);return true;
 }
-async function emitActiveExternalDte(tipo,pedido_id){
+async function emitActiveExternalDte(tipo,pedido_id,extra={}){
   const includeCedible=Boolean($('#siiIncludeCedible')?.checked)&&[33,34,52].includes(Number(tipo));
-  const payload={tipo_dte:tipo,pedido_id:siiLoadedOrderId||pedido_id,rut_receptor:$("#siiRutReceptor").value.trim(),razon_social_receptor:$("#siiRazonReceptor").value.trim(),giro_receptor:$("#siiGiroReceptor").value.trim(),direccion_receptor:$("#siiDireccionReceptor").value.trim(),comuna_receptor:$("#siiComunaReceptor").value.trim(),ciudad_receptor:$("#siiCiudadReceptor").value.trim(),incluir_cedible:includeCedible};
+  const payload={tipo_dte:tipo,pedido_id:siiLoadedOrderId||pedido_id,rut_receptor:$("#siiRutReceptor").value.trim(),razon_social_receptor:$("#siiRazonReceptor").value.trim(),giro_receptor:$("#siiGiroReceptor").value.trim(),direccion_receptor:$("#siiDireccionReceptor").value.trim(),comuna_receptor:$("#siiComunaReceptor").value.trim(),ciudad_receptor:$("#siiCiudadReceptor").value.trim(),incluir_cedible:includeCedible,...extra};
   if(tipo===52){payload.tipo_despacho=Number($("#fclTipoDespacho").value);payload.ind_traslado=Number($("#fclIndTraslado").value);payload.transporte={patente:$("#fclPatente").value.trim(),rut_transportista:$("#fclRutTrans").value.trim()}}
   if([56,61].includes(tipo)){
     if(!$("#siiRefFolio").value.trim())return toast("La Nota requiere el folio del documento de referencia");
     payload.monto_nota=Number($("#fclMontoNota")?.value||0);
     payload.referencia={tipo_dte:Number($("#siiRefTipo").value||33),folio:Number($("#siiRefFolio").value||0),fecha:$("#siiRefFecha").value,codigo:Number($("#siiRefCodigo").value||1),razon:$("#siiRefRazon").value.trim()||"Referencia tributaria"};
   }
-  const printFormat=configuredDocumentFormat(),ticketMode=printFormat==='TICKET_80'&&[33,34,39,41].includes(Number(tipo));
+  const printFormat=configuredDocumentFormat(),ticketMode=!payload.manual_sale&&printFormat==='TICKET_80'&&[33,34,39,41].includes(Number(tipo));
   let documentWindow=null;
   try{
     documentWindow=window.open('about:blank','_blank');
@@ -3513,13 +3614,27 @@ async function emitActiveExternalDte(tipo,pedido_id){
       openExternalPdfBundle(documentWindow,`DTE ${tipo} · Folio ${folio}`,[{label:'Original',url:original},...(cedibleUrl?[{label:'Cedible',url:cedibleUrl}]:[])]);
     }
     toast(`✓ ${out.reutilizado?'Documento existente':out.provider_name||'Proveedor'} · DTE ${tipo} · folio ${folio.toLocaleString('es-CL')}${includeCedible&&cedibleUrl?' · cedible disponible':''}${ticketMode?' · Ticket 80 mm interno':''}`);
+    if(out?.stock_warning)toast(`⚠ DTE emitido correctamente, pero el movimiento de stock requiere revisión: ${out.stock_warning}`);
     try{if(typeof loadAdminModules==='function')await loadAdminModules({modules:['clients','orders'],retry:false})}catch(e){console.warn('refresh orders after external DTE',e)}
-    siiState.loaded=false;await loadSiiBilling(true).catch(()=>{});await loadSiiOrderData().catch(()=>{});
+    siiState.loaded=false;await loadSiiBilling(true).catch(()=>{});if(!payload.manual_sale)await loadSiiOrderData().catch(()=>{});else{try{await loadAdminModules({modules:['inventory'],retry:false});renderWarehouseStock()}catch(_){}}
     return out;
   }catch(err){try{if(documentWindow&&!documentWindow.closed)documentWindow.close()}catch(_){}if(err.payload?.document_id){siiState.loaded=false;await loadSiiBilling(true).catch(()=>{})}throw err}
 }
 async function emitSiiDte(){
-  const tipo=Number($("#siiTipoDte").value),pedido_id=$("#siiPedidoId").value.trim();if(!pedido_id)return toast("Ingresa el ID, N.º de pedido o solo el número; por ejemplo 24");
+  const tipo=Number($("#siiTipoDte").value),direct=isDirectSiiSale(),pedido_id=$("#siiPedidoId").value.trim();
+  if(direct){
+    if(![33,34].includes(tipo))return toast("La venta manual directa está habilitada solo para Factura 33 o Factura Exenta 34.");
+    if(!siiManualItems.length)return toast("Agrega al menos un producto a la venta directa.");
+    const items=siiManualItems.map(x=>({producto_id:x.producto_id||null,producto_nombre:x.producto_nombre||x.descripcion,tamano_id:x.tamano_id||null,tamano_nombre:x.tamano_nombre||null,descripcion:x.descripcion,cantidad:Number(x.cantidad||0),precio_unitario:Number(x.precio_unitario||0),subtotal:Math.round(Number(x.cantidad||0)*Number(x.precio_unitario||0))})).filter(x=>x.cantidad>0&&x.precio_unitario>=0);
+    if(!items.length)return toast("Revisa las cantidades y precios de la venta directa.");
+    if(!siiManualRequestId)siiManualRequestId=crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random());
+    const payload={manual_sale:true,manual_request_id:siiManualRequestId,items,total:manualDteTotal(),bodega_id:$("#siiManualWarehouse")?.value||"",mueve_stock:Boolean($("#siiManualMoveStock")?.checked)};
+    if(payload.mueve_stock&&!payload.bodega_id)return toast("Selecciona la bodega de salida para descontar stock.");
+    if(payload.mueve_stock&&items.some(x=>!x.producto_id))return toast("Para descontar stock, todas las líneas deben provenir del catálogo de productos.");
+    if(window.FacturacionAPI){await FacturacionAPI.load(false,token);const active=FacturacionAPI.activeCodeCached();if(active&&active!=="SII_PROPIO"){const out=await emitActiveExternalDte(tipo,"",payload);if(out?.ok){siiManualItems=[];siiManualRequestId="";renderSiiManualItems();}return out;}}
+    return toast("La venta manual directa con movimiento de stock está habilitada para Facturacion.cl. Para Facturación Propia usa un pedido.");
+  }
+  if(!pedido_id)return toast("Ingresa el ID, N.º de pedido o solo el número; por ejemplo 24");
   if(!siiLoadedOrderId)return toast("Primero busca/carga el pedido y revisa su detalle antes de generar el documento.");
   if(!Array.isArray(siiLoadedOrderItems)||!siiLoadedOrderItems.length)return toast("El pedido no tiene detalle de productos. No se puede generar el documento.");
   if(window.FacturacionAPI){
@@ -3528,7 +3643,10 @@ async function emitSiiDte(){
     if(active&&active!=="SII_PROPIO")return emitActiveExternalDte(tipo,pedido_id);
   }
   const mode=resolveSiiIssueMode(),existing=siiExistingForIssue(tipo,mode);
-  if(existing){let tab=null;try{tab=window.open('about:blank','_blank');const detail=await SiiAPI.detail(existing.id,token);if(detail?.representacion){const pdf=await generateSiiRepresentationPdf(detail.representacion,tab);await persistSiiPdf(existing.id,pdf)}else tab?.close();toast(`✓ Documento existente · folio ${Number(existing.folio||0).toLocaleString('es-CL')} · no se consumió otro folio`);return{reutilizado:true,...existing}}catch(err){try{tab?.close()}catch(_){}throw err}}
+  if(existing){
+    if(Number(existing.tipo_dte)!==tipo)return toast(`Este pedido ya tiene ${SII_DTE_NAMES[Number(existing.tipo_dte)]||`DTE ${existing.tipo_dte}`} folio ${Number(existing.folio||0).toLocaleString('es-CL')}. No se puede emitir otra factura/boleta; usa Nota de Crédito o Débito para corregir.`);
+    let tab=null;try{tab=window.open('about:blank','_blank');const detail=await SiiAPI.detail(existing.id,token);if(detail?.representacion){const pdf=await generateSiiRepresentationPdf(detail.representacion,tab);await persistSiiPdf(existing.id,pdf)}else tab?.close();toast(`✓ Documento existente · folio ${Number(existing.folio||0).toLocaleString('es-CL')} · no se consumió otro folio`);return{reutilizado:true,...existing}}catch(err){try{tab?.close()}catch(_){}throw err}
+  }
   if(mode.mode==="PRUEBA_LOCAL_SIN_FOLIOS")return toast("No hay folios PRUEBA LOCAL disponibles para este DTE");if(mode.mode==="SII"&&!mode.official)return toast("No hay CAF oficial disponible para este DTE. Selecciona PRUEBA LOCAL o importa un CAF SII.");
   if([39,41].includes(tipo)&&mode.mode==="SII"&&!siiState.config?.boleta_api_habilitada)return toast("La API REST real de Boleta está instalada pero deshabilitada. Mantén PRUEBA LOCAL o actívala en Configuración tributaria cuando inicies certificación real.");if([39,41].includes(tipo)&&mode.mode==="SII"&&String(siiState.config?.boleta_modelo_emision||"POR_DEFINIR").toUpperCase()==="POR_DEFINIR")return toast("Define primero el modelo de emisión de Boleta que declaraste en el SII.");
   const local=mode.mode==="PRUEBA_LOCAL",payload={tipo_dte:tipo,pedido_id,enviar_sii:!local,modo_prueba_local:local,rut_receptor:$("#siiRutReceptor").value.trim(),razon_social_receptor:$("#siiRazonReceptor").value.trim(),giro_receptor:$("#siiGiroReceptor").value.trim(),direccion_receptor:$("#siiDireccionReceptor").value.trim(),comuna_receptor:$("#siiComunaReceptor").value.trim(),ciudad_receptor:$("#siiCiudadReceptor").value.trim(),formato_impresion:[39,41].includes(tipo)?($("#siiBoletaPrintFormat")?.value||siiState.config?.boleta_formato||"TICKET_80"):"A4"};
@@ -3538,7 +3656,6 @@ async function emitSiiDte(){
     if(out?.representacion){const pdf=await generateSiiRepresentationPdf(out.representacion,pdfWindow);await persistSiiPdf(out.documento_id,pdf)}else if(pdfWindow&&!pdfWindow.closed)pdfWindow.close();siiState.loaded=false;await loadSiiBilling(true);siiLoadedOrderDocs.unshift({id:out.documento_id,ambiente:String(siiState.config?.ambiente||'CERTIFICACION').toUpperCase(),tipo_dte:out.tipo_dte,folio:out.folio,estado:out.estado,track_id:out.track_id,es_prueba_local:Boolean(out.es_prueba_local)});updateSiiIssueModeUi();try{if(typeof loadAdminModules==="function")await loadAdminModules({modules:["clients","orders"],retry:false})}catch(e){console.warn("refresh clients after DTE",e)}const clientMsg=out?.cliente_creado?" · cliente creado en Clientes":out?.cliente_guardado?" · ficha de Cliente actualizada":"";if(local)toast(`✓ PRUEBA LOCAL generada · ${SII_DTE_NAMES[Number(out.tipo_dte)]||`DTE ${out.tipo_dte}`} · folio ${out.folio} · XML firmado + PDF abierto${clientMsg}`);else toast(`✓ DTE ${out.tipo_dte} folio ${out.folio}${out.track_id?` · TrackID ${out.track_id}`:''} · PDF generado${clientMsg}`);return out
   }catch(err){try{if(pdfWindow&&!pdfWindow.closed)pdfWindow.close()}catch(_){}throw err}
 }
-
 
 
 // R9.18.125 · Mantenedor central de folios
@@ -3600,6 +3717,11 @@ $("#siiCertificationRefresh")?.addEventListener("click",e=>busy(e.currentTarget,
 $("#siiOpenCertificationPortal")?.addEventListener("click",()=>window.open('https://www.sii.cl/servicios_online/1039-menu_certificacion-1184.html','_blank','noopener,noreferrer'));
 $("#siiCertificationTable")?.addEventListener("click",async e=>{const b=e.target.closest('[data-sii-cert-save]');if(!b)return;await busy(b,async()=>{try{const code=b.dataset.siiCertSave,state=$("#siiCertificationTable")?.querySelector(`.sii-cert-state[data-code="${CSS.escape(code)}"]`)?.value||'PENDIENTE',detalle=$("#siiCertificationTable")?.querySelector(`.sii-cert-detail[data-code="${CSS.escape(code)}"]`)?.value||'',evidencia=$("#siiCertificationTable")?.querySelector(`.sii-cert-evidence[data-code="${CSS.escape(code)}"]`)?.value||'';await SiiAPI.certificationUpdate({codigo:code,estado:state,detalle,evidencia},token);await loadSiiCertification();toast(`✓ Etapa ${code} actualizada`)}catch(err){toast(`✕ ${err.message||err}`)}})});
 function billingDownload(filename,blob){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}
+let siiDocumentsSearchTimer=null;
+$("#siiDocumentsSearch")?.addEventListener("input",e=>{clearTimeout(siiDocumentsSearchTimer);siiDocumentsSearchTimer=setTimeout(()=>{siiDocumentFilters.q=String(e.target.value||"");renderSiiDocuments()},120)});
+$("#siiDocumentsDateFilter")?.addEventListener("change",e=>{siiDocumentFilters.date=String(e.target.value||"");renderSiiDocuments()});
+$("#siiDocumentsStatusFilter")?.addEventListener("change",e=>{siiDocumentFilters.status=String(e.target.value||"");renderSiiDocuments()});
+$("#siiDocumentsClearFilters")?.addEventListener("click",()=>{siiDocumentFilters.q="";siiDocumentFilters.date="";siiDocumentFilters.status="";const q=$("#siiDocumentsSearch"),d=$("#siiDocumentsDateFilter"),st=$("#siiDocumentsStatusFilter");if(q)q.value="";if(d)d.value="";if(st)st.value="";renderSiiDocuments()});
 $("#siiDocumentsTable")?.addEventListener('click',async e=>{
   const ticket=e.target.closest('[data-billing-ticket]'),xml=e.target.closest('[data-billing-xml]'),review=e.target.closest('[data-billing-review]');
   const button=ticket||xml||review;if(!button)return;

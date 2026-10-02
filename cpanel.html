@@ -7580,7 +7580,7 @@ body > #requestClientEditor:not(.hidden) .editor-actions{
             <div class="notification-list" id="notificationList"><div class="notification-empty">No hay notificaciones nuevas.</div></div>
           </aside>
         </div>
-        <div class="admin-userbox"><img id="currentUserAvatar" src="./favicon.png" alt="Perfil"><div><strong id="currentUserName">Usuario</strong><small id="currentUserRole">Conectado</small></div><div class="online-pill" id="syncPill"><span></span><b id="syncPillText">Conectado</b></div></div>
+        <div class="admin-userbox"><img id="currentUserAvatar" class="brand-fallback" src="./favicon-192.png" alt="Perfil"><div><strong id="currentUserName">Usuario</strong><small id="currentUserRole">Conectado</small></div><div class="online-pill" id="syncPill"><span></span><b id="syncPillText">Conectado</b></div></div>
       </div>
     </header>
 
@@ -7789,8 +7789,16 @@ body > #requestClientEditor:not(.hidden) .editor-actions{
           <label class="field-group"><span>Entrega</span><select id="ocDelivery"><option>Retiro</option><option>Despacho</option><option>Coordinar</option></select></label><label class="field-group"><span>Dirección</span><input id="ocAddress"></label>
           <label class="field-group"><span>Comuna</span><input id="ocCommune" placeholder="Ej: Independencia"></label>
           <label class="field-group"><span>Medio de pago</span><select id="ocPayment"><option value="EFECTIVO">Efectivo</option><option value="TRANSFERENCIA">Transferencia</option><option value="TRANSBANK">Transbank</option></select></label><label class="field-group"><span>Bodega de salida</span><select id="ocWarehouse"></select></label><label class="field-group"><span>Despacho · CLP</span><input id="ocDispatch" type="text" inputmode="numeric" autocomplete="off" value="0" placeholder="Ej: 5.000"></label>
-          <label class="field-group span-2"><span>Productos / líneas</span><textarea id="ocItems" rows="7" placeholder="Formato: Producto | cantidad | precio
-Torta chocolate | 1 | 25000"></textarea></label>
+          <div class="field-group span-2 order-catalog-block">
+            <span>Productos / líneas</span>
+            <div class="catalog-quick-picker" id="orderCatalogPicker">
+              <div class="catalog-quick-search"><i class="bi bi-search"></i><input id="ocProductSearch" type="search" autocomplete="off" placeholder="Buscar producto por nombre, descripción o código..."></div>
+              <div class="catalog-quick-results hidden" id="ocProductResults"></div>
+            </div>
+            <div class="order-draft-toolbar"><small id="ocProductSearchHelp">Selecciona productos del catálogo. El stock se valida contra la bodega elegida.</small><button class="btn btn-light btn-compact" id="ocAddFreeLine" type="button"><i class="bi bi-pencil-square"></i> Línea libre</button></div>
+            <div class="order-draft-items" id="ocProductLines"></div>
+            <textarea id="ocItems" class="hidden" aria-hidden="true"></textarea>
+          </div>
           <label class="field-group span-2"><span>Observaciones</span><textarea id="ocNotes"></textarea></label>
         </div>
         <div class="editor-actions"><button class="btn btn-primary" id="saveOrderFromCpanel"><i class="bi bi-check2-circle"></i> Crear pedido</button><button class="btn btn-light" id="cancelOrderCreate">Cancelar</button></div>
@@ -7949,9 +7957,12 @@ Torta chocolate | 1 | 25000"></textarea></label>
             <label class="field-group"><span>Estado</span><select id="qStatus"><option>BORRADOR</option><option>ENVIADA</option><option>ACEPTADA</option><option>RECHAZADA</option><option>VENCIDA</option><option>ANULADA</option><option disabled>UTILIZADA</option></select></label>
           </div>
 
-          <div class="quote-add-line">
-            <select id="quoteProductPicker"><option value="">Seleccionar producto del catálogo...</option></select>
-            <button class="btn btn-light" id="addQuoteProduct" type="button"><i class="bi bi-plus-lg"></i> Agregar producto</button>
+          <div class="quote-add-line quote-catalog-add">
+            <div class="catalog-quick-picker" id="quoteCatalogPicker">
+              <div class="catalog-quick-search"><i class="bi bi-search"></i><input id="quoteProductSearch" type="search" autocomplete="off" placeholder="Buscar producto por nombre, descripción o código..."></div>
+              <div class="catalog-quick-results hidden" id="quoteProductResults"></div>
+            </div>
+            <select id="quoteProductPicker" class="hidden" aria-hidden="true"><option value="">Seleccionar producto del catálogo...</option></select>
             <button class="btn btn-light" id="addQuoteLine" type="button"><i class="bi bi-pencil-square"></i> Línea libre</button>
           </div>
 
@@ -8528,49 +8539,42 @@ Torta chocolate | 1 | 25000"></textarea></label>
     <section class="admin-view" id="view-billing-sii">
       <div class="billing-command-panel">
         <div class="billing-command-head">
-          <div class="billing-command-title"><span class="eyebrow">Facturación</span><h2>Facturación electrónica</h2><p>Un solo panel de trabajo. El proveedor activo determina la API utilizada sin modificar la interfaz.</p></div>
+          <div class="billing-command-title"><span class="eyebrow">Facturación</span><h2>Facturación electrónica</h2></div>
           <div class="billing-command-state">
             <span class="sii-env-badge certification" id="billingEnvironmentBadge">CERTIFICACIÓN</span>
             <span class="billing-active-pill"><small>Proveedor activo</small><strong id="billingActiveProviderName">Cargando…</strong></span>
             <span class="sii-env-badge" id="siiEnvironmentBadge" hidden>Sin configurar</span>
           </div>
         </div>
-        <div class="billing-command-bar" role="toolbar" aria-label="Acciones de facturación">
-          <button class="billing-command-btn" id="billingProvidersOpen" type="button"><i class="bi bi-diagram-3"></i><span>Proveedores</span></button>
-          <button class="billing-command-btn" id="billingFacturacionClConnect" type="button"><i class="bi bi-plug"></i><span>Conectar Facturacion.cl</span></button>
+        <div class="billing-command-bar billing-command-bar-clean" role="toolbar" aria-label="Acciones de facturación">
           <button class="billing-command-btn is-primary" id="siiOwnEmitLauncher" type="button" data-sii-open="siiEmitModal"><i class="bi bi-receipt-cutoff"></i><span>Generar documento</span></button>
-          <button class="billing-command-btn" type="button" data-sii-open="siiConfigModal"><i class="bi bi-building-gear"></i><span>Configuración</span></button>
-          <button class="billing-command-btn" type="button" data-sii-open="siiCertificateModal"><i class="bi bi-patch-check"></i><span>Certificado</span></button>
-          <button class="billing-command-btn" type="button" data-sii-open="siiCafModal"><i class="bi bi-file-earmark-lock2"></i><span>CAF y folios</span></button>
-          <button class="billing-command-btn" type="button" data-sii-open="siiExchangeModal"><i class="bi bi-arrow-left-right"></i><span>Intercambio DTE</span></button>
-          <button class="billing-command-btn" type="button" data-sii-open="siiCertificationModal"><i class="bi bi-list-check"></i><span>Certificación SII</span></button>
+          <button class="billing-command-btn" type="button" data-sii-open="siiConfigModal"><i class="bi bi-gear"></i><span>Configuración</span></button>
+          <button class="billing-command-btn" type="button" data-sii-open="siiLocalHubModal"><i class="bi bi-building"></i><span>Facturación Propia / SII</span></button>
           <button class="billing-command-btn" id="siiRefresh" type="button"><i class="bi bi-arrow-clockwise"></i><span>Actualizar</span></button>
-        </div>
-        <div class="billing-status-strip" aria-label="Estado de facturación">
-          <div><span>Servicio</span><strong id="siiServiceStatus">Verificando…</strong><small id="siiServiceVersion">—</small></div>
-          <div><span>Certificado</span><strong id="siiCertificateStatus">—</strong><small id="siiCertificateExpiry">—</small></div>
-          <div><span>CAF / folios</span><strong id="siiCafStatus">—</strong><small>Por tipo de DTE</small></div>
-          <div><span>IVA general</span><strong id="billingIvaStatus">19%</strong><small>Mismo valor del sistema</small></div>
-          <div><span>Último DTE</span><strong id="siiLastDteStatus">—</strong><small id="siiLastTrack">—</small></div>
-        </div>
-        <div class="billing-tax-card" aria-label="Configuración de IVA general">
-          <div class="billing-tax-icon"><i class="bi bi-percent"></i></div>
-          <div class="billing-tax-copy"><span class="eyebrow">Impuesto compartido</span><strong>IVA general del sistema</strong><small>Este porcentaje se usa como base para nuevas cotizaciones, pedidos y DTE. Los documentos ya emitidos conservan sus montos históricos.</small></div>
-          <label class="billing-tax-field"><span>IVA (%)</span><input id="billingIvaQuick" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="19"></label>
-          <button class="btn btn-primary billing-tax-save" id="billingIvaQuickSave" type="button"><i class="bi bi-floppy"></i> Guardar IVA</button>
         </div>
       </div>
 
-      <div class="editor hidden sii-modal billing-providers-modal" id="billingProvidersModal" role="dialog" aria-modal="true" aria-labelledby="billingProvidersModalTitle">
-        <div class="editor-modal-head"><div><span class="eyebrow">Facturación</span><h3 id="billingProvidersModalTitle">Mantenedor de Proveedores de Facturación</h3><small>Administra el ambiente, el proveedor que emite y el alcance del historial de documentos.</small></div><button type="button" class="editor-close-x" data-billing-providers-close aria-label="Cerrar">×</button></div>
-        <div class="billing-maintainer-toolbar">
-          <label class="field-group billing-environment-field"><span>Ambiente de facturación</span><span class="system-select-shell"><select id="billingEnvironment"><option value="CERTIFICACION">CERTIFICACIÓN</option><option value="PRODUCCION">PRODUCCIÓN</option></select><i class="bi bi-chevron-down" aria-hidden="true"></i></span><small>El ambiente es único para todo el módulo y no cambia al seleccionar otro proveedor.</small></label>
-          <label class="field-group billing-iva-field"><span>IVA general (%)</span><input id="billingIva" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="19"><small>Se comparte con cotizaciones, pedidos y emisión de DTE.</small></label>
-          <div class="billing-active-summary"><span>Proveedor activo para emitir</span><strong id="billingActiveProviderNameModal">Se muestra en la barra superior</strong><small>Solo un proveedor puede emitir al mismo tiempo.</small></div>
-          <div class="billing-history-summary"><div><span>Historial de documentos</span><strong id="billingDocumentsScope">Solo proveedor activo</strong><small>Este switch solo cambia lo que ves; no cambia quién emite.</small></div><label class="billing-provider-switch billing-history-switch" title="Mostrar todos los documentos"><input id="billingShowAllDocuments" type="checkbox"><span></span></label></div>
-          <button class="btn btn-primary" id="billingEnvironmentSave" type="button"><i class="bi bi-floppy"></i> Guardar facturación</button>
+
+      <div class="editor hidden sii-modal sii-local-hub-modal" id="siiLocalHubModal" role="dialog" aria-modal="true" aria-labelledby="siiLocalHubModalTitle">
+        <div class="editor-modal-head"><div><span class="eyebrow">Facturación Propia</span><h3 id="siiLocalHubModalTitle">Herramientas SII</h3></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+        <div class="sii-local-hub-actions">
+          <button class="sii-local-hub-btn" type="button" data-sii-open="siiCertificateModal"><i class="bi bi-patch-check"></i><span><strong>Certificado digital</strong><small>Firma electrónica</small></span><i class="bi bi-chevron-right"></i></button>
+          <button class="sii-local-hub-btn" type="button" data-sii-open="siiCafModal"><i class="bi bi-file-earmark-lock2"></i><span><strong>CAF y folios</strong><small>Folios SII local</small></span><i class="bi bi-chevron-right"></i></button>
+          <button class="sii-local-hub-btn" type="button" data-sii-open="siiExchangeModal"><i class="bi bi-arrow-left-right"></i><span><strong>Intercambio DTE</strong><small>Recepción y respuestas</small></span><i class="bi bi-chevron-right"></i></button>
+          <button class="sii-local-hub-btn" type="button" data-sii-open="siiCertificationModal"><i class="bi bi-list-check"></i><span><strong>Certificación SII</strong><small>Control de certificación</small></span><i class="bi bi-chevron-right"></i></button>
         </div>
-        <div class="billing-modal-tools"><button class="btn btn-light" id="billingProvidersRefresh" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div>
+        <div class="billing-status-strip sii-local-hub-status" aria-label="Estado de facturación propia">
+          <div><span>Servicio</span><strong id="siiServiceStatus">Verificando…</strong><small id="siiServiceVersion">—</small></div>
+          <div><span>Certificado</span><strong id="siiCertificateStatus">—</strong><small id="siiCertificateExpiry">—</small></div>
+          <div><span>CAF / folios</span><strong id="siiCafStatus">—</strong><small>Por tipo de DTE</small></div>
+          <div><span>Último DTE</span><strong id="siiLastDteStatus">—</strong><small id="siiLastTrack">—</small></div>
+        </div>
+        <div class="editor-actions"><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
+      </div>
+
+      <div class="editor hidden sii-modal billing-providers-modal" id="billingProvidersModal" role="dialog" aria-modal="true" aria-labelledby="billingProvidersModalTitle">
+        <div class="editor-modal-head"><div><span class="eyebrow">Facturación</span><h3 id="billingProvidersModalTitle">Proveedores de facturación</h3></div><button type="button" class="editor-close-x" data-billing-providers-close aria-label="Cerrar">×</button></div>
+        <div class="billing-modal-tools billing-provider-list-tools"><span>Proveedores disponibles</span><button class="btn btn-light" id="billingProvidersRefresh" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div>
         <div class="table-wrap billing-provider-table-wrap"><table class="sii-table billing-provider-table"><thead><tr><th>Proveedor</th><th>Tipo</th><th>Conexión</th><th>Estado</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="billingProviderTable"><tr><td colspan="6">Cargando proveedores…</td></tr></tbody></table></div>
         <div class="editor-actions"><button class="btn btn-light" type="button" data-billing-providers-close>Cerrar</button></div>
       </div>
@@ -8640,13 +8644,35 @@ Torta chocolate | 1 | 25000"></textarea></label>
       </div>
 
       <div class="admin-card sii-documents-card">
-        <div class="card-head"><div><span class="eyebrow">Trazabilidad</span><h2>Documentos tributarios</h2><p class="module-help">Historial de documentos emitidos y enviados al SII.</p></div><button class="btn btn-light" id="siiRefreshDocuments" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div>
+        <div class="card-head"><div><span class="eyebrow">Trazabilidad</span><h2>Documentos tributarios</h2></div><button class="btn btn-light" id="siiRefreshDocuments" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div>
+        <div class="sii-doc-filterbar" aria-label="Filtros de documentos tributarios">
+          <label class="sii-doc-search"><i class="bi bi-search" aria-hidden="true"></i><input id="siiDocumentsSearch" type="search" placeholder="Buscar folio, pedido, receptor o RUT" autocomplete="off"></label>
+          <label class="sii-doc-filter"><span>Fecha</span><input id="siiDocumentsDateFilter" type="date"></label>
+          <label class="sii-doc-filter"><span>Estado</span><select id="siiDocumentsStatusFilter"><option value="">Todos</option></select></label>
+          <button class="btn btn-light sii-doc-clear" id="siiDocumentsClearFilters" type="button"><i class="bi bi-x-circle"></i> Limpiar</button>
+        </div>
+        <div class="sii-doc-filter-meta"><span id="siiDocumentsFilterCount">0 documentos</span></div>
         <div class="table-wrap sii-table-wrap"><table class="sii-table sii-doc-table"><thead><tr><th>Fecha</th><th>DTE</th><th>Folio</th><th>Pedido</th><th>Receptor</th><th>Total</th><th>Estado</th><th>TrackID</th><th>Acciones</th></tr></thead><tbody id="siiDocumentsTable"></tbody></table></div>
       </div>
     </section>
 
     <div class="editor hidden sii-modal" id="siiConfigModal" role="dialog" aria-modal="true" aria-labelledby="siiConfigModalTitle">
-      <div class="editor-modal-head"><div><span class="eyebrow">Emisor</span><h3 id="siiConfigModalTitle">Configuración tributaria</h3><small>Datos del contribuyente para Facturación Propia. El ambiente se administra desde el mantenedor de proveedores.</small></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <div class="editor-modal-head"><div><span class="eyebrow">Facturación</span><h3 id="siiConfigModalTitle">Configuración</h3></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <section class="billing-config-section" aria-label="Configuración general de facturación">
+        <div class="billing-config-section-head"><strong>General</strong></div>
+        <div class="billing-config-grid">
+          <label class="field-group"><span>Ambiente</span><span class="system-select-shell"><select id="billingEnvironment"><option value="CERTIFICACION">CERTIFICACIÓN</option><option value="PRODUCCION">PRODUCCIÓN</option></select><i class="bi bi-chevron-down" aria-hidden="true"></i></span></label>
+          <label class="field-group"><span>IVA general (%)</span><input id="billingIva" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="19"></label>
+          <div class="billing-config-summary"><span>Proveedor activo</span><strong id="billingActiveProviderNameModal">Cargando…</strong></div>
+          <div class="billing-config-summary billing-config-history"><div><span>Historial</span><strong id="billingDocumentsScope">Solo proveedor activo</strong></div><label class="billing-provider-switch" title="Mostrar todos los documentos"><input id="billingShowAllDocuments" type="checkbox"><span></span></label></div>
+        </div>
+        <div class="billing-config-actions">
+          <button class="btn btn-primary" id="billingEnvironmentSave" type="button"><i class="bi bi-floppy"></i> Guardar</button>
+          <button class="btn btn-light" id="billingFacturacionClConnect" type="button"><i class="bi bi-plug"></i> Facturacion.cl</button>
+          <button class="btn btn-light" id="billingProvidersOpen" type="button"><i class="bi bi-diagram-3"></i> Proveedores</button>
+        </div>
+      </section>
+      <div class="billing-config-divider"></div>
       <div class="form-grid">
         <input id="siiEnvironment" type="hidden" value="CERTIFICACION">
         <label class="field-group sii-enable-line"><span>Habilitar emisión</span><select id="siiEnabled"><option value="NO">No</option><option value="SI">Sí</option></select></label>
@@ -8657,15 +8683,14 @@ Torta chocolate | 1 | 25000"></textarea></label>
         <label class="field-group"><span>Dirección origen</span><input id="siiDireccion" placeholder="Dirección casa matriz"></label>
         <label class="field-group"><span>Comuna origen</span><input id="siiComuna" placeholder="Comuna"></label>
         <label class="field-group"><span>Ciudad origen</span><input id="siiCiudad" placeholder="Ciudad"></label>
-        <label class="field-group"><span>Dirección Regional SII</span><input id="siiDireccionRegional" placeholder="Ej. DIRECCIÓN REGIONAL SANTIAGO CENTRO"><small>Se imprime bajo el recuadro tributario del DTE.</small></label>
+        <label class="field-group"><span>Dirección Regional SII</span><input id="siiDireccionRegional" placeholder="Ej. DIRECCIÓN REGIONAL SANTIAGO CENTRO"></label>
         <label class="field-group"><span>Email emisor</span><input id="siiEmail" type="email" placeholder="facturacion@empresa.cl"></label>
         <label class="field-group"><span>N° resolución SII</span><input id="siiResolucionNumero" type="number" min="0" placeholder="0 en certificación"></label>
         <label class="field-group"><span>Fecha resolución</span><input id="siiResolucionFecha" type="date"></label>
-        <label class="field-group"><span>API Boleta 39/41</span><select id="siiBoletaApiEnabled"><option value="NO">Mantener solo PRUEBA LOCAL</option><option value="SI">Habilitar CERTIFICACIÓN / PRODUCCIÓN real</option></select><small>La API REST de Boleta queda instalada, pero por seguridad parte deshabilitada.</small></label>
-        <label class="field-group"><span>Modelo de emisión Boleta declarado en SII</span><select id="siiBoletaEmissionModel"><option value="POR_DEFINIR">Por definir (bloquea emisión real)</option><option value="SIEMPRE_BOLETA">Siempre emito Boleta, incluso con pago electrónico</option><option value="VOUCHER_ES_BOLETA">Voucher/comprobante electrónico reemplaza Boleta en pago electrónico</option></select><small>Debe coincidir con el modelo que declares en el SII. PRUEBA LOCAL no depende de esta selección.</small></label>
-        <label class="field-group"><span>Formato predeterminado Boleta</span><select id="siiBoletaFormat"><option value="TICKET_57">Ticket 57 mm (mínimo SII)</option><option value="TICKET_58">Ticket 58 mm (térmica estándar)</option><option value="TICKET_80" selected>Ticket 80 mm (recomendado)</option><option value="A4">Hoja A4</option></select><small>El SII admite representación impresa desde 5,7 cm de ancho.</small></label>
+        <label class="field-group"><span>API Boleta 39/41</span><select id="siiBoletaApiEnabled"><option value="NO">Mantener solo PRUEBA LOCAL</option><option value="SI">Habilitar CERTIFICACIÓN / PRODUCCIÓN real</option></select></label>
+        <label class="field-group"><span>Modelo de emisión Boleta declarado en SII</span><select id="siiBoletaEmissionModel"><option value="POR_DEFINIR">Por definir (bloquea emisión real)</option><option value="SIEMPRE_BOLETA">Siempre emito Boleta, incluso con pago electrónico</option><option value="VOUCHER_ES_BOLETA">Voucher/comprobante electrónico reemplaza Boleta en pago electrónico</option></select></label>
+        <label class="field-group"><span>Formato predeterminado Boleta</span><select id="siiBoletaFormat"><option value="TICKET_57">Ticket 57 mm (mínimo SII)</option><option value="TICKET_58">Ticket 58 mm (térmica estándar)</option><option value="TICKET_80" selected>Ticket 80 mm (recomendado)</option><option value="A4">Hoja A4</option></select></label>
       </div>
-      <div class="integration-note"><i class="bi bi-shield-check"></i><span>Factura/Guía/Notas usan Maullín/Palena. Boletas 39/41 usan la <b>API REST específica del SII</b>: autenticación separada y envío Pangal (certificación) / Rahue (producción). PRUEBA LOCAL permanece independiente y es la opción automática mientras esté disponible.</span></div>
       <div class="editor-actions"><button class="btn btn-primary" id="siiSaveConfig" type="button"><i class="bi bi-floppy"></i> Guardar configuración</button><button class="btn btn-light" id="siiTestAuth" type="button"><i class="bi bi-shield-check"></i> Probar DTE clásico</button><button class="btn btn-light" id="siiTestBoletaAuth" type="button"><i class="bi bi-receipt-cutoff"></i> Probar API Boleta</button><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
     </div>
 
@@ -8712,37 +8737,50 @@ Torta chocolate | 1 | 25000"></textarea></label>
     </div>
 
     <div class="editor hidden sii-modal sii-emit-modal" id="siiEmitModal" role="dialog" aria-modal="true" aria-labelledby="siiEmitModalTitle">
-      <div class="editor-modal-head"><div><span class="eyebrow">Emisión SII</span><h3 id="siiEmitModalTitle">Emitir documento tributario</h3></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
+      <div class="editor-modal-head"><div><span class="eyebrow">Facturación</span><h3 id="siiEmitModalTitle">Emitir documento</h3></div><button type="button" class="editor-close-x" data-sii-close aria-label="Cerrar">×</button></div>
       <div class="form-grid sii-emit-grid">
-        <label class="field-group"><span>Tipo de documento</span><select id="siiTipoDte"><option value="33">33 · Factura Electrónica</option><option value="34">34 · Factura No Afecta o Exenta Electrónica</option><option value="39">39 · Boleta Electrónica</option><option value="41">41 · Boleta No Afecta o Exenta Electrónica</option><option value="52">52 · Guía de Despacho Electrónica</option><option value="56">56 · Nota de Débito Electrónica</option><option value="61">61 · Nota de Crédito Electrónica</option></select></label>
-        <label class="field-group"><span>Modo de emisión</span><select id="siiIssueMode"><option value="AUTO">Automático</option><option value="PRUEBA_LOCAL">PRUEBA LOCAL</option><option value="SII">CAF oficial / SII</option></select></label>
-        <label class="field-group sii-boleta-format-field hidden"><span>Tamaño de Boleta</span><select id="siiBoletaPrintFormat"><option value="TICKET_57">Ticket 57 mm</option><option value="TICKET_58">Ticket 58 mm</option><option value="TICKET_80">Ticket 80 mm</option><option value="A4">A4</option></select></label>
-        <label class="field-group"><span>ID / N° pedido</span><input id="siiPedidoId" placeholder="Ej. 12 o PED-00012" inputmode="text" autocomplete="off"></label>
-        <div class="field-group"><span>Datos del pedido</span><button class="btn btn-light" id="siiLoadOrder" type="button"><i class="bi bi-search"></i> Buscar / cargar pedido</button></div><div class="sii-order-preview hidden span-2" id="siiOrderPreview" aria-live="polite"></div>
-        <div class="sii-issue-status hidden span-2" id="siiIssueModeNotice" aria-live="polite"></div>
-        <label class="field-group"><span>RUT receptor</span><input id="siiRutReceptor" placeholder="76.123.456-7"></label>
-        <label class="field-group"><span>Razón social receptor</span><input id="siiRazonReceptor" placeholder="Razón social / nombre"></label>
-        <label class="field-group"><span>Giro receptor</span><input id="siiGiroReceptor" placeholder="Obligatorio para factura"></label>
-        <label class="field-group"><span>Dirección receptor</span><input id="siiDireccionReceptor" placeholder="Dirección tributaria"></label>
-        <label class="field-group"><span>Comuna receptor</span><input id="siiComunaReceptor" placeholder="Comuna"></label>
-        <label class="field-group"><span>Ciudad receptor</span><input id="siiCiudadReceptor" placeholder="Ciudad"></label>
-        <label class="field-group sii-reference-field hidden"><span>Tipo DTE referencia</span><input id="siiRefTipo" value="33" maxlength="3"></label>
-        <label class="field-group sii-reference-field hidden"><span>Folio referencia</span><input id="siiRefFolio" placeholder="123"></label>
-        <label class="field-group sii-reference-field hidden"><span>Fecha referencia</span><input id="siiRefFecha" type="date"></label>
-        <label class="field-group sii-reference-field hidden"><span>Código referencia</span><select id="siiRefCodigo"><option value="1">1 · Anula documento</option><option value="2">2 · Corrige texto</option><option value="3">3 · Corrige montos</option></select></label>
-        <label class="field-group span-2 sii-reference-field hidden"><span>Razón referencia</span><input id="siiRefRazon" placeholder="Motivo de la nota"></label>
-        <label class="field-group fcl-note-field hidden"><span>Monto de la nota (CLP)</span><input id="fclMontoNota" type="number" min="1" step="1" placeholder="Monto para corregir valores"><small>Código 3: ingresa el monto del ajuste. Código 1 usa el total del pedido; código 2 emite una corrección sin monto.</small></label>
-        <label class="field-group fcl-guide-field hidden"><span>Tipo de despacho</span><select id="fclTipoDespacho"><option value="2">Emisor a instalaciones del cliente</option><option value="1">Por cuenta del receptor</option><option value="3">Emisor a otras instalaciones</option></select></label>
-        <label class="field-group fcl-guide-field hidden"><span>Motivo del traslado</span><select id="fclIndTraslado"><option value="1">Venta</option><option value="2">Venta por efectuar</option><option value="3">Consignación</option><option value="4">Entrega gratuita</option><option value="5">Traslado interno</option><option value="6">Otro traslado</option><option value="7">Devolución</option></select></label>
-        <label class="field-group fcl-guide-field hidden"><span>Patente transporte</span><input id="fclPatente" maxlength="8" placeholder="ABCD12"></label>
-        <label class="field-group fcl-guide-field hidden"><span>RUT transportista</span><input id="fclRutTrans" placeholder="RUT del transportista"></label>
+        <label class="field-group emit-type"><span>Tipo de documento</span><select id="siiTipoDte"><option value="33">33 · Factura Electrónica</option><option value="34">34 · Factura No Afecta o Exenta Electrónica</option><option value="39">39 · Boleta Electrónica</option><option value="41">41 · Boleta No Afecta o Exenta Electrónica</option><option value="52">52 · Guía de Despacho Electrónica</option><option value="56">56 · Nota de Débito Electrónica</option><option value="61">61 · Nota de Crédito Electrónica</option></select></label>
+        <label class="field-group emit-source"><span>Origen</span><select id="siiSourceMode"><option value="PEDIDO">Desde pedido</option><option value="DIRECTO">Venta manual directa</option></select></label>
+        <label class="field-group emit-mode"><span>Modo</span><select id="siiIssueMode"><option value="AUTO">Automático</option><option value="PRUEBA_LOCAL">PRUEBA LOCAL</option><option value="SII">CAF oficial / SII</option></select></label>
+        <label class="field-group sii-boleta-format-field emit-format hidden"><span>Formato</span><select id="siiBoletaPrintFormat"><option value="TICKET_57">Ticket 57 mm</option><option value="TICKET_58">Ticket 58 mm</option><option value="TICKET_80">Ticket 80 mm</option><option value="A4">A4</option></select></label>
+        <label class="field-group emit-order sii-order-source-field"><span>Pedido</span><input id="siiPedidoId" placeholder="N° pedido" inputmode="text" autocomplete="off"></label>
+        <div class="field-group emit-order-action sii-order-source-field"><span>&nbsp;</span><button class="btn btn-light" id="siiLoadOrder" type="button"><i class="bi bi-search"></i> Cargar pedido</button></div>
+        <div class="sii-order-preview hidden emit-full" id="siiOrderPreview" aria-live="polite"></div>
+        <div class="sii-issue-status hidden emit-full" id="siiIssueModeNotice" aria-live="polite"></div>
+        <div class="sii-manual-sale-panel emit-full hidden" id="siiManualSalePanel">
+          <div class="sii-manual-stock-row">
+            <label class="field-group"><span>Bodega de salida</span><select id="siiManualWarehouse"></select></label>
+            <label class="sii-manual-stock-check" for="siiManualMoveStock"><input id="siiManualMoveStock" type="checkbox" checked><span><strong>Descontar stock de bodega</strong><small>Solo se aplica en esta venta manual directa.</small></span></label>
+          </div>
+          <div class="catalog-quick-picker" id="siiManualCatalogPicker">
+            <div class="catalog-quick-search"><i class="bi bi-search"></i><input id="siiManualProductSearch" type="search" autocomplete="off" placeholder="Buscar producto por nombre, descripción o código..."></div>
+            <div class="catalog-quick-results hidden" id="siiManualProductResults"></div>
+          </div>
+          <div class="sii-manual-items" id="siiManualItems"></div>
+          <div class="sii-manual-total"><span>Total venta directa</span><strong id="siiManualTotal">$0</strong></div>
+        </div>
+        <label class="field-group emit-rut"><span>RUT receptor</span><input id="siiRutReceptor" placeholder="76.123.456-7"></label>
+        <label class="field-group emit-name"><span>Razón social</span><input id="siiRazonReceptor" placeholder="Nombre / razón social"></label>
+        <label class="field-group emit-giro"><span>Giro</span><input id="siiGiroReceptor" placeholder="Giro receptor"></label>
+        <label class="field-group emit-address"><span>Dirección</span><input id="siiDireccionReceptor" placeholder="Dirección tributaria"></label>
+        <label class="field-group emit-comuna"><span>Comuna</span><input id="siiComunaReceptor" placeholder="Comuna"></label>
+        <label class="field-group emit-city"><span>Ciudad</span><input id="siiCiudadReceptor" placeholder="Ciudad"></label>
+        <label class="field-group sii-reference-field emit-quarter hidden"><span>Tipo DTE ref.</span><input id="siiRefTipo" value="33" maxlength="3"></label>
+        <label class="field-group sii-reference-field emit-quarter hidden"><span>Folio ref.</span><input id="siiRefFolio" placeholder="123"></label>
+        <label class="field-group sii-reference-field emit-quarter hidden"><span>Fecha ref.</span><input id="siiRefFecha" type="date"></label>
+        <label class="field-group sii-reference-field emit-quarter hidden"><span>Código ref.</span><select id="siiRefCodigo"><option value="1">1 · Anula documento</option><option value="2">2 · Corrige texto</option><option value="3">3 · Corrige montos</option></select></label>
+        <label class="field-group sii-reference-field emit-full hidden"><span>Razón referencia</span><input id="siiRefRazon" placeholder="Motivo de la nota"></label>
+        <label class="field-group fcl-note-field emit-half hidden"><span>Monto nota (CLP)</span><input id="fclMontoNota" type="number" min="1" step="1" placeholder="Monto"></label>
+        <label class="field-group fcl-guide-field emit-half hidden"><span>Tipo de despacho</span><select id="fclTipoDespacho"><option value="2">Emisor a instalaciones del cliente</option><option value="1">Por cuenta del receptor</option><option value="3">Emisor a otras instalaciones</option></select></label>
+        <label class="field-group fcl-guide-field emit-half hidden"><span>Motivo del traslado</span><select id="fclIndTraslado"><option value="1">Venta</option><option value="2">Venta por efectuar</option><option value="3">Consignación</option><option value="4">Entrega gratuita</option><option value="5">Traslado interno</option><option value="6">Otro traslado</option><option value="7">Devolución</option></select></label>
+        <label class="field-group fcl-guide-field emit-quarter hidden"><span>Patente</span><input id="fclPatente" maxlength="8" placeholder="ABCD12"></label>
+        <label class="field-group fcl-guide-field emit-quarter hidden"><span>RUT transportista</span><input id="fclRutTrans" placeholder="RUT"></label>
       </div>
 
-      <label class="sii-cedible-option span-2 hidden" id="siiCedibleField" for="siiIncludeCedible">
-        <span class="sii-cedible-check"><input id="siiIncludeCedible" type="checkbox"><span><strong>Incluir copia cedible</strong><small>Al emitir, se abrirá el PDF original y también la copia cedible. Disponible para Facturas 33/34 y Guía 52 cuando corresponda.</small></span></span>
+      <label class="sii-cedible-option hidden" id="siiCedibleField" for="siiIncludeCedible">
+        <span class="sii-cedible-check"><input id="siiIncludeCedible" type="checkbox"><span><strong>Incluir copia cedible</strong></span></span>
       </label>
-      
-      <div class="editor-actions"><button class="btn btn-primary" id="siiEmitDte" type="button"><i class="bi bi-receipt"></i> Emitir DTE</button><button class="btn btn-light" type="button" data-sii-close>Cerrar</button></div>
+      <div class="editor-actions sii-emit-actions"><button class="btn btn-primary" id="siiEmitDte" type="button"><i class="bi bi-receipt"></i> Emitir DTE</button><button class="btn btn-light" type="button" data-sii-close>Cancelar</button></div>
     </div>
 
 

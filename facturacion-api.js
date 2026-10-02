@@ -153,8 +153,9 @@
       if(!fclGatewayVersionCompatible(ready.version))throw makeError(`Gateway Facturacion.cl incompatible o no disponible (${ready.version||'sin versión'}). Actualiza facturacion-cl-gateway.`);
       if(ready.integration_ready!==true)throw makeError('Falta el esquema base de integración Facturacion.cl (SQL 40). Instálalo antes de emitir.');
       const payload={pedido_id:data.pedido_id,tipo_dte:Number(data.tipo_dte||0),incluir_cedible:Boolean(data.incluir_cedible)};
-      for(const key of ['rut_receptor','razon_social_receptor','giro_receptor','direccion_receptor','comuna_receptor','ciudad_receptor','referencia','monto_nota','tipo_despacho','ind_traslado','transporte'])if(data[key]!==undefined)payload[key]=data[key];
-      const out=await rawCall(providerUrl(code),'emit_order',payload,token,120000);return{...out,provider_code:code,provider_name:label(code)};
+      for(const key of ['rut_receptor','razon_social_receptor','giro_receptor','direccion_receptor','comuna_receptor','ciudad_receptor','referencia','monto_nota','tipo_despacho','ind_traslado','transporte','manual_sale','manual_request_id','items','total','bodega_id','mueve_stock'])if(data[key]!==undefined)payload[key]=data[key];
+      const action=data.manual_sale?'emit_manual':'emit_order';
+      const out=await rawCall(providerUrl(code),action,payload,token,120000);return{...out,provider_code:code,provider_name:label(code)};
     }
     throw makeError('PROVEEDOR_FACTURACION_NO_ACTIVO');
   }
@@ -202,11 +203,12 @@
     const badge=$('#billingEnvironmentBadge');if(badge){badge.textContent=state.ambiente==='PRODUCCION'?'PRODUCCIÓN':'CERTIFICACIÓN';badge.classList.toggle('production',state.ambiente==='PRODUCCION');badge.classList.toggle('certification',state.ambiente!=='PRODUCCION')}
     if(typeof window.updateSiiIssueModeUi==='function')try{window.updateSiiIssueModeUi()}catch(_){}
   }
-  function openProvidersModal(){const modal=$('#billingProvidersModal');if(!modal)return;const billingIva=$('#billingIva'),quickIva=$('#billingIvaQuick'),settingsIva=$('#sIva');const current=settingsIva?.value||quickIva?.value||'19';if(billingIva)billingIva.value=current;if(quickIva&&!quickIva.value)quickIva.value=current;modal.classList.remove('hidden');document.body.classList.add('sii-modal-open');}
+  function hideOtherBillingModals(except){document.querySelectorAll('.sii-modal:not(.hidden)').forEach(m=>{if(m!==except)m.classList.add('hidden')})}
+  function openProvidersModal(){const modal=$('#billingProvidersModal');if(!modal)return;hideOtherBillingModals(modal);const billingIva=$('#billingIva'),quickIva=$('#billingIvaQuick'),settingsIva=$('#sIva');const current=settingsIva?.value||quickIva?.value||billingIva?.value||'19';if(billingIva&&!billingIva.value)billingIva.value=current;modal.classList.remove('hidden');document.body.classList.add('sii-modal-open');}
   function closeProvidersModal(){const modal=$('#billingProvidersModal');if(modal)modal.classList.add('hidden');if(!document.querySelector('.sii-modal:not(.hidden)'))document.body.classList.remove('sii-modal-open');}
   function openProviderEditor(code,credentialsOnly=false){
     const p=state.proveedores.find(x=>String(x.codigo)===String(code));if(!p)return;
-    const modal=$('#billingProviderEditor');if(!modal)return;
+    const modal=$('#billingProviderEditor');if(!modal)return;hideOtherBillingModals(modal);
     $('#billingProviderCode').value=p.codigo||'';$('#billingProviderName').value=p.nombre||'';$('#billingProviderType').value=p.tipo||'';$('#billingProviderEnabled').value=p.habilitado?'SI':'NO';$('#billingProviderNotes').value=p.observaciones||'';
     const quick=credentialsOnly&&String(p.codigo).toUpperCase()==='FACTURACION_CL';
     modal.classList.toggle('fcl-quick-connect',quick);

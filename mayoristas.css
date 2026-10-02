@@ -537,3 +537,99 @@ body.wh-modal-open{overflow:hidden}
 
 /* R9.18.137 · Facturación Mayorista */
 .billing-head p,.billing-card-head p,.billing-credit-title p{margin:.25rem 0 0;color:var(--muted);font-size:12px}.billing-toolbar{display:grid;grid-template-columns:180px 230px minmax(220px,1fr);gap:10px;align-items:end;margin-bottom:16px}.billing-toolbar label{display:grid;gap:6px}.billing-toolbar input,.billing-toolbar select,.billing-credit-form input,.billing-credit-form select{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff}.billing-statement-btn,.billing-pay-btn{border:0;border-radius:12px;padding:12px 15px;font-weight:900;background:linear-gradient(135deg,var(--wine),var(--wine2));color:#fff;display:flex;align-items:center;justify-content:center;gap:8px}.billing-credit-pay,.billing-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:16px}.billing-credit-title{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}.billing-credit-title h3,.billing-card-head h3{font-family:"Cormorant Garamond",serif;font-size:26px;margin:0}.billing-credit-title span,.billing-card-head span{color:var(--wine);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.billing-debt{text-align:right}.billing-debt small{display:block;color:var(--muted)}.billing-debt strong{font-size:24px}.billing-credit-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.billing-credit-form .span-2{grid-column:1/-1}.billing-proof-field small{font-weight:500;color:var(--muted)}.billing-payment-summary{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;padding:11px;border-radius:12px;background:#faf7f3;color:var(--muted);font-size:12px}.billing-payment-summary span{display:flex;gap:5px}.billing-table{max-height:440px;overflow:auto;margin-top:12px}.billing-download{display:inline-flex;gap:5px;align-items:center;color:var(--wine);font-weight:900;text-decoration:none}.billing-no-file{color:var(--muted);font-size:11px}.billing-test{display:block;color:#a36c00;font-size:10px;margin-top:3px}.billing-card-head{margin-bottom:8px}@media(max-width:720px){.billing-toolbar{grid-template-columns:1fr}.billing-credit-title{flex-direction:column}.billing-debt{text-align:left}.billing-credit-form{grid-template-columns:1fr}.billing-credit-form .span-2{grid-column:auto}.billing-table{max-height:55vh}}
+
+/* =========================================================
+   R9.18.196 · PORTAL MAYORISTA - UI PROFESIONAL
+   ========================================================= */
+
+/* Secciones con menos texto y jerarquía más limpia */
+.portal-view .section-head p,
+.portal-view .billing-card-head p,
+.portal-view .billing-credit-title p,
+.portal-view .hero p{display:none !important}
+.portal-view .section-head>div>span,
+.portal-view .billing-card-head>div>span,
+.portal-view .billing-credit-title>div>span{
+  font-size:10px !important;
+  letter-spacing:.055em !important;
+  color:#7c8792 !important;
+}
+.portal-view .section-head h2,
+.portal-view .billing-card-head h3,
+.portal-view .billing-credit-title h3{
+  font-family:"Manrope",Arial,sans-serif !important;
+  color:#26313d !important;
+  letter-spacing:-.015em !important;
+}
+
+/* Modales del portal: estándar administrativo */
+.wh-product-card[role="dialog"],
+.wh-order-card[role="dialog"],
+.wh-profile-edit-card[role="dialog"]{
+  background:#fff !important;
+  border:1px solid #dfe4e8 !important;
+  border-radius:16px !important;
+  box-shadow:0 28px 80px rgba(15,23,42,.20) !important;
+  color:#26313d !important;
+  font-family:"Manrope",Arial,sans-serif !important;
+}
+.wh-order-card[role="dialog"],
+.wh-profile-edit-card[role="dialog"]{padding:22px !important}
+.wh-order-modal-head>span,
+.wh-profile-edit-head>span,
+.wh-profile-edit-head>p{display:none !important}
+.wh-order-modal-head h2,
+.wh-profile-edit-head h2{
+  margin:0 0 18px !important;
+  font-family:"Manrope",Arial,sans-serif !important;
+  font-size:19px !important;
+  line-height:1.25 !important;
+  font-weight:850 !important;
+  color:#26313d !important;
+}
+.wh-order-close,
+.wh-profile-edit-close,
+.wh-product-close{
+  width:36px !important;
+  height:36px !important;
+  border:1px solid #e1e6ea !important;
+  border-radius:9px !important;
+  background:#fff !important;
+  color:#647180 !important;
+  box-shadow:none !important;
+}
+.wh-profile-edit-form{gap:12px !important;margin:16px 0 !important}
+.wh-profile-edit-form input,
+.wh-profile-edit-form select,
+.wh-profile-edit-form textarea{
+  min-height:44px !important;
+  border:1px solid #d7dde3 !important;
+  border-radius:10px !important;
+  padding:10px 12px !important;
+  box-shadow:none !important;
+  font-size:13px !important;
+}
+.wh-profile-edit-form input:focus,
+.wh-profile-edit-form select:focus,
+.wh-profile-edit-form textarea:focus{
+  outline:0 !important;
+  border-color:#8d7065 !important;
+  box-shadow:0 0 0 3px rgba(111,82,72,.08) !important;
+}
+@media(max-width:720px){
+  .wh-order-card[role="dialog"],
+  .wh-profile-edit-card[role="dialog"],
+  .wh-product-card[role="dialog"]{border-radius:16px 16px 0 0 !important}
+  .wh-profile-edit-form{grid-template-columns:1fr !important}
+  .profile-edit-wide{grid-column:auto !important}
+}
+
+
+/* R9.18.197 · responsive modal + marca proporcional */
+.brand img{width:auto !important;height:auto !important;max-width:150px !important;max-height:54px !important;object-fit:contain !important;aspect-ratio:auto !important}
+.wh-product-modal,.wh-order-modal{box-sizing:border-box !important;max-width:100vw !important;overflow-x:hidden !important}
+.wh-product-card,.wh-order-card{box-sizing:border-box !important;max-width:calc(100vw - 24px) !important;overflow-x:hidden !important}
+.wh-product-card *,.wh-order-card *{min-width:0}
+.wh-order-card .table-wrap{width:100%;max-width:100%;overflow-x:auto}
+@media(max-width:720px){.wh-product-card,.wh-order-card{max-width:100vw !important}}
+@media(max-width:560px){.brand img{max-width:118px !important;max-height:44px !important}}

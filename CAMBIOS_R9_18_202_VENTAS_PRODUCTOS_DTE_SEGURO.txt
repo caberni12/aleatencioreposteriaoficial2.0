@@ -1,0 +1,18 @@
+ALE ATENCIO R9.18.202
+
+CAMBIOS PRINCIPALES
+- Buscador rápido de productos en Pedido, Cotización y Emisión directa.
+- Búsqueda por nombre, SKU/código y descripción.
+- Selector de catálogo con precio y stock disponible por bodega.
+- Venta manual directa de Factura 33/34 con opción "Descontar stock de bodega".
+- El movimiento de inventario de venta directa se ejecuta solo después de una emisión confirmada.
+- Idempotencia para impedir doble descuento de stock en reintentos.
+- Protección para impedir una segunda Factura/Boleta principal sobre el mismo pedido.
+- Notas de Crédito/Débito 56/61 siguen permitidas como documentos de corrección.
+- Historial DTE con un solo botón "Acciones" por fila.
+- Corrección del desborde visual del checkbox Copia cedible.
+
+INSTALACIÓN
+- Ejecutar SQL 41_ALE_ATENCIO_SQL_R9_18_202_VENTA_DIRECTA_DTE_UNICO.sql.
+- Volver a desplegar las Edge Functions incluidas que fueron modificadas.
+- Reemplazar los archivos web del paquete.

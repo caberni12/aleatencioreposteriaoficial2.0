@@ -3077,3 +3077,29 @@ body.product-modal-open{overflow:hidden!important}
 
 /* R9.18.155 · Misión, visión y valores */
 .about-principles{margin-top:-24px}.about-principles .policy-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.about-principles .policy-card{min-height:190px}.about-principles .values-card{grid-column:auto}.policy-card p{white-space:normal}@media(max-width:900px){.about-principles .policy-grid{grid-template-columns:1fr}}
+
+
+/* R9.18.197 · logos de marca sin estirar */
+#brandLogo,
+.brand img,
+.brand-logo,
+.brand-wordmark,
+.brand-wordmark-single,
+.footer-logo,
+.site-footer .footer-logo,
+.footer-logo-only img,
+.footer-brand-row img{
+  height:auto !important;
+  object-fit:contain !important;
+  aspect-ratio:auto !important;
+}
+#brandLogo,
+.brand img,
+.brand-wordmark-single{max-height:58px !important;width:auto !important;max-width:174px !important}
+.site-footer .footer-logo,
+.footer-logo,
+.footer-logo-only img{width:auto !important;max-width:230px !important;max-height:90px !important}
+@media(max-width:620px){
+  #brandLogo,.brand img,.brand-wordmark-single{max-width:130px !important;max-height:50px !important}
+  .site-footer .footer-logo,.footer-logo,.footer-logo-only img{max-width:190px !important;max-height:76px !important}
+}
